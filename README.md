@@ -6,3 +6,5 @@ To push to main:
 - commit and push those changes in yout IDE using UI or terminal
 - submit a PR on github for your branch to be merged into main
 - review code and then merge
+
+  **DO NOT** push directly to main
