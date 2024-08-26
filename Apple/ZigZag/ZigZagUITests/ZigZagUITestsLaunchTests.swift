@@ -1,13 +1,13 @@
 //
-//  CSCI3300UITestsLaunchTests.swift
-//  CSCI3300UITests
+//  ZigZagUITestsLaunchTests.swift
+//  ZigZagUITests
 //
-//  Created by Daniel W on 8/16/24.
+//  Created by Daniel W on 8/26/24.
 //
 
 import XCTest
 
-final class CSCI3300UITestsLaunchTests: XCTestCase {
+final class ZigZagUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

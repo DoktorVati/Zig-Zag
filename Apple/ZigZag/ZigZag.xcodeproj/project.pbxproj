@@ -7,65 +7,63 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		657395BE2C6F89E4008675F6 /* CSCI3300App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657395BD2C6F89E4008675F6 /* CSCI3300App.swift */; };
-		657395C02C6F89E4008675F6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657395BF2C6F89E4008675F6 /* ContentView.swift */; };
-		657395C22C6F89E5008675F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 657395C12C6F89E5008675F6 /* Assets.xcassets */; };
-		657395C52C6F89E5008675F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 657395C42C6F89E5008675F6 /* Preview Assets.xcassets */; };
-		657395C72C6F89E5008675F6 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657395C62C6F89E5008675F6 /* Persistence.swift */; };
-		657395CA2C6F89E5008675F6 /* CSCI3300.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 657395C82C6F89E5008675F6 /* CSCI3300.xcdatamodeld */; };
-		657395D42C6F89E5008675F6 /* CSCI3300Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657395D32C6F89E5008675F6 /* CSCI3300Tests.swift */; };
-		657395DE2C6F89E5008675F6 /* CSCI3300UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657395DD2C6F89E5008675F6 /* CSCI3300UITests.swift */; };
-		657395E02C6F89E5008675F6 /* CSCI3300UITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657395DF2C6F89E5008675F6 /* CSCI3300UITestsLaunchTests.swift */; };
+		6530F92C2C7D19640038F7B7 /* ZigZagApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */; };
+		6530F92E2C7D19640038F7B7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F92D2C7D19640038F7B7 /* ContentView.swift */; };
+		6530F9302C7D19640038F7B7 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F92F2C7D19640038F7B7 /* Item.swift */; };
+		6530F9322C7D19650038F7B7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6530F9312C7D19650038F7B7 /* Assets.xcassets */; };
+		6530F9352C7D19650038F7B7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6530F9342C7D19650038F7B7 /* Preview Assets.xcassets */; };
+		6530F93F2C7D19650038F7B7 /* ZigZagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F93E2C7D19650038F7B7 /* ZigZagTests.swift */; };
+		6530F9492C7D19650038F7B7 /* ZigZagUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F9482C7D19650038F7B7 /* ZigZagUITests.swift */; };
+		6530F94B2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F94A2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		657395D02C6F89E5008675F6 /* PBXContainerItemProxy */ = {
+		6530F93B2C7D19650038F7B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 657395B22C6F89E4008675F6 /* Project object */;
+			containerPortal = 6530F9202C7D19640038F7B7 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 657395B92C6F89E4008675F6;
-			remoteInfo = CSCI3300;
+			remoteGlobalIDString = 6530F9272C7D19640038F7B7;
+			remoteInfo = ZigZag;
 		};
-		657395DA2C6F89E5008675F6 /* PBXContainerItemProxy */ = {
+		6530F9452C7D19650038F7B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 657395B22C6F89E4008675F6 /* Project object */;
+			containerPortal = 6530F9202C7D19640038F7B7 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 657395B92C6F89E4008675F6;
-			remoteInfo = CSCI3300;
+			remoteGlobalIDString = 6530F9272C7D19640038F7B7;
+			remoteInfo = ZigZag;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		657395BA2C6F89E4008675F6 /* CSCI3300.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CSCI3300.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		657395BD2C6F89E4008675F6 /* CSCI3300App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSCI3300App.swift; sourceTree = "<group>"; };
-		657395BF2C6F89E4008675F6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		657395C12C6F89E5008675F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		657395C42C6F89E5008675F6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		657395C62C6F89E5008675F6 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
-		657395C92C6F89E5008675F6 /* CSCI3300.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CSCI3300.xcdatamodel; sourceTree = "<group>"; };
-		657395CF2C6F89E5008675F6 /* CSCI3300Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CSCI3300Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		657395D32C6F89E5008675F6 /* CSCI3300Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSCI3300Tests.swift; sourceTree = "<group>"; };
-		657395D92C6F89E5008675F6 /* CSCI3300UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CSCI3300UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		657395DD2C6F89E5008675F6 /* CSCI3300UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSCI3300UITests.swift; sourceTree = "<group>"; };
-		657395DF2C6F89E5008675F6 /* CSCI3300UITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSCI3300UITestsLaunchTests.swift; sourceTree = "<group>"; };
+		6530F9282C7D19640038F7B7 /* ZigZag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZigZag.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagApp.swift; sourceTree = "<group>"; };
+		6530F92D2C7D19640038F7B7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		6530F92F2C7D19640038F7B7 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		6530F9312C7D19650038F7B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6530F9342C7D19650038F7B7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		6530F93A2C7D19650038F7B7 /* ZigZagTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZigZagTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6530F93E2C7D19650038F7B7 /* ZigZagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagTests.swift; sourceTree = "<group>"; };
+		6530F9442C7D19650038F7B7 /* ZigZagUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZigZagUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6530F9482C7D19650038F7B7 /* ZigZagUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITests.swift; sourceTree = "<group>"; };
+		6530F94A2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		657395B72C6F89E4008675F6 /* Frameworks */ = {
+		6530F9252C7D19640038F7B7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		657395CC2C6F89E5008675F6 /* Frameworks */ = {
+		6530F9372C7D19650038F7B7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		657395D62C6F89E5008675F6 /* Frameworks */ = {
+		6530F9412C7D19650038F7B7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -75,144 +73,143 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		657395B12C6F89E4008675F6 = {
+		6530F91F2C7D19640038F7B7 = {
 			isa = PBXGroup;
 			children = (
-				657395BC2C6F89E4008675F6 /* CSCI3300 */,
-				657395D22C6F89E5008675F6 /* CSCI3300Tests */,
-				657395DC2C6F89E5008675F6 /* CSCI3300UITests */,
-				657395BB2C6F89E4008675F6 /* Products */,
+				6530F92A2C7D19640038F7B7 /* ZigZag */,
+				6530F93D2C7D19650038F7B7 /* ZigZagTests */,
+				6530F9472C7D19650038F7B7 /* ZigZagUITests */,
+				6530F9292C7D19640038F7B7 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		657395BB2C6F89E4008675F6 /* Products */ = {
+		6530F9292C7D19640038F7B7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				657395BA2C6F89E4008675F6 /* CSCI3300.app */,
-				657395CF2C6F89E5008675F6 /* CSCI3300Tests.xctest */,
-				657395D92C6F89E5008675F6 /* CSCI3300UITests.xctest */,
+				6530F9282C7D19640038F7B7 /* ZigZag.app */,
+				6530F93A2C7D19650038F7B7 /* ZigZagTests.xctest */,
+				6530F9442C7D19650038F7B7 /* ZigZagUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		657395BC2C6F89E4008675F6 /* CSCI3300 */ = {
+		6530F92A2C7D19640038F7B7 /* ZigZag */ = {
 			isa = PBXGroup;
 			children = (
-				657395BD2C6F89E4008675F6 /* CSCI3300App.swift */,
-				657395BF2C6F89E4008675F6 /* ContentView.swift */,
-				657395C12C6F89E5008675F6 /* Assets.xcassets */,
-				657395C62C6F89E5008675F6 /* Persistence.swift */,
-				657395C82C6F89E5008675F6 /* CSCI3300.xcdatamodeld */,
-				657395C32C6F89E5008675F6 /* Preview Content */,
+				6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */,
+				6530F92D2C7D19640038F7B7 /* ContentView.swift */,
+				6530F92F2C7D19640038F7B7 /* Item.swift */,
+				6530F9312C7D19650038F7B7 /* Assets.xcassets */,
+				6530F9332C7D19650038F7B7 /* Preview Content */,
 			);
-			path = CSCI3300;
+			path = ZigZag;
 			sourceTree = "<group>";
 		};
-		657395C32C6F89E5008675F6 /* Preview Content */ = {
+		6530F9332C7D19650038F7B7 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				657395C42C6F89E5008675F6 /* Preview Assets.xcassets */,
+				6530F9342C7D19650038F7B7 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		657395D22C6F89E5008675F6 /* CSCI3300Tests */ = {
+		6530F93D2C7D19650038F7B7 /* ZigZagTests */ = {
 			isa = PBXGroup;
 			children = (
-				657395D32C6F89E5008675F6 /* CSCI3300Tests.swift */,
+				6530F93E2C7D19650038F7B7 /* ZigZagTests.swift */,
 			);
-			path = CSCI3300Tests;
+			path = ZigZagTests;
 			sourceTree = "<group>";
 		};
-		657395DC2C6F89E5008675F6 /* CSCI3300UITests */ = {
+		6530F9472C7D19650038F7B7 /* ZigZagUITests */ = {
 			isa = PBXGroup;
 			children = (
-				657395DD2C6F89E5008675F6 /* CSCI3300UITests.swift */,
-				657395DF2C6F89E5008675F6 /* CSCI3300UITestsLaunchTests.swift */,
+				6530F9482C7D19650038F7B7 /* ZigZagUITests.swift */,
+				6530F94A2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift */,
 			);
-			path = CSCI3300UITests;
+			path = ZigZagUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		657395B92C6F89E4008675F6 /* CSCI3300 */ = {
+		6530F9272C7D19640038F7B7 /* ZigZag */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 657395E32C6F89E5008675F6 /* Build configuration list for PBXNativeTarget "CSCI3300" */;
+			buildConfigurationList = 6530F94E2C7D19650038F7B7 /* Build configuration list for PBXNativeTarget "ZigZag" */;
 			buildPhases = (
-				657395B62C6F89E4008675F6 /* Sources */,
-				657395B72C6F89E4008675F6 /* Frameworks */,
-				657395B82C6F89E4008675F6 /* Resources */,
+				6530F9242C7D19640038F7B7 /* Sources */,
+				6530F9252C7D19640038F7B7 /* Frameworks */,
+				6530F9262C7D19640038F7B7 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = CSCI3300;
-			productName = CSCI3300;
-			productReference = 657395BA2C6F89E4008675F6 /* CSCI3300.app */;
+			name = ZigZag;
+			productName = ZigZag;
+			productReference = 6530F9282C7D19640038F7B7 /* ZigZag.app */;
 			productType = "com.apple.product-type.application";
 		};
-		657395CE2C6F89E5008675F6 /* CSCI3300Tests */ = {
+		6530F9392C7D19650038F7B7 /* ZigZagTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 657395E62C6F89E5008675F6 /* Build configuration list for PBXNativeTarget "CSCI3300Tests" */;
+			buildConfigurationList = 6530F9512C7D19650038F7B7 /* Build configuration list for PBXNativeTarget "ZigZagTests" */;
 			buildPhases = (
-				657395CB2C6F89E5008675F6 /* Sources */,
-				657395CC2C6F89E5008675F6 /* Frameworks */,
-				657395CD2C6F89E5008675F6 /* Resources */,
+				6530F9362C7D19650038F7B7 /* Sources */,
+				6530F9372C7D19650038F7B7 /* Frameworks */,
+				6530F9382C7D19650038F7B7 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				657395D12C6F89E5008675F6 /* PBXTargetDependency */,
+				6530F93C2C7D19650038F7B7 /* PBXTargetDependency */,
 			);
-			name = CSCI3300Tests;
-			productName = CSCI3300Tests;
-			productReference = 657395CF2C6F89E5008675F6 /* CSCI3300Tests.xctest */;
+			name = ZigZagTests;
+			productName = ZigZagTests;
+			productReference = 6530F93A2C7D19650038F7B7 /* ZigZagTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		657395D82C6F89E5008675F6 /* CSCI3300UITests */ = {
+		6530F9432C7D19650038F7B7 /* ZigZagUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 657395E92C6F89E5008675F6 /* Build configuration list for PBXNativeTarget "CSCI3300UITests" */;
+			buildConfigurationList = 6530F9542C7D19650038F7B7 /* Build configuration list for PBXNativeTarget "ZigZagUITests" */;
 			buildPhases = (
-				657395D52C6F89E5008675F6 /* Sources */,
-				657395D62C6F89E5008675F6 /* Frameworks */,
-				657395D72C6F89E5008675F6 /* Resources */,
+				6530F9402C7D19650038F7B7 /* Sources */,
+				6530F9412C7D19650038F7B7 /* Frameworks */,
+				6530F9422C7D19650038F7B7 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				657395DB2C6F89E5008675F6 /* PBXTargetDependency */,
+				6530F9462C7D19650038F7B7 /* PBXTargetDependency */,
 			);
-			name = CSCI3300UITests;
-			productName = CSCI3300UITests;
-			productReference = 657395D92C6F89E5008675F6 /* CSCI3300UITests.xctest */;
+			name = ZigZagUITests;
+			productName = ZigZagUITests;
+			productReference = 6530F9442C7D19650038F7B7 /* ZigZagUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		657395B22C6F89E4008675F6 /* Project object */ = {
+		6530F9202C7D19640038F7B7 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
-					657395B92C6F89E4008675F6 = {
+					6530F9272C7D19640038F7B7 = {
 						CreatedOnToolsVersion = 15.4;
 					};
-					657395CE2C6F89E5008675F6 = {
+					6530F9392C7D19650038F7B7 = {
 						CreatedOnToolsVersion = 15.4;
-						TestTargetID = 657395B92C6F89E4008675F6;
+						TestTargetID = 6530F9272C7D19640038F7B7;
 					};
-					657395D82C6F89E5008675F6 = {
+					6530F9432C7D19650038F7B7 = {
 						CreatedOnToolsVersion = 15.4;
-						TestTargetID = 657395B92C6F89E4008675F6;
+						TestTargetID = 6530F9272C7D19640038F7B7;
 					};
 				};
 			};
-			buildConfigurationList = 657395B52C6F89E4008675F6 /* Build configuration list for PBXProject "CSCI3300" */;
+			buildConfigurationList = 6530F9232C7D19640038F7B7 /* Build configuration list for PBXProject "ZigZag" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -220,36 +217,36 @@
 				en,
 				Base,
 			);
-			mainGroup = 657395B12C6F89E4008675F6;
-			productRefGroup = 657395BB2C6F89E4008675F6 /* Products */;
+			mainGroup = 6530F91F2C7D19640038F7B7;
+			productRefGroup = 6530F9292C7D19640038F7B7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				657395B92C6F89E4008675F6 /* CSCI3300 */,
-				657395CE2C6F89E5008675F6 /* CSCI3300Tests */,
-				657395D82C6F89E5008675F6 /* CSCI3300UITests */,
+				6530F9272C7D19640038F7B7 /* ZigZag */,
+				6530F9392C7D19650038F7B7 /* ZigZagTests */,
+				6530F9432C7D19650038F7B7 /* ZigZagUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		657395B82C6F89E4008675F6 /* Resources */ = {
+		6530F9262C7D19640038F7B7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				657395C52C6F89E5008675F6 /* Preview Assets.xcassets in Resources */,
-				657395C22C6F89E5008675F6 /* Assets.xcassets in Resources */,
+				6530F9352C7D19650038F7B7 /* Preview Assets.xcassets in Resources */,
+				6530F9322C7D19650038F7B7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		657395CD2C6F89E5008675F6 /* Resources */ = {
+		6530F9382C7D19650038F7B7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		657395D72C6F89E5008675F6 /* Resources */ = {
+		6530F9422C7D19650038F7B7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -259,51 +256,50 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		657395B62C6F89E4008675F6 /* Sources */ = {
+		6530F9242C7D19640038F7B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				657395C72C6F89E5008675F6 /* Persistence.swift in Sources */,
-				657395CA2C6F89E5008675F6 /* CSCI3300.xcdatamodeld in Sources */,
-				657395C02C6F89E4008675F6 /* ContentView.swift in Sources */,
-				657395BE2C6F89E4008675F6 /* CSCI3300App.swift in Sources */,
+				6530F92E2C7D19640038F7B7 /* ContentView.swift in Sources */,
+				6530F9302C7D19640038F7B7 /* Item.swift in Sources */,
+				6530F92C2C7D19640038F7B7 /* ZigZagApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		657395CB2C6F89E5008675F6 /* Sources */ = {
+		6530F9362C7D19650038F7B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				657395D42C6F89E5008675F6 /* CSCI3300Tests.swift in Sources */,
+				6530F93F2C7D19650038F7B7 /* ZigZagTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		657395D52C6F89E5008675F6 /* Sources */ = {
+		6530F9402C7D19650038F7B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				657395E02C6F89E5008675F6 /* CSCI3300UITestsLaunchTests.swift in Sources */,
-				657395DE2C6F89E5008675F6 /* CSCI3300UITests.swift in Sources */,
+				6530F94B2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift in Sources */,
+				6530F9492C7D19650038F7B7 /* ZigZagUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		657395D12C6F89E5008675F6 /* PBXTargetDependency */ = {
+		6530F93C2C7D19650038F7B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 657395B92C6F89E4008675F6 /* CSCI3300 */;
-			targetProxy = 657395D02C6F89E5008675F6 /* PBXContainerItemProxy */;
+			target = 6530F9272C7D19640038F7B7 /* ZigZag */;
+			targetProxy = 6530F93B2C7D19650038F7B7 /* PBXContainerItemProxy */;
 		};
-		657395DB2C6F89E5008675F6 /* PBXTargetDependency */ = {
+		6530F9462C7D19650038F7B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 657395B92C6F89E4008675F6 /* CSCI3300 */;
-			targetProxy = 657395DA2C6F89E5008675F6 /* PBXContainerItemProxy */;
+			target = 6530F9272C7D19640038F7B7 /* ZigZag */;
+			targetProxy = 6530F9452C7D19650038F7B7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		657395E12C6F89E5008675F6 /* Debug */ = {
+		6530F94C2C7D19650038F7B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -366,7 +362,7 @@
 			};
 			name = Debug;
 		};
-		657395E22C6F89E5008675F6 /* Release */ = {
+		6530F94D2C7D19650038F7B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -422,14 +418,14 @@
 			};
 			name = Release;
 		};
-		657395E42C6F89E5008675F6 /* Debug */ = {
+		6530F94F2C7D19650038F7B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CSCI3300/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"ZigZag/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -442,7 +438,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = csci3300.CSCI3300;
+				PRODUCT_BUNDLE_IDENTIFIER = csci3300.ZigZag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -450,14 +446,14 @@
 			};
 			name = Debug;
 		};
-		657395E52C6F89E5008675F6 /* Release */ = {
+		6530F9502C7D19650038F7B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CSCI3300/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"ZigZag/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -470,7 +466,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = csci3300.CSCI3300;
+				PRODUCT_BUNDLE_IDENTIFIER = csci3300.ZigZag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -478,7 +474,7 @@
 			};
 			name = Release;
 		};
-		657395E72C6F89E5008675F6 /* Debug */ = {
+		6530F9522C7D19650038F7B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -488,16 +484,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = csci3300.CSCI3300Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = csci3300.ZigZagTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CSCI3300.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CSCI3300";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZigZag.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ZigZag";
 			};
 			name = Debug;
 		};
-		657395E82C6F89E5008675F6 /* Release */ = {
+		6530F9532C7D19650038F7B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -507,16 +503,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = csci3300.CSCI3300Tests;
+				PRODUCT_BUNDLE_IDENTIFIER = csci3300.ZigZagTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CSCI3300.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CSCI3300";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZigZag.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ZigZag";
 			};
 			name = Release;
 		};
-		657395EA2C6F89E5008675F6 /* Debug */ = {
+		6530F9552C7D19650038F7B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -524,16 +520,16 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = csci3300.CSCI3300UITests;
+				PRODUCT_BUNDLE_IDENTIFIER = csci3300.ZigZagUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = CSCI3300;
+				TEST_TARGET_NAME = ZigZag;
 			};
 			name = Debug;
 		};
-		657395EB2C6F89E5008675F6 /* Release */ = {
+		6530F9562C7D19650038F7B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -541,68 +537,55 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = csci3300.CSCI3300UITests;
+				PRODUCT_BUNDLE_IDENTIFIER = csci3300.ZigZagUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = CSCI3300;
+				TEST_TARGET_NAME = ZigZag;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		657395B52C6F89E4008675F6 /* Build configuration list for PBXProject "CSCI3300" */ = {
+		6530F9232C7D19640038F7B7 /* Build configuration list for PBXProject "ZigZag" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				657395E12C6F89E5008675F6 /* Debug */,
-				657395E22C6F89E5008675F6 /* Release */,
+				6530F94C2C7D19650038F7B7 /* Debug */,
+				6530F94D2C7D19650038F7B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		657395E32C6F89E5008675F6 /* Build configuration list for PBXNativeTarget "CSCI3300" */ = {
+		6530F94E2C7D19650038F7B7 /* Build configuration list for PBXNativeTarget "ZigZag" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				657395E42C6F89E5008675F6 /* Debug */,
-				657395E52C6F89E5008675F6 /* Release */,
+				6530F94F2C7D19650038F7B7 /* Debug */,
+				6530F9502C7D19650038F7B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		657395E62C6F89E5008675F6 /* Build configuration list for PBXNativeTarget "CSCI3300Tests" */ = {
+		6530F9512C7D19650038F7B7 /* Build configuration list for PBXNativeTarget "ZigZagTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				657395E72C6F89E5008675F6 /* Debug */,
-				657395E82C6F89E5008675F6 /* Release */,
+				6530F9522C7D19650038F7B7 /* Debug */,
+				6530F9532C7D19650038F7B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		657395E92C6F89E5008675F6 /* Build configuration list for PBXNativeTarget "CSCI3300UITests" */ = {
+		6530F9542C7D19650038F7B7 /* Build configuration list for PBXNativeTarget "ZigZagUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				657395EA2C6F89E5008675F6 /* Debug */,
-				657395EB2C6F89E5008675F6 /* Release */,
+				6530F9552C7D19650038F7B7 /* Debug */,
+				6530F9562C7D19650038F7B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		657395C82C6F89E5008675F6 /* CSCI3300.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				657395C92C6F89E5008675F6 /* CSCI3300.xcdatamodel */,
-			);
-			currentVersion = 657395C92C6F89E5008675F6 /* CSCI3300.xcdatamodel */;
-			path = CSCI3300.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
-	rootObject = 657395B22C6F89E4008675F6 /* Project object */;
+	rootObject = 6530F9202C7D19640038F7B7 /* Project object */;
 }
