@@ -58,14 +58,14 @@ public class MainActivity extends AppCompatActivity {
         // Set layout parameters
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
+                LinearLayout.LayoutParams.MATCH_PARENT);
 
         newPost.setLayoutParams(params);
         newPost.setGravity(View.TEXT_ALIGNMENT_CENTER); // Center the text within the TextView
 
         // Center the entire TextView within the parent LinearLayout
         newPost.setGravity(android.view.Gravity.CENTER); // Set gravity to center
-
+        newPost.setBackgroundResource(R.drawable.rounded_posts_shape);
         // Add the new TextView to the message container
         messageContainer.addView(newPost);
     }

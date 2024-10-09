@@ -15,7 +15,9 @@
         android:text="Zig Zag"
         android:textSize="54sp"
         android:layout_marginBottom="80dp"
-        android:gravity="center" />
+        android:gravity="center"
+        android:background="@drawable/rounded_rectangle" /> <!-- Set the background to the map-->
+
 
     <!-- Scrollable content -->
     <ScrollView
@@ -38,7 +40,8 @@
                 android:text="This app is awesome!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
 
             <TextView
                 android:id="@+id/messageGroup2"
@@ -47,7 +50,8 @@
                 android:text="This app is awesome!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
 
             <TextView
                 android:id="@+id/messageGroup3"
@@ -56,7 +60,8 @@
                 android:text="This app is awesome!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
 
             <!-- Add more message groups as needed -->
             <!-- For demonstration, let's add more items -->
@@ -67,7 +72,8 @@
                 android:text="This app is awesome!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
 
             <TextView
                 android:id="@+id/messageGroup5"
@@ -76,7 +82,8 @@
                 android:text="This app is awesome!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
             <TextView
                 android:id="@+id/messageGroup6"
                 android:layout_width="wrap_content"
@@ -84,7 +91,8 @@
                 android:text="This app is so cool!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
             <TextView
                 android:id="@+id/messageGroup7"
                 android:layout_width="wrap_content"
@@ -92,7 +100,8 @@
                 android:text="This app is so cool!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
             <TextView
                 android:id="@+id/messageGroup8"
                 android:layout_width="wrap_content"
@@ -100,7 +109,8 @@
                 android:text="This app is so cool!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
             <TextView
                 android:id="@+id/messageGroup9"
                 android:layout_width="wrap_content"
@@ -108,7 +118,8 @@
                 android:text="THis app is the best!!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
 
             <TextView
                 android:id="@+id/messageGroup10"
@@ -117,7 +128,8 @@
                 android:text="THis app beats the others!"
                 android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:background="@drawable/rounded_posts_shape"/>
             <!-- Add more as necessary -->
         </LinearLayout>
     </ScrollView>
