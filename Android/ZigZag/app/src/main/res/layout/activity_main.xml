@@ -16,121 +16,133 @@
         android:textSize="54sp"
         android:layout_marginBottom="80dp"
         android:gravity="center"
-        android:background="@drawable/rounded_rectangle" /> <!-- Set the background to the map-->
+        android:background="@drawable/rounded_rectangle" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hot"
+        android:layout_marginStart="10dp"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nearest"
+        android:layout_marginStart="10dp"
+        android:textSize="15sp" />
 
     <!-- Scrollable content -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="100dp"
+        android:layout_weight="2">
 
         <LinearLayout
+            android:layout_weight="0"
             android:id="@+id/messageContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center_horizontal">
 
             <!-- Message Groups -->
-            <TextView
+            <LinearLayout
+                android:layout_weight="1"
                 android:id="@+id/messageGroup1"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="This app is awesome!"
-                android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/rounded_posts_shape">
 
-            <TextView
+                <LinearLayout
+                    android:layout_marginStart="0dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="hi this is " />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="This app is awesome! this app is awesome"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_weight="1"
                 android:id="@+id/messageGroup2"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="This app is awesome!"
-                android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/rounded_posts_shape">
 
-            <TextView
+                <LinearLayout
+                    android:layout_marginStart="0dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="hi this is " />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="This app is awesome! this app is awesome"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_weight="1"
                 android:id="@+id/messageGroup3"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="This app is awesome!"
-                android:textSize="20sp"
                 android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/rounded_posts_shape">
 
-            <!-- Add more message groups as needed -->
-            <!-- For demonstration, let's add more items -->
-            <TextView
-                android:id="@+id/messageGroup4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="This app is awesome!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
+                <LinearLayout
+                    android:layout_marginStart="0dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="10dp">
 
-            <TextView
-                android:id="@+id/messageGroup5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="This app is awesome!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
-            <TextView
-                android:id="@+id/messageGroup6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="This app is so cool!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
-            <TextView
-                android:id="@+id/messageGroup7"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="This app is so cool!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
-            <TextView
-                android:id="@+id/messageGroup8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="This app is so cool!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
-            <TextView
-                android:id="@+id/messageGroup9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="THis app is the best!!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="hi this is " />
 
-            <TextView
-                android:id="@+id/messageGroup10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="THis app beats the others!"
-                android:textSize="20sp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:background="@drawable/rounded_posts_shape"/>
-            <!-- Add more as necessary -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="This app is actually so cool! this app is awesome"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
