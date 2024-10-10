@@ -10,6 +10,7 @@
 
     <!-- Fixed Header -->
     <TextView
+        android:id="@+id/headerTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Zig Zag"
@@ -57,26 +58,49 @@
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/rounded_posts_shape">
 
-                <LinearLayout
+                <GridLayout
                     android:layout_marginStart="0dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="10dp"
+                    android:columnCount="3"
+                    android:rowCount="2">
 
                     <TextView
+                        android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="start"
-                        android:text="hi this is " />
+                        android:text="1 hour ago" />
+
+                    <ImageView android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:src="@drawable/common_full_open_on_phone"
+                        android:scaleX="1" android:scaleY="1" android:layout_marginLeft="50dp" android:layout_marginBottom="50dp"
+                        ></ImageView>
 
                     <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:layout_marginLeft="90dp"
+                        android:text="21 hours" />
+
+                    <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:text="This app is awesome! this app is awesome"
                         android:textSize="20sp" />
-                </LinearLayout>
+                </GridLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -89,26 +113,49 @@
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/rounded_posts_shape">
 
-                <LinearLayout
+                <GridLayout
                     android:layout_marginStart="0dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="10dp"
+                    android:columnCount="3"
+                    android:rowCount="2">
 
                     <TextView
+                        android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="start"
-                        android:text="hi this is " />
+                        android:text="1 hour ago" />
+
+                    <ImageView android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:src="@drawable/common_full_open_on_phone"
+                        android:scaleX="1" android:scaleY="1" android:layout_marginLeft="50dp" android:layout_marginBottom="50dp"
+                        ></ImageView>
 
                     <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:layout_marginLeft="90dp"
+                        android:text="21 hours" />
+
+                    <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:text="This app is awesome! this app is awesome"
                         android:textSize="20sp" />
-                </LinearLayout>
+                </GridLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -121,26 +168,49 @@
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/rounded_posts_shape">
 
-                <LinearLayout
+                <GridLayout
                     android:layout_marginStart="0dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="10dp"
+                    android:columnCount="3"
+                    android:rowCount="2">
 
                     <TextView
+                        android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="start"
-                        android:text="hi this is " />
+                        android:text="1 hour ago" />
+
+                    <ImageView android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:src="@drawable/common_full_open_on_phone"
+                        android:scaleX="1" android:scaleY="1" android:layout_marginLeft="50dp" android:layout_marginBottom="50dp"
+                        ></ImageView>
 
                     <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="start"
-                        android:text="This app is actually so cool! this app is awesome"
+                        android:layout_marginLeft="90dp"
+                        android:text="21 hours" />
+
+                    <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="This app is awesome! this app is awesome"
                         android:textSize="20sp" />
-                </LinearLayout>
+                </GridLayout>
             </LinearLayout>
 
         </LinearLayout>
