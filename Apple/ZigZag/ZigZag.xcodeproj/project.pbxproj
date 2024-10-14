@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		651C81DB2CB723C90016F4BF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 651C81DA2CB723C90016F4BF /* GoogleService-Info.plist */; };
 		6530F92C2C7D19640038F7B7 /* ZigZagApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */; };
 		6530F92E2C7D19640038F7B7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F92D2C7D19640038F7B7 /* ContentView.swift */; };
 		6530F9302C7D19640038F7B7 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6530F92F2C7D19640038F7B7 /* Item.swift */; };
@@ -40,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		651C81DA2CB723C90016F4BF /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6530F9282C7D19640038F7B7 /* ZigZag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZigZag.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagApp.swift; sourceTree = "<group>"; };
 		6530F92D2C7D19640038F7B7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,6 +54,10 @@
 		6530F9482C7D19650038F7B7 /* ZigZagUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITests.swift; sourceTree = "<group>"; };
 		6530F94A2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		651C81CA2CB71EC40016F4BF /* Feed */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Feed; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		6530F9252C7D19640038F7B7 /* Frameworks */ = {
@@ -86,6 +92,7 @@
 		6530F91F2C7D19640038F7B7 = {
 			isa = PBXGroup;
 			children = (
+				651C81DA2CB723C90016F4BF /* GoogleService-Info.plist */,
 				6530F92A2C7D19640038F7B7 /* ZigZag */,
 				6530F93D2C7D19650038F7B7 /* ZigZagTests */,
 				6530F9472C7D19650038F7B7 /* ZigZagUITests */,
@@ -106,6 +113,7 @@
 		6530F92A2C7D19640038F7B7 /* ZigZag */ = {
 			isa = PBXGroup;
 			children = (
+				651C81CA2CB71EC40016F4BF /* Feed */,
 				6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */,
 				6530F92D2C7D19640038F7B7 /* ContentView.swift */,
 				6530F92F2C7D19640038F7B7 /* Item.swift */,
@@ -154,6 +162,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				651C81CA2CB71EC40016F4BF /* Feed */,
 			);
 			name = ZigZag;
 			packageProductDependencies = (
@@ -256,6 +267,7 @@
 			files = (
 				6530F9352C7D19650038F7B7 /* Preview Assets.xcassets in Resources */,
 				6530F9322C7D19650038F7B7 /* Assets.xcassets in Resources */,
+				651C81DB2CB723C90016F4BF /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
