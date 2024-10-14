@@ -16,6 +16,7 @@ struct MapView: View {
     var body: some View {
         ZStack {
             Map(coordinateRegion: $region)
+                .frame(height: 250)
                 .cornerRadius(15)
                 .overlay {
                     RoundedRectangle(cornerSize: CGSize(width: 15, height: 15))
