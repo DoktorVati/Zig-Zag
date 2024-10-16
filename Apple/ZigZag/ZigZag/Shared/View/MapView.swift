@@ -25,7 +25,7 @@ struct MapView: View {
             
             
             // Text overlay
-            Text("ZigZag")
+            Text(overlayText)
                 .font(.largeTitle)
                 .foregroundColor(.white)
                 .bold()

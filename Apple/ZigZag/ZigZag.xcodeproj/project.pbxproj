@@ -56,7 +56,8 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		651C81CA2CB71EC40016F4BF /* Feed */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Feed; sourceTree = "<group>"; };
+		6531B6972CBDB8EA0050FCDA /* Feature */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Feature; sourceTree = "<group>"; };
+		6531B6AA2CBDB9470050FCDA /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +114,8 @@
 		6530F92A2C7D19640038F7B7 /* ZigZag */ = {
 			isa = PBXGroup;
 			children = (
-				651C81CA2CB71EC40016F4BF /* Feed */,
+				6531B6AA2CBDB9470050FCDA /* Shared */,
+				6531B6972CBDB8EA0050FCDA /* Feature */,
 				6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */,
 				6530F92D2C7D19640038F7B7 /* ContentView.swift */,
 				6530F92F2C7D19640038F7B7 /* Item.swift */,
@@ -164,7 +166,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				651C81CA2CB71EC40016F4BF /* Feed */,
+				6531B6972CBDB8EA0050FCDA /* Feature */,
+				6531B6AA2CBDB9470050FCDA /* Shared */,
 			);
 			name = ZigZag;
 			packageProductDependencies = (
