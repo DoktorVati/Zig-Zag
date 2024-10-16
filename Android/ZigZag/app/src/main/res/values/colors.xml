@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="transparentGrey">#23707070</color>
     <color name="timeText">#A8717171</color>
+    <color name="blue">#00C6FF</color>
 </resources>

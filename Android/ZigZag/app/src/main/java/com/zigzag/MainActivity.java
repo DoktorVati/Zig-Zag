@@ -5,9 +5,12 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the message groups
-    private Button button;
+    private ImageButton button;
+
     private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
 
     @Override
@@ -121,18 +125,75 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addNewPost(String text) {
-        TextView newPost = new TextView(this);
-        newPost.setText(text);
-        newPost.setTextSize(20);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+        // Create a new message group layout
+        LinearLayout newMessageGroup = new LinearLayout(this);
+        LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        newPost.setLayoutParams(params);
-        newPost.setGravity(View.TEXT_ALIGNMENT_CENTER);
-        newPost.setGravity(android.view.Gravity.CENTER);
-        newPost.setBackgroundResource(R.drawable.rounded_posts_shape);
+        messageGroupLayoutParams.setMargins(10, 0, 10, 30); // Set margins
+        newMessageGroup.setLayoutParams(messageGroupLayoutParams);
+        newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
-        messageContainer.addView(newPost);
+        // Create a GridLayout for the message content
+        GridLayout gridLayout = new GridLayout(this);
+        gridLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT)); // Match parent height for content
+        gridLayout.setColumnCount(3); // Set to 3 columns
+        gridLayout.setRowCount(2); // Set to 2 rows
+        gridLayout.setPadding(0, 0, 0, 0);
+
+        // Create TextView for the time ("1 hour ago")
+        TextView timeTextView = new TextView(this);
+        timeTextView.setTextColor(getResources().getColor(R.color.timeText));
+        timeTextView.setText("1 hour ago");
+        timeTextView.setLayoutParams(new GridLayout.LayoutParams(
+                GridLayout.spec(0), GridLayout.spec(0))); // 1st row, 1st column
+
+        // Create TextView for the duration ("21 hours")
+        TextView durationTextView = new TextView(this);
+        durationTextView.setTextColor(getResources().getColor(R.color.timeText));
+        durationTextView.setText("21 hours");
+        durationTextView.setLayoutParams(new GridLayout.LayoutParams(
+                GridLayout.spec(0), GridLayout.spec(2))); // 1st row, 2nd column
+
+        // Create ImageView for the backward time icon
+        ImageView backwardTimeImageView = new ImageView(this);
+        backwardTimeImageView.setImageResource(R.drawable.backward_time);
+        backwardTimeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE); // Adjust scale type
+        GridLayout.LayoutParams imageParams = new GridLayout.LayoutParams(
+                GridLayout.spec(0), GridLayout.spec(1)); // 1st row, 1st column
+        imageParams.width = 48; // Set a specific width (adjust as needed)
+        imageParams.height = 48; // Set a specific height (adjust as needed)
+        imageParams.setMargins(60, 0, 0, 0); // Adjust margins to position correctly
+        backwardTimeImageView.setLayoutParams(imageParams);
+
+        // Create TextView for the post content
+        TextView postTextView = new TextView(this);
+        postTextView.setText(text);
+        postTextView.setTextSize(20);
+        GridLayout.LayoutParams postParams = new GridLayout.LayoutParams(
+                GridLayout.spec(1), GridLayout.spec(0, 3)); // 2nd row, spanning 3 columns
+        postParams.width = GridLayout.LayoutParams.MATCH_PARENT;
+        postParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
+        postTextView.setLayoutParams(postParams);
+        postTextView.setGravity(Gravity.START); // Align to start
+
+        // Add views to the GridLayout
+        gridLayout.addView(timeTextView); // First row, first column
+        gridLayout.addView(backwardTimeImageView); // First row, second column
+        gridLayout.addView(durationTextView); // First row, third column
+        gridLayout.addView(postTextView); // Second row, spanning 3 columns
+
+        // Add the GridLayout to the new message group
+        newMessageGroup.addView(gridLayout);
+
+        // Finally, add the new message group to the container
+        messageContainer.addView(newMessageGroup);
     }
+
+
+
+
+
 }
