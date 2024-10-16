@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FeedView: View {
     @StateObject var viewModel = FeedViewModel()
+    @StateObject var navigationManager = NavigationManager()
     
     var distancesArray: [Double] = [0.01, 0.05, 0.1, 1]
     var distanceIcons: [String] = ["figure.walk.circle", "house.circle", "building.2.crop.circle", "globe.americas"]
@@ -25,7 +26,7 @@ struct FeedView: View {
                     .frame(height: 180)
                     .ignoresSafeArea(.all)
              // Scrollable Feed
-                NavigationStack {
+                NavigationStack(path: $navigationManager.path) {
                     VStack {
                         List {
                           //  RadiusButtonsView()
@@ -40,16 +41,29 @@ struct FeedView: View {
                         .refreshable {
                             //Add logic
                         }
+                        
+                        Button("test") {
+                            navigationManager.navigateTo(.createPost)
+                        }
                     }
                     .toolbar {
                         ToolbarItem {
                             RadiusButtonsView()
                         }
                     }
+                    .navigationDestination(for: ZigZagDestination.self) { destination in
+                        switch destination {
+                        case .createPost:
+                            CreatePostView()
+                            //TODO: find a way to make transitionBetter
+                        }
+                    }
                 }
                // .border(Color.red)
  
             }
+            .environmentObject(navigationManager)
+
             
             MapView(region: $viewModel.region, overlayText: "ZigZag")
 

@@ -11,6 +11,8 @@ import MapKit
 struct CreatePostView: View {
     @StateObject var viewModel = CreatePostViewModel()
     
+    @EnvironmentObject var navigationManager: NavigationManager
+    
     @State private var postText: String = ""
     @State private var timerSet = false
     @State private var location: String = "Current Location"
@@ -18,8 +20,8 @@ struct CreatePostView: View {
     var body: some View {
         VStack(spacing: 32) {
             // Map background with "Create Post" title
-            MapView(region: $viewModel.region, overlayText: "Create Post")
-                .frame(height: 200) // Adjust height as needed
+//            MapView(region: $viewModel.region, overlayText: "Create Post")
+//                .frame(height: 200) // Adjust height as needed
             
             // Post Input Field
             VStack {
@@ -58,7 +60,7 @@ struct CreatePostView: View {
                 
                 // POST Button
                 Button(action: {
-                    // Action for creating post
+                    navigationManager.navigateBackToRoot()
                 }) {
                     Text("POST")
                         .font(.title2)
