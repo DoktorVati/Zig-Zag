@@ -80,16 +80,6 @@ struct CreatePostView: View {
     }
 }
 
-struct MapViewPlaceholder: View {
-    var body: some View {
-        ZStack {
-            Color.gray.opacity(0.5) // Simulate map background
-            Text("Map Placeholder")
-                .foregroundColor(.white)
-        }
-    }
-}
-
 #Preview {
     CreatePostView()
 }
