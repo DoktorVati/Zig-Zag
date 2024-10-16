@@ -10,13 +10,14 @@ import MapKit
 
 struct MapView: View {
     @Binding var region: MKCoordinateRegion
+    @Binding var mapSize: CGFloat
     
-    let overlayText: String
+    @Binding var overlayText: String
     
     var body: some View {
         ZStack {
             Map(coordinateRegion: $region)
-                .frame(height: 250)
+                .frame(height: mapSize)
                 .cornerRadius(15)
                 .overlay {
                     RoundedRectangle(cornerSize: CGSize(width: 15, height: 15))
@@ -31,7 +32,6 @@ struct MapView: View {
                 .bold()
                 .padding()
         }
-        .ignoresSafeArea(.all)
     }
 }
 
@@ -40,7 +40,7 @@ struct MapView: View {
     VStack{
         MapView(region: .constant(MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 34.528675, longitude: -83.987841),
-            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))), overlayText: "ZigZag")
+            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))), mapSize: .constant(250), overlayText: .constant("ZigZag"))
         Rectangle().foregroundStyle(.black).ignoresSafeArea(.all)
     }
 }

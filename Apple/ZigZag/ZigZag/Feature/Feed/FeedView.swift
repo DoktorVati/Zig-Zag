@@ -11,8 +11,8 @@ struct FeedView: View {
     @StateObject var viewModel = FeedViewModel()
     @StateObject var navigationManager = NavigationManager()
     
-    var distancesArray: [Double] = [0.01, 0.05, 0.1, 1]
-    var distanceIcons: [String] = ["figure.walk.circle", "house.circle", "building.2.crop.circle", "globe.americas"]
+    @State var mapsize: CGFloat = 250
+    @State var mapTitle = "ZigZag"
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -23,15 +23,15 @@ struct FeedView: View {
             VStack {
                 Rectangle()
                     .foregroundStyle(Color(UIColor.systemBackground))
-                    .frame(height: 180)
+                    .frame(height: mapsize - 10)
                     .ignoresSafeArea(.all)
-             // Scrollable Feed
+                // Scrollable Feed
                 NavigationStack(path: $navigationManager.path) {
                     VStack {
                         List {
-                          //  RadiusButtonsView()
-                          //  .listRowBackground(Color.clear) // Set background to clear
-
+                            //  RadiusButtonsView()
+                            //  .listRowBackground(Color.clear) // Set background to clear
+                            
                             ForEach(0..<10, id: \.self) { _ in
                                 Section {
                                     PostView()  // Custom post view below
@@ -40,10 +40,6 @@ struct FeedView: View {
                         }
                         .refreshable {
                             //Add logic
-                        }
-                        
-                        Button("test") {
-                            navigationManager.navigateTo(.createPost)
                         }
                     }
                     .toolbar {
@@ -58,15 +54,18 @@ struct FeedView: View {
                             //TODO: find a way to make transitionBetter
                         }
                     }
+                    .onAppear {
+                        withAnimation {
+                            mapsize = 250
+                            mapTitle = "ZigZag"
+                        }
+                    }
                 }
-               // .border(Color.red)
- 
+                
             }
             .environmentObject(navigationManager)
-
             
-            MapView(region: $viewModel.region, overlayText: "ZigZag")
-
+            MapView(region: $viewModel.region, mapSize: $mapsize, overlayText: $mapTitle)
             
             // Floating "+" Button
             VStack {
@@ -74,20 +73,28 @@ struct FeedView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        // Action for the floating button
+                        navigationManager.navigateTo(.createPost)
+                        withAnimation {
+                            mapsize = 180
+                            mapTitle = "Create Post"
+                        }
                     }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 30))
-                            .foregroundColor(.white)
-                            .frame(width: 60, height: 60)
-                            .background(Color(UIColor.systemBlue))
-                            .clipShape(Circle())
-                            .shadow(radius: 10)
+                        if mapsize == 250 {
+                            Image(systemName: "plus")
+                                .font(.system(size: 30))
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                                .background(Color(UIColor.systemBlue))
+                                .clipShape(Circle())
+                                .shadow(radius: 10)
+                        }
                     }
                     .padding(.trailing, 30)
+                    .padding(.bottom)
                 }
             }
         }
+        .ignoresSafeArea(.all)
         .environmentObject(viewModel)
     }
 }
