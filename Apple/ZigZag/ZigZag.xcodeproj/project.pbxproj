@@ -21,6 +21,7 @@
 		659077A32C7D38EC00C7F69E /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 659077A22C7D38EC00C7F69E /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		659077A52C7D38EC00C7F69E /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 659077A42C7D38EC00C7F69E /* FirebaseAppCheck */; };
 		659077A72C7D38EC00C7F69E /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 659077A62C7D38EC00C7F69E /* FirebaseAppDistribution-Beta */; };
+		65DDD6E02CC016BA00F793AA /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DDD6DF2CC016BA00F793AA /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		6530F9442C7D19650038F7B7 /* ZigZagUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZigZagUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6530F9482C7D19650038F7B7 /* ZigZagUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITests.swift; sourceTree = "<group>"; };
 		6530F94A2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		65DDD6DF2CC016BA00F793AA /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -121,6 +123,7 @@
 				6530F92F2C7D19640038F7B7 /* Item.swift */,
 				6530F9312C7D19650038F7B7 /* Assets.xcassets */,
 				6530F9332C7D19650038F7B7 /* Preview Content */,
+				65DDD6DF2CC016BA00F793AA /* HomeView.swift */,
 			);
 			path = ZigZag;
 			sourceTree = "<group>";
@@ -295,6 +298,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				65DDD6E02CC016BA00F793AA /* HomeView.swift in Sources */,
 				6530F92E2C7D19640038F7B7 /* ContentView.swift in Sources */,
 				6530F9302C7D19640038F7B7 /* Item.swift in Sources */,
 				6530F92C2C7D19640038F7B7 /* ZigZagApp.swift in Sources */,

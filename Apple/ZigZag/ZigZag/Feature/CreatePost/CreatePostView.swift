@@ -11,17 +11,13 @@ import MapKit
 struct CreatePostView: View {
     @StateObject var viewModel = CreatePostViewModel()
     
+    @EnvironmentObject var navigationManager: NavigationManager
+    
     @State private var postText: String = ""
     @State private var timerSet = false
     @State private var location: String = "Current Location"
     
     var body: some View {
-        VStack(spacing: 32) {
-            // Map background with "Create Post" title
-            MapView(region: $viewModel.region, overlayText: "Create Post")
-                .frame(height: 200) // Adjust height as needed
-            
-            // Post Input Field
             VStack {
                 HStack() {
                     Image(systemName: "location.circle")
@@ -30,6 +26,7 @@ struct CreatePostView: View {
                         .foregroundColor(.gray)
                     Spacer()
                 }
+                .padding(.top)
                 
                 TextEditor(text: $postText)
                     .frame(minHeight: 20, maxHeight: 200) // Set min/max height for the expanding text area
@@ -58,7 +55,7 @@ struct CreatePostView: View {
                 
                 // POST Button
                 Button(action: {
-                    // Action for creating post
+                    navigationManager.navigateBackToRoot()
                 }) {
                     Text("POST")
                         .font(.title2)
@@ -74,9 +71,6 @@ struct CreatePostView: View {
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
-        }
-        .ignoresSafeArea(edges: .top)
-        
     }
 }
 

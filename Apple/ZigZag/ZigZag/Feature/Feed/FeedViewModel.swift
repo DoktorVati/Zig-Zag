@@ -16,7 +16,7 @@ class FeedViewModel: ObservableObject {
         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
     @Published var selectedRadiusIndex: Int? = 0  // Track which button is selected
     
-    let distancesArray: [Double] = [0.01, 0.05, 0.1, 50]
+    let distancesArray: [Double] = [0.001, 0.01, 0.1, 10]
     let distanceIcons: [String] = ["figure.walk.circle", "house", "building.2.crop.circle", "globe.americas"]
     
     // This function controls both zoom logic and button selection
