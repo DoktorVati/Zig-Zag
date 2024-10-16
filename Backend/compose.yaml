@@ -1,0 +1,59 @@
+version: '3'
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: db
+      DB_PORT: 5432
+    expose:
+      - 3000
+    depends_on:
+      - db
+    networks:
+      - zigzag_network
+
+  db:
+    image: postgis/postgis
+    restart: always
+    user: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    expose:
+      - 5432
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zigzag_network
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    ports:
+    - "80:80"
+    - "443:443"
+    depends_on:
+      - server
+    networks:
+      - zigzag_network
+
+volumes:
+  db-data:
+
+networks:
+  zigzag_network:
+    driver: bridge
