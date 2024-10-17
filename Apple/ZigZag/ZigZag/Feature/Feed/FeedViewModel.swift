@@ -19,6 +19,10 @@ class FeedViewModel: ObservableObject {
     let distancesArray: [Double] = [0.001, 0.01, 0.1, 10]
     let distanceIcons: [String] = ["figure.walk.circle", "house", "building.2.crop.circle", "globe.americas"]
     
+    var needsLocationPermission: Bool {
+        LocationManager.shared.authorizationStatus == .notDetermined
+    }
+    
     // This function controls both zoom logic and button selection
     func mapZoom(index: Int) {
         // Update selected button index
@@ -29,5 +33,10 @@ class FeedViewModel: ObservableObject {
             region.span.longitudeDelta = distancesArray[index]
         }
         
+    }
+    
+    func setUserLoaction() {
+        guard let userLocation = LocationManager.shared.location else { return }
+        region = MKCoordinateRegion(center: userLocation.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
     }
 }

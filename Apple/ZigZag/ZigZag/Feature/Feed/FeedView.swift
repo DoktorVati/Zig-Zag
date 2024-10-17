@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct FeedView: View {
     @StateObject var viewModel = FeedViewModel()
@@ -55,6 +56,10 @@ struct FeedView: View {
                         }
                     }
                     .onAppear {
+                        if viewModel.needsLocationPermission {
+                            LocationManager.shared.requestWhenInUseAuthorization()
+                        }
+                        viewModel.setUserLoaction()
                         withAnimation {
                             mapsize = 250
                             mapTitle = "ZigZag"

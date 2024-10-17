@@ -54,6 +54,7 @@
 		6530F9442C7D19650038F7B7 /* ZigZagUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZigZagUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6530F9482C7D19650038F7B7 /* ZigZagUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITests.swift; sourceTree = "<group>"; };
 		6530F94A2C7D19650038F7B7 /* ZigZagUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZigZagUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		653DD5EE2CC05B7C00BA279A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		65DDD6DF2CC016BA00F793AA /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,6 +117,7 @@
 		6530F92A2C7D19640038F7B7 /* ZigZag */ = {
 			isa = PBXGroup;
 			children = (
+				653DD5EE2CC05B7C00BA279A /* Info.plist */,
 				6531B6AA2CBDB9470050FCDA /* Shared */,
 				6531B6972CBDB8EA0050FCDA /* Feature */,
 				6530F92B2C7D19640038F7B7 /* ZigZagApp.swift */,
@@ -465,8 +467,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ZigZag/Preview Content\"";
+				DEVELOPMENT_TEAM = 3ZQRT52HLS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZigZag/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "ZigZag needs access to your location even when the app is not in use to show relevant content based on your location.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "ZigZag uses your location to show nearby posts.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -493,8 +499,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ZigZag/Preview Content\"";
+				DEVELOPMENT_TEAM = 3ZQRT52HLS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZigZag/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "ZigZag needs access to your location even when the app is not in use to show relevant content based on your location.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "ZigZag uses your location to show nearby posts.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
