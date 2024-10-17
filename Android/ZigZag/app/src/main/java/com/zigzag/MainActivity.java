@@ -46,7 +46,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     private TextView headerTextView;
-    //private static final String BASE_URL = "http://api.zigzag.madebysaul.com/posts?";
+    private static final String BASE_URL = "http://api.zigzag.madebysaul.com/posts?";
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the message groups
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private double lastLongitude;
     private int lastZoomLevel = -1;
     private int zoomLevel = 12; // This is the zoom modifier for the map
-    //private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
+    private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
     private Handler handler = new Handler(); // Handler for delays
 
     @Override
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         lastLongitude = longitude;
         lastZoomLevel = zoomLevel;
 
-        String apiKey = null/*key*/;
+        String apiKey = /*null*/key;
         String url = "https://maps.googleapis.com/maps/api/staticmap?center="
                 + latitude + "," + longitude + "&zoom=" + zoomLevel + "&size=200x200&key=" + apiKey;
         loadImageAsBackground(url);
@@ -146,10 +146,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+//califronia is 3801 km away
     private void zoomIn() {
         zoomLevel = 18; // Closer zoom
-        fetchPosts(lastLatitude, lastLongitude, 1000); // Distance is in meters
+        fetchPosts(lastLatitude, lastLongitude, 1000); // Distance is in meters maybe
         getUserLocation(); // Refresh location to update the map
     }
 
@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void zoomOut() {
         zoomLevel = 0; // Further zoom out
-        fetchPosts(lastLatitude, lastLongitude, 50000); // Distance is in meters
+        fetchPosts(lastLatitude, lastLongitude, 5000000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
     // Increase scale of the button to show that it is selected.
@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, "your_user_id_here", lastLatitude, lastLongitude);
         // This line below is temporary to show posts, delete on showing
-        updateUIWithPost(text, currentTime);
+        //updateUIWithPost(text, currentTime);
 
         new Thread(() -> {
             try {
@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void fetchPosts(double latitude, double longitude, int distance) {
-        String url = "http://google"/*BASE_URL*/ + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
+        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
 
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
