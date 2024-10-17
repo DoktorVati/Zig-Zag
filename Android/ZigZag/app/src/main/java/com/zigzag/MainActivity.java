@@ -149,25 +149,25 @@ public class MainActivity extends AppCompatActivity {
 //califronia is 3801 km away
     private void zoomIn() {
         zoomLevel = 18; // Closer zoom
-        fetchPosts(lastLatitude, lastLongitude, 1000); // Distance is in meters maybe
+        fetchPosts(lastLatitude, lastLongitude, 80); // Distance is in meters maybe
         getUserLocation(); // Refresh location to update the map
     }
 
     private void showNearby() {
         zoomLevel = 15; // Default nearby zoom
-        fetchPosts(lastLatitude, lastLongitude, 5000); // Distance is in meters
+        fetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
     private void zoomToUserArea() {
-        zoomLevel = 10; // User area zoom
-        fetchPosts(lastLatitude, lastLongitude, 10000); // Distance is in meters
+        zoomLevel = 12; // User area zoom
+        fetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
     private void zoomOut() {
-        zoomLevel = 0; // Further zoom out
-        fetchPosts(lastLatitude, lastLongitude, 5000000); // Distance is in meters
+        zoomLevel = 8; // Further zoom out
+        fetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
     // Increase scale of the button to show that it is selected.
