@@ -2,6 +2,7 @@ package com.zigzag;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the message groups
     private ImageButton button;
+
 
     // These variables are for caching the previous locations so that if the user spams
     // the buttons it wont call the api a million times.
@@ -146,10 +148,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-//califronia is 3801 km away
+//california is 3801 km away
     private void zoomIn() {
         zoomLevel = 18; // Closer zoom
-        fetchPosts(lastLatitude, lastLongitude, 80); // Distance is in meters maybe
+        fetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
@@ -239,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, "your_user_id_here", lastLatitude, lastLongitude);
         // This line below is temporary to show posts, delete on showing
-        //updateUIWithPost(text, currentTime);
+        updateUIWithPost(text, "Just now");
 
         new Thread(() -> {
             try {
@@ -259,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
                         // Call the method to update the UI with the new post
-                        updateUIWithPost(text, currentTime);
+                        //updateUIWithPost(text, currentTime);
                     });
                 } else {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
+                    //runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -278,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        messageGroupLayoutParams.setMargins(10, 0, 10, 60); // Set margins
+        messageGroupLayoutParams.setMargins(10, 0, 10, 30); // Set margins
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
@@ -287,9 +289,9 @@ public class MainActivity extends AppCompatActivity {
         gridLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
-        gridLayout.setColumnCount(3);
+        gridLayout.setColumnCount(4);
         gridLayout.setRowCount(2);
-        gridLayout.setPadding(0, 0, 0, 0);
+        gridLayout.setPadding(0, -5, 0, 0);
 
         // Create TextView for the time (using current time)
         TextView timeTextView = new TextView(this);
@@ -316,12 +318,36 @@ public class MainActivity extends AppCompatActivity {
         imageParams.setMargins(60, 0, 0, 0);
         backwardTimeImageView.setLayoutParams(imageParams);
 
+        // Create ImageButton for more options
+        ImageButton moreButton = new ImageButton(this);
+        moreButton.setImageResource(R.drawable.baseline_more_horiz_24);
+        moreButton.setScaleX(1f);
+        moreButton.setScaleY(1f);
+        moreButton.setScaleType(ImageView.ScaleType.FIT_XY);
+        moreButton.setBackgroundColor(Color.TRANSPARENT);
+            // Set layout parameters to match the XML attributes
+        GridLayout.LayoutParams moreButtonParams = new GridLayout.LayoutParams(
+                GridLayout.spec(0), GridLayout.spec(3)); // Adjust to be in the correct column
+        moreButtonParams.width = 100; // Set appropriate width
+        moreButtonParams.height = 160; // Set appropriate height
+        moreButtonParams.setMargins(0, -60, 20, -30); // Adjust margins if necessary
+        moreButtonParams.setGravity(Gravity.END); // This sets the gravity to end
+        //moreButton.setId(View.generateViewId()); // Generate a unique ID if needed
+        moreButton.setLayoutParams(moreButtonParams);
+
+        // Set click listener
+        moreButton.setOnClickListener(v -> {
+            Toast.makeText(this, "More options clicked!", Toast.LENGTH_SHORT).show();
+            // Add any additional functionality here
+        });
+
+
         // Create TextView for the post content
         TextView postTextView = new TextView(this);
         postTextView.setText(text);
         postTextView.setTextSize(20);
         GridLayout.LayoutParams postParams = new GridLayout.LayoutParams(
-                GridLayout.spec(1), GridLayout.spec(0, 3)); // 2nd row, spanning 3 columns
+                GridLayout.spec(1), GridLayout.spec(0, 4)); // 2nd row, spanning 3 columns
         postParams.width = GridLayout.LayoutParams.MATCH_PARENT;
         postParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
         postTextView.setLayoutParams(postParams);
@@ -331,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
         gridLayout.addView(timeTextView);
         gridLayout.addView(backwardTimeImageView);
         gridLayout.addView(durationTextView);
+        gridLayout.addView(moreButton);
         gridLayout.addView(postTextView);
 
         // Add the GridLayout to the new message group
