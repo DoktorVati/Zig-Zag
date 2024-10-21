@@ -12,6 +12,8 @@ struct FeedView: View {
     @StateObject var viewModel = FeedViewModel()
     @StateObject var navigationManager = NavigationManager()
     
+    @State private var posts: [Post] = []
+    @State private var isLoading = false
     @State var mapsize: CGFloat = 250
     @State var mapTitle = "ZigZag"
     
@@ -29,18 +31,26 @@ struct FeedView: View {
                 // Scrollable Feed
                 NavigationStack(path: $navigationManager.path) {
                     VStack {
-                        List {
-                            //  RadiusButtonsView()
-                            //  .listRowBackground(Color.clear) // Set background to clear
-                            
-                            ForEach(0..<10, id: \.self) { _ in
-                                Section {
-                                    PostView()  // Custom post view below
-                                }
+                        List(posts) { post in
+                            Section {
+                                PostView(post: post)
                             }
+ 
                         }
                         .refreshable {
-                            //Add logic
+                            isLoading = true
+                            guard let location = LocationManager.shared.location else { return }
+                            APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { result in
+                                DispatchQueue.main.async {
+                                    isLoading = false
+                                    switch result {
+                                    case .success(let fetchedPosts):
+                                        self.posts = fetchedPosts
+                                    case .failure(let error):
+                                        print("Error fetching posts: \(error.localizedDescription)")
+                                    }
+                                }
+                            }
                         }
                     }
                     .toolbar {
@@ -63,6 +73,21 @@ struct FeedView: View {
                         withAnimation {
                             mapsize = 250
                             mapTitle = "ZigZag"
+                        }
+                    }
+                    .task{
+                        isLoading = true
+                        guard let location = LocationManager.shared.location else { return }
+                        APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { result in
+                            DispatchQueue.main.async {
+                                isLoading = false
+                                switch result {
+                                case .success(let fetchedPosts):
+                                    self.posts = fetchedPosts
+                                case .failure(let error):
+                                    print("Error fetching posts: \(error.localizedDescription)")
+                                }
+                            }
                         }
                     }
                 }
