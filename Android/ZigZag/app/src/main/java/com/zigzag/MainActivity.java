@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
-    private LinearLayout messageContainer; // Container for the message groups
+    private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
 
@@ -75,16 +75,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // Link to activity_main.xml layout
 
-        // Initialize the message container and button
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
-        headerTextView = findViewById(R.id.headerTextView); // Update with your TextView ID
-        headerTextView.setText(DEFAULT_TAG); // Set default text
+
+        headerTextView = findViewById(R.id.headerTextView);
+        headerTextView.setText(DEFAULT_TAG);
+
         mapImage = findViewById(R.id.mapImage);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocation();
-// Create a clickable TextView for the tag input
+
+        // This s the TextView for the tag input
         TextView clickableText = new TextView(this);
         clickableText.setText(headerTextView.getText());
         clickableText.setTextSize(20);
@@ -133,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         scaleButton(findViewById(R.id.close));
         handler.postDelayed(this::zoomIn, 2000);
 
-        // Set a click listener for the button
+        // Post button
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateMap(double latitude, double longitude) {
         // Check if the location or zoom level has changed
         if (latitude == lastLatitude && longitude == lastLongitude && zoomLevel == lastZoomLevel) {
-            return; // Skip API call
+            return; // Skip API call to prevent useless calls
         }
 
         lastLatitude = latitude;
@@ -182,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 //california is 3801 km away
     private void zoomIn() {
         zoomLevel = 18; // Closer zoom
-        //fetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 100);
         checkAndFetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
 
         getUserLocation(); // Refresh location to update the map
@@ -190,14 +192,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void showNearby() {
         zoomLevel = 15; // Default nearby zoom
-        //fetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 820);
         checkAndFetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
     private void zoomToUserArea() {
         zoomLevel = 12; // User area zoom
-        //fetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 40000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
 
         getUserLocation(); // Refresh location to update the map
@@ -205,17 +207,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void zoomOut() {
         zoomLevel = 8; // Further zoom out
-        //fetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 800000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
 
         getUserLocation(); // Refresh location to update the map
     }
     // Increase scale of the button to show that it is selected.
     private void scaleButton(View button) {
-        button.setScaleX(1.2f); // Scale up X
-        button.setScaleY(1.2f); // Scale up Y
+        button.setScaleX(1.2f);
+        button.setScaleY(1.2f);
     }
-//this will set the buttons back to normal scale
+
+    //this will set the buttons back to normal scale
     private void resetButtonScales() {
         // Reset scale for all buttons
         findViewById(R.id.close).setScaleX(0.8f);
@@ -230,6 +233,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.global).setScaleX(0.8f);
         findViewById(R.id.global).setScaleY(0.8f);
     }
+
+    // This is called first when a tag is entered or when they change the radius.
     private void checkAndFetchPosts(double latitude, double longitude, int distance) {
         String userInput = headerTextView.getText().toString().trim();
 
@@ -247,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
             fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
         }
     }
+    // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
 
@@ -268,12 +274,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+    // This closes the android keyboard after entering / returning
     private void closeKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (getCurrentFocus() != null) {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
     }
+
+    // Sets mapImage to the Google Maps Image API
     private void loadImageAsBackground(String url) {
         Glide.with(this)
                 .load(url)
@@ -290,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    // Request perms for location usage
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -297,11 +308,12 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getUserLocation();
             } else {
-                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Location permission denied, Please Enable Locations", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    // This is what comes up when they click the post button.
     private void showInputDialog() {
         // Create a LinearLayout to hold the EditText for the post
         LinearLayout layout = new LinearLayout(this);
@@ -317,14 +329,14 @@ public class MainActivity extends AppCompatActivity {
         inputPost.setPadding(20, 20, 20, 20); // Padding inside EditText
         layout.addView(inputPost);
 
-        // Create a TextView for additional instructions (optional)
+        // additional instructions
         TextView instructionText = new TextView(this);
         instructionText.setText("You can also add a tag (e.g., #tagname) at the end.");
         instructionText.setTextSize(16);
-        instructionText.setPadding(0, 10, 0, 0); // Padding for the TextView
+        instructionText.setPadding(0, 10, 0, 0);
         layout.addView(instructionText);
 
-        // Create the dialog with a professional appearance
+        // Create the dialog
         new AlertDialog.Builder(this)
                 .setTitle("Create a New Post")
                 .setView(layout)
@@ -340,13 +352,13 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-
+    // This adds the post to the API
     private void addNewPost(String text) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, "your_user_id_here", lastLatitude, lastLongitude);
-        // This line below is temporary to show posts, delete on showing
+        // This line below shows the posted zig immediately
         updateUIWithPost(text, "Just now");
 
         new Thread(() -> {
@@ -379,14 +391,14 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-
+    // This is the builder for the post message and time that are passed into the post
     private void updateUIWithPost(String text, String currentTime) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        messageGroupLayoutParams.setMargins(10, 0, 10, 30); // Set margins
+        messageGroupLayoutParams.setMargins(10, 0, 10, 30);
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
@@ -399,21 +411,21 @@ public class MainActivity extends AppCompatActivity {
         gridLayout.setRowCount(2);
         gridLayout.setPadding(0, -5, 0, 0);
 
-        // Create TextView for the time (using current time)
+        // Create TextView for the time using current time
         TextView timeTextView = new TextView(this);
         timeTextView.setTextColor(getResources().getColor(R.color.timeText));
-        timeTextView.setText(currentTime); // You may want to format this to show "1 hour ago"
+        timeTextView.setText(currentTime);
         timeTextView.setLayoutParams(new GridLayout.LayoutParams(
                 GridLayout.spec(0), GridLayout.spec(0))); // 1st row, 1st column
 
-        // Create TextView for the duration (you can set this based on your logic)
+        // Create TextView for the duration
         TextView durationTextView = new TextView(this);
         durationTextView.setTextColor(getResources().getColor(R.color.timeText));
         durationTextView.setText("10 hours left"); // Modify as needed
         durationTextView.setLayoutParams(new GridLayout.LayoutParams(
                 GridLayout.spec(0), GridLayout.spec(2))); // 1st row, 2nd column
 
-        // Create ImageView for the backward time icon
+        // Create ImageView for the time icon
         ImageView backwardTimeImageView = new ImageView(this);
         backwardTimeImageView.setImageResource(R.drawable.backward_time);
         backwardTimeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -431,20 +443,21 @@ public class MainActivity extends AppCompatActivity {
         moreButton.setScaleY(1f);
         moreButton.setScaleType(ImageView.ScaleType.FIT_XY);
         moreButton.setBackgroundColor(Color.TRANSPARENT);
+
             // Set layout parameters to match the XML attributes
         GridLayout.LayoutParams moreButtonParams = new GridLayout.LayoutParams(
-                GridLayout.spec(0), GridLayout.spec(3)); // Adjust to be in the correct column
-        moreButtonParams.width = 100; // Set appropriate width
-        moreButtonParams.height = 160; // Set appropriate height
-        moreButtonParams.setMargins(0, -60, 20, -30); // Adjust margins if necessary
-        moreButtonParams.setGravity(Gravity.END); // This sets the gravity to end
-        //moreButton.setId(View.generateViewId()); // Generate a unique ID if needed
+                GridLayout.spec(0), GridLayout.spec(3));
+        moreButtonParams.width = 100;
+        moreButtonParams.height = 160;
+        moreButtonParams.setMargins(0, -60, 20, -30);
+        moreButtonParams.setGravity(Gravity.END);
+        //moreButton.setId(View.generateViewId()); // Generate a unique ID if needed later on
         moreButton.setLayoutParams(moreButtonParams);
 
-        // Set click listener
+        // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
             Toast.makeText(this, "More options clicked!", Toast.LENGTH_SHORT).show();
-            // Add any additional functionality here
+            // This is where we will add the delete function later on
         });
 
 
@@ -453,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
         postTextView.setText(text);
         postTextView.setTextSize(20);
         GridLayout.LayoutParams postParams = new GridLayout.LayoutParams(
-                GridLayout.spec(1), GridLayout.spec(0, 4)); // 2nd row, spanning 3 columns
+                GridLayout.spec(1), GridLayout.spec(0, 4));
         postParams.width = GridLayout.LayoutParams.MATCH_PARENT;
         postParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
         postTextView.setLayoutParams(postParams);
@@ -469,11 +482,12 @@ public class MainActivity extends AppCompatActivity {
         // Add the GridLayout to the new message group
         newMessageGroup.addView(gridLayout);
 
-        // Finally, add the new message group to the container
+        // and add the new message group to the container
         messageContainer.addView(newMessageGroup);
     }
 
 
+    // Fetches posts based on distance
     private void fetchPosts(double latitude, double longitude, int distance) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
 
@@ -520,6 +534,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // This helps format the time that is received from the Backend API to show simple results
     private String formatTime(String createdAt) {
         // Parse the createdAt time and convert it to a "time ago" format
         try {
