@@ -310,16 +310,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Create an EditText for the post message
         final EditText inputPost = new EditText(this);
-        inputPost.setHint("What's on your mind?"); // Professional hint
-        inputPost.setTextSize(16);
-        inputPost.setBackgroundResource(R.drawable.rounded_posts_shape); // Optional: custom background
+        inputPost.setHint("What's on your mind?");
+        inputPost.setTextSize(18);
+        inputPost.setTextColor(getResources().getColor(R.color.black));
+        //inputPost.setBackgroundResource(R.drawable.rounded_posts_shape);
         inputPost.setPadding(20, 20, 20, 20); // Padding inside EditText
         layout.addView(inputPost);
 
         // Create a TextView for additional instructions (optional)
         TextView instructionText = new TextView(this);
         instructionText.setText("You can also add a tag (e.g., #tagname) at the end.");
-        instructionText.setTextSize(14);
+        instructionText.setTextSize(16);
         instructionText.setPadding(0, 10, 0, 0); // Padding for the TextView
         layout.addView(instructionText);
 

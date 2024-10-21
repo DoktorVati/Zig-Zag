@@ -21,7 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="Type your tag..."
-        android:text="ZIG ZAG"
+        android:textColorHint="@color/black"
+        android:text="Zig Zag"
         android:textSize="34sp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -102,6 +103,7 @@
         android:layout_weight="2"
         android:layout_marginTop="290dp"
         android:layout_marginBottom="0dp"
+        android:background="@color/invisible"
         android:id="@+id/scrollContainer">
 
         <LinearLayout
