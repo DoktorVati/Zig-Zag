@@ -14,7 +14,7 @@ class APIManager {
     static let shared = APIManager()
     
     // Base URL for the API
-    private let baseURL = "http://api.zigzag.madebysaul.com"
+    private let baseURL = "https://api.zigzag.madebysaul.com"
     
     // URLSession configuration (optional)
     private let session: URLSession
@@ -34,14 +34,16 @@ class APIManager {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // Request body
+        // Request body with updated structure to match Post model
         let body: [String: Any] = [
             "text": text,
-            "latitude": latitude,
-            "longitude": longitude,
-            "author": authorId,
-            "postLatitude": latitude,
-            "postLongitude": longitude
+            "authorId": authorId,
+            "location": [
+                "latitude": latitude,
+                "longitude": longitude
+            ],
+            "createdAt": ISO8601DateFormatter().string(from: Date()),
+            "updatedAt": ISO8601DateFormatter().string(from: Date())
         ]
         
         do {
@@ -52,7 +54,7 @@ class APIManager {
         }
         
         // Make the request
-        session.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -61,8 +63,8 @@ class APIManager {
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(.success(()))
             } else {
-//                let error = NSError(domain: "", code: httpResponse?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: "Failed to create post"])
-//                completion(.failure(error))
+                let error = NSError(domain: "", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: "Failed to create post"])
+                completion(.failure(error))
             }
         }.resume()
     }
