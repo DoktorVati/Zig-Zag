@@ -1,6 +1,7 @@
 package com.zigzag;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -8,12 +9,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,12 +51,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView headerTextView;
-    private static final String BASE_URL = "http://api.zigzag.madebysaul.com/posts?";
+    private RelativeLayout mapImage;
+    private EditText headerTextView;
+    private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the message groups
     private ImageButton button;
+    private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
 
 
     // These variables are for caching the previous locations so that if the user spams
@@ -72,9 +79,33 @@ public class MainActivity extends AppCompatActivity {
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
         headerTextView = findViewById(R.id.headerTextView); // Update with your TextView ID
+        headerTextView.setText(DEFAULT_TAG); // Set default text
+        mapImage = findViewById(R.id.mapImage);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocation();
+// Create a clickable TextView for the tag input
+        TextView clickableText = new TextView(this);
+        clickableText.setText(headerTextView.getText());
+        clickableText.setTextSize(20);
+        clickableText.setTextColor(Color.BLACK);
+        clickableText.setPadding(20, 20, 20, 20);
+        // Click listener for the tag input
+        clickableText.setOnClickListener(v -> {
+            closeKeyboard();
+            checkAndFetchPosts(lastLatitude, lastLongitude, 40000);
+        });
+
+        // Key listener for headerTextView
+        headerTextView.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                closeKeyboard();
+                checkAndFetchPosts(lastLatitude, lastLongitude, 800000);
+                return true;
+            }
+            return false;
+        });
+
         findViewById(R.id.close).setOnClickListener(v -> {
             resetButtonScales();
             scaleButton(v);
@@ -151,55 +182,105 @@ public class MainActivity extends AppCompatActivity {
 //california is 3801 km away
     private void zoomIn() {
         zoomLevel = 18; // Closer zoom
-        fetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
+
         getUserLocation(); // Refresh location to update the map
     }
 
     private void showNearby() {
         zoomLevel = 15; // Default nearby zoom
-        fetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
     private void zoomToUserArea() {
         zoomLevel = 12; // User area zoom
-        fetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
+
         getUserLocation(); // Refresh location to update the map
     }
 
     private void zoomOut() {
         zoomLevel = 8; // Further zoom out
-        fetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
+        //fetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
+
         getUserLocation(); // Refresh location to update the map
     }
     // Increase scale of the button to show that it is selected.
     private void scaleButton(View button) {
-        button.setScaleX(1.5f); // Scale up X
-        button.setScaleY(1.5f); // Scale up Y
+        button.setScaleX(1.2f); // Scale up X
+        button.setScaleY(1.2f); // Scale up Y
     }
 //this will set the buttons back to normal scale
     private void resetButtonScales() {
         // Reset scale for all buttons
-        findViewById(R.id.close).setScaleX(1f);
-        findViewById(R.id.close).setScaleY(1f);
+        findViewById(R.id.close).setScaleX(0.8f);
+        findViewById(R.id.close).setScaleY(0.8f);
 
-        findViewById(R.id.nearby).setScaleX(1f);
-        findViewById(R.id.nearby).setScaleY(1f);
+        findViewById(R.id.nearby).setScaleX(0.8f);
+        findViewById(R.id.nearby).setScaleY(0.8f);
 
-        findViewById(R.id.userArea).setScaleX(1f);
-        findViewById(R.id.userArea).setScaleY(1f);
+        findViewById(R.id.userArea).setScaleX(0.8f);
+        findViewById(R.id.userArea).setScaleY(0.8f);
 
-        findViewById(R.id.global).setScaleX(1f);
-        findViewById(R.id.global).setScaleY(1f);
+        findViewById(R.id.global).setScaleX(0.8f);
+        findViewById(R.id.global).setScaleY(0.8f);
     }
+    private void checkAndFetchPosts(double latitude, double longitude, int distance) {
+        String userInput = headerTextView.getText().toString().trim();
 
+        // Check if the user has changed the default tag or input is empty
+        if (userInput.isEmpty() || userInput.equals(DEFAULT_TAG)) {
+            // Fetch all posts in the radius without hashtags
+            fetchPosts(latitude, longitude, distance);
+        } else if (userInput.startsWith("#")) {
+            String hashtag = userInput.substring(1);
+            // Fetch posts based on the hashtag
+            fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
+        } else {
+            String hashtag = userInput;
+            // Fetch posts based on the input without hashtags
+            fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
+        }
+    }
+    private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
+        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
+
+        new Thread(() -> {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String jsonResponse = response.body().string();
+                    handlePostsResponse(jsonResponse);
+                } else {
+                    Log.e("MainActivity", "Error fetching posts: " + response.message());
+                }
+            } catch (Exception e) {
+                Log.e("MainActivity", "Exception: ", e);
+            }
+        }).start();
+    }
+    private void closeKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (getCurrentFocus() != null) {
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
     private void loadImageAsBackground(String url) {
         Glide.with(this)
                 .load(url)
                 .into(new CustomTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        headerTextView.setBackground(resource);
+                        mapImage.setBackground(resource);
                     }
 
                     @Override
@@ -222,18 +303,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showInputDialog() {
-        final EditText input = new EditText(this);
+        // Create a LinearLayout to hold the EditText for the post
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 40, 40, 40); // Add padding for a nicer look
+
+        // Create an EditText for the post message
+        final EditText inputPost = new EditText(this);
+        inputPost.setHint("What's on your mind?"); // Professional hint
+        inputPost.setTextSize(16);
+        inputPost.setBackgroundResource(R.drawable.rounded_posts_shape); // Optional: custom background
+        inputPost.setPadding(20, 20, 20, 20); // Padding inside EditText
+        layout.addView(inputPost);
+
+        // Create a TextView for additional instructions (optional)
+        TextView instructionText = new TextView(this);
+        instructionText.setText("You can also add a tag (e.g., #tagname) at the end.");
+        instructionText.setTextSize(14);
+        instructionText.setPadding(0, 10, 0, 0); // Padding for the TextView
+        layout.addView(instructionText);
+
+        // Create the dialog with a professional appearance
         new AlertDialog.Builder(this)
-                .setTitle("New Post")
-                .setMessage("Enter your post:")
-                .setView(input)
-                .setPositiveButton("OK", (dialog, which) -> {
-                    String userInput = input.getText().toString();
-                    addNewPost(userInput);
+                .setTitle("Create a New Post")
+                .setView(layout)
+                .setPositiveButton("Post", (dialog, which) -> {
+                    String userInput = inputPost.getText().toString().trim();
+                    if (!userInput.isEmpty()) {
+                        addNewPost(userInput);
+                    } else {
+                        Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     private void addNewPost(String text) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
@@ -245,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                URL url = new URL("http://api.zigzag.madebysaul.com/posts/?latitude=" + lastLatitude + "&longitude=" + lastLongitude);
+                URL url = new URL("https://api.zigzag.madebysaul.com/posts/?latitude=" + lastLatitude + "&longitude=" + lastLongitude);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -420,19 +525,28 @@ public class MainActivity extends AppCompatActivity {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             Date date = inputFormat.parse(createdAt);
 
-            // Format the date into a "time ago" format
+            // Calculate the time difference
             long diffInMillis = new Date().getTime() - date.getTime();
             long diffInMinutes = diffInMillis / (1000 * 60);
-
-            if (diffInMinutes < 1) return "Just now";
-            if (diffInMinutes < 60) return diffInMinutes + " minute" + (diffInMinutes > 1 ? "s" : "") + " ago";
             long diffInHours = diffInMinutes / 60;
-            return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " ago";
+            long diffInDays = diffInHours / 24;
+
+            // Generate the appropriate time ago string
+            if (diffInMinutes < 1) {
+                return "Just now";
+            } else if (diffInMinutes < 60) {
+                return diffInMinutes + " minute" + (diffInMinutes > 1 ? "s" : "") + " ago";
+            } else if (diffInHours < 24) {
+                return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " ago";
+            } else {
+                return diffInDays + " day" + (diffInDays > 1 ? "s" : "") + " ago";
+            }
         } catch (Exception e) {
             Log.e("MainActivity", "Date parsing error: ", e);
             return "Unknown time";
         }
     }
+
 
 
 
