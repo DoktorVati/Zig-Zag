@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -38,6 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout mapImage;
     private EditText headerTextView;
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
+
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the post message groups
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private int lastZoomLevel = -1;
     private int zoomLevel = 12; // This is the zoom modifier for the map
     private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
+    //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler(); // Handler for delays
 
     @Override
@@ -86,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocation();
 
-        // This s the TextView for the tag input
+        // This is the TextView for the tag input
         TextView clickableText = new TextView(this);
         clickableText.setText(headerTextView.getText());
         clickableText.setTextSize(20);
@@ -168,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
         if (latitude == lastLatitude && longitude == lastLongitude && zoomLevel == lastZoomLevel) {
             return; // Skip API call to prevent useless calls
         }
-
         lastLatitude = latitude;
         lastLongitude = longitude;
         lastZoomLevel = zoomLevel;
@@ -183,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
 //california is 3801 km away
     private void zoomIn() {
+
         zoomLevel = 18; // Closer zoom
         //fetchPosts(lastLatitude, lastLongitude, 100);
         checkAndFetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
@@ -220,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
 
     //this will set the buttons back to normal scale
     private void resetButtonScales() {
+
         // Reset scale for all buttons
         findViewById(R.id.close).setScaleX(0.8f);
         findViewById(R.id.close).setScaleY(0.8f);
@@ -256,24 +261,28 @@ public class MainActivity extends AppCompatActivity {
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
 
+        Log.d("FetchPosts", "Request URL: " + url);
+
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
-                    .url(url)
+                    .url(url) // Ensure this URL uses https
                     .build();
 
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
+                    Log.d("FetchPosts", "Received response: " + jsonResponse);
                     handlePostsResponse(jsonResponse);
                 } else {
-                    Log.e("MainActivity", "Error fetching posts: " + response.message());
+                    Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message());
                 }
             } catch (Exception e) {
-                Log.e("MainActivity", "Exception: ", e);
+                Log.e("MainActivity", "Exception: fetch hashtag ", e);
             }
         }).start();
     }
+
 
     // This closes the android keyboard after entering / returning
     private void closeKeyboard() {
@@ -325,11 +334,15 @@ public class MainActivity extends AppCompatActivity {
         inputPost.setHint("What's on your mind?");
         inputPost.setTextSize(18);
         inputPost.setTextColor(getResources().getColor(R.color.black));
-        //inputPost.setBackgroundResource(R.drawable.rounded_posts_shape);
         inputPost.setPadding(20, 20, 20, 20); // Padding inside EditText
+
+        // Set input type to allow text and emojis
+        inputPost.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_VARIATION_NORMAL);
+        inputPost.setMaxLines(3); // Optional: limit number of lines
+
         layout.addView(inputPost);
 
-        // additional instructions
+        // Additional instructions
         TextView instructionText = new TextView(this);
         instructionText.setText("You can also add a tag (e.g., #tagname) at the end.");
         instructionText.setTextSize(16);
@@ -352,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+
     // This adds the post to the API
     private void addNewPost(String text) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
@@ -359,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, "your_user_id_here", lastLatitude, lastLongitude);
         // This line below shows the posted zig immediately
-        updateUIWithPost(text, "Just now");
+        updateUIWithPost(text, "Just now", "0 feet");
 
         new Thread(() -> {
             try {
@@ -386,13 +400,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error occurred", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
 
     // This is the builder for the post message and time that are passed into the post
-    private void updateUIWithPost(String text, String currentTime) {
+    private void updateUIWithPost(String text, String currentTime, String distance) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -408,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         gridLayout.setColumnCount(4);
-        gridLayout.setRowCount(2);
+        gridLayout.setRowCount(3);
         gridLayout.setPadding(0, -5, 0, 0);
 
         // Create TextView for the time using current time
@@ -467,10 +481,22 @@ public class MainActivity extends AppCompatActivity {
         postTextView.setTextSize(20);
         GridLayout.LayoutParams postParams = new GridLayout.LayoutParams(
                 GridLayout.spec(1), GridLayout.spec(0, 4));
-        postParams.width = GridLayout.LayoutParams.MATCH_PARENT;
+        postParams.width = GridLayout.LayoutParams.WRAP_CONTENT;
         postParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
         postTextView.setLayoutParams(postParams);
         postTextView.setGravity(Gravity.START);
+
+        TextView postDistanceView = new TextView(this);
+        postDistanceView.setTextColor(getResources().getColor(R.color.timeText));
+        postDistanceView.setText(distance);
+        postDistanceView.setTextSize(14);
+
+        GridLayout.LayoutParams distanceParams = new GridLayout.LayoutParams(
+                GridLayout.spec(2), GridLayout.spec(2));
+        postDistanceView.setGravity(Gravity.END);
+        postDistanceView.setPadding(400, 0, 70, 0);
+        postDistanceView.setLayoutParams(distanceParams);
+
 
         // Add views to the GridLayout
         gridLayout.addView(timeTextView);
@@ -478,6 +504,7 @@ public class MainActivity extends AppCompatActivity {
         gridLayout.addView(durationTextView);
         gridLayout.addView(moreButton);
         gridLayout.addView(postTextView);
+        gridLayout.addView(postDistanceView);
 
         // Add the GridLayout to the new message group
         newMessageGroup.addView(gridLayout);
@@ -490,6 +517,7 @@ public class MainActivity extends AppCompatActivity {
     // Fetches posts based on distance
     private void fetchPosts(double latitude, double longitude, int distance) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
+        Log.d("FetchPosts", "Request URL: " + url + " latitude: " + latitude + " longitude: " + longitude + " distance: " + distance);
 
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
@@ -502,18 +530,25 @@ public class MainActivity extends AppCompatActivity {
                     String jsonResponse = response.body().string();
                     handlePostsResponse(jsonResponse);
                 } else {
-                    Log.e("MainActivity", "Error fetching posts: " + response.message());
+                    String errorBody = response.body() != null ? response.body().string() : "No response body";
+                    Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
                 }
+            } catch (IOException e) {
+                Log.e("MainActivity", "Network error fetching posts: " + e.getMessage(), e);
             } catch (Exception e) {
-                Log.e("MainActivity", "Exception: ", e);
+                Log.e("MainActivity", "Exception fetching posts: " + e.getMessage(), e);
             }
         }).start();
     }
 
+
+
     private void handlePostsResponse(String jsonResponse) {
         runOnUiThread(() -> {
             try {
+                Log.d("handlePostsResponse", "Response received");
                 JSONArray postsArray = new JSONArray(jsonResponse);
+                Log.d("This is the",jsonResponse);
                 messageContainer.removeAllViews(); // Clear previous posts
 
                 for (int i = 0; i < postsArray.length(); i++) {
@@ -522,21 +557,57 @@ public class MainActivity extends AppCompatActivity {
                     String text = post.getString("text"); // Get the post text
                     String createdAt = post.getString("createdAt"); // Get the createdAt time
 
+                    // Access the location object and then access the distance
+                    JSONObject location = post.getJSONObject("location");
+                    String distanceInMetersStr = location.getString("distance"); // Get the distance as a string
+
+                    // Log the distance string
+                    Log.d("Distance check", "Distance string: " + distanceInMetersStr);
+
+                    // Convert the distance string to an integer
+                    double distanceInMeters = Double.parseDouble(distanceInMetersStr);
+
                     // Format the createdAt time
                     String formattedTime = formatTime(createdAt);
 
-                    // Update the UI with the post and formatted time
-                    updateUIWithPost(text, formattedTime);
+                    // Convert distance and prepare display string
+                    String distanceString = formatDistance(distanceInMeters); // Pass as int
+
+                    // Update the UI with the post, formatted time, and distance
+                    updateUIWithPost(text, formattedTime, distanceString);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
+            } catch (NumberFormatException e) {
+                Log.e("MainActivity", "Distance conversion error: ", e);
+            } catch (Exception e) {
+                Log.e("MainActivity", "General error: ", e);
             }
         });
     }
 
+
+    private String formatDistance(double meters) {
+        // Convert meters to miles
+        double miles = meters * 0.000621371;
+
+        // Log the distance in meters and calculated miles
+        Log.d("DistanceLogger", "Distance in meters: " + meters + ", calculated miles: " + miles);
+
+        if (miles < 0.1) {
+            double feet = meters * 3.28084; // Convert meters to feet
+            Log.d("DistanceLogger", "Distance in feet: " + feet); // Log the feet distance
+            return String.format("%.0f ft", feet);
+        } else {
+            return String.format("%.2f mi", miles);
+        }
+    }
+
+
+
+
     // This helps format the time that is received from the Backend API to show simple results
     private String formatTime(String createdAt) {
-        // Parse the createdAt time and convert it to a "time ago" format
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             Date date = inputFormat.parse(createdAt);
@@ -562,6 +633,7 @@ public class MainActivity extends AppCompatActivity {
             return "Unknown time";
         }
     }
+
 
 
 
