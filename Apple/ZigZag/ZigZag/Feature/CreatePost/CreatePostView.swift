@@ -55,6 +55,10 @@ struct CreatePostView: View {
                 
                 // POST Button
                 Button(action: {
+                    guard let location = LocationManager.shared.location else { return }
+                    if !postText.isEmpty {
+                        APIManager.shared.createPost(lat: location.coordinate.latitude, long: location.coordinate.longitude, text: postText, author: "Daniel", completion: {_ in print("Post Created")})
+                    }
                     navigationManager.navigateBackToRoot()
                 }) {
                     Text("POST")
