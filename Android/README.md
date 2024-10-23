@@ -1,8 +1,11 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 Drop android studio project here
 This
 =======
+=======
+>>>>>>> 072778b39f265705f1da670c7f7bff4cab86647b
 =======
 >>>>>>> 072778b39f265705f1da670c7f7bff4cab86647b
 In order to implement a new update to this folder. You must:
@@ -19,6 +22,9 @@ Make sure you are in the android-branch
    
    
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> Android-Branch
+=======
+>>>>>>> 072778b39f265705f1da670c7f7bff4cab86647b
 =======
 >>>>>>> 072778b39f265705f1da670c7f7bff4cab86647b
