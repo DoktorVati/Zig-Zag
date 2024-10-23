@@ -16,6 +16,10 @@ class FeedViewModel: ObservableObject {
         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
     @Published var selectedRadiusIndex: Int? = 0  // Track which button is selected
     
+    @Published var isLoading: Bool = false
+    
+    @Published var posts: [Post] = []
+    
     let distancesArray: [Double] = [0.001, 0.01, 0.1, 10]
     let distanceIcons: [String] = ["figure.walk.circle", "house", "building.2.crop.circle", "globe.americas"]
     
@@ -38,5 +42,21 @@ class FeedViewModel: ObservableObject {
     func setUserLoaction() {
         guard let userLocation = LocationManager.shared.location else { return }
         region = MKCoordinateRegion(center: userLocation.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+    }
+    
+    func fetchPosts() {
+        isLoading = true
+        guard let location = LocationManager.shared.location else { return }
+        APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                switch result {
+                case .success(let fetchedPosts):
+                    self.posts = fetchedPosts
+                case .failure(let error):
+                    print("Error fetching posts: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
