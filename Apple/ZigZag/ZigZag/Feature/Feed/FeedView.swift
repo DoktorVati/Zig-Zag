@@ -12,8 +12,6 @@ struct FeedView: View {
     @StateObject var viewModel = FeedViewModel()
     @StateObject var navigationManager = NavigationManager()
     
-    @State private var posts: [Post] = []
-    @State private var isLoading = false
     @State var mapsize: CGFloat = 250
     @State var mapTitle = "ZigZag"
     
@@ -31,26 +29,14 @@ struct FeedView: View {
                 // Scrollable Feed
                 NavigationStack(path: $navigationManager.path) {
                     VStack {
-                        List(posts) { post in
+                        List(viewModel.posts) { post in
                             Section {
                                 PostView(post: post)
                             }
- 
+                            
                         }
                         .refreshable {
-                            isLoading = true
-                            guard let location = LocationManager.shared.location else { return }
-                            APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { result in
-                                DispatchQueue.main.async {
-                                    isLoading = false
-                                    switch result {
-                                    case .success(let fetchedPosts):
-                                        self.posts = fetchedPosts
-                                    case .failure(let error):
-                                        print("Error fetching posts: \(error.localizedDescription)")
-                                    }
-                                }
-                            }
+                            viewModel.fetchPosts()
                         }
                     }
                     .toolbar {
@@ -63,6 +49,9 @@ struct FeedView: View {
                         case .createPost:
                             CreatePostView()
                             //TODO: find a way to make transitionBetter
+                        case .tagFilter:
+                            //TODO: add tagView
+                            EmptyView()
                         }
                     }
                     .onAppear {
@@ -76,19 +65,7 @@ struct FeedView: View {
                         }
                     }
                     .task{
-                        isLoading = true
-                        guard let location = LocationManager.shared.location else { return }
-                        APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { result in
-                            DispatchQueue.main.async {
-                                isLoading = false
-                                switch result {
-                                case .success(let fetchedPosts):
-                                    self.posts = fetchedPosts
-                                case .failure(let error):
-                                    print("Error fetching posts: \(error.localizedDescription)")
-                                }
-                            }
-                        }
+                        viewModel.fetchPosts()
                     }
                 }
                 
