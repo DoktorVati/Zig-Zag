@@ -1,7 +1,10 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 Drop android studio project here
 This
 =======
+=======
+>>>>>>> 072778b39f265705f1da670c7f7bff4cab86647b
 In order to implement a new update to this folder. You must:
 Make sure there is a clone of this folder in your file system. Download this branch and move it to documents.
 Make sure git is connected to the repository and this specific branch.
@@ -15,4 +18,7 @@ Make sure you are in the android-branch
    
    
    
+<<<<<<< HEAD
 >>>>>>> Android-Branch
+=======
+>>>>>>> 072778b39f265705f1da670c7f7bff4cab86647b
