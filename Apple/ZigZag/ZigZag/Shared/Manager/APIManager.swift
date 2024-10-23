@@ -24,49 +24,72 @@ class APIManager {
     }
     
     // MARK: - Create Post
-    func createPost(text: String, latitude: Double, longitude: Double, authorId: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/posts") else {
+    struct CreatedPost: Codable {
+        let id: Int
+        let authorId: String
+        let text: String
+        let expiryDate: String?
+        let createdAt: String
+        let updatedAt: String
+        let location: CreatedLocation
+    }
+    
+    struct CreatedLocation: Codable {
+        let latitude: Double
+        let longitude: Double
+        let distance: Double
+    }
+
+    func createPost(lat: Double, long: Double, text: String, author: String, postLat: Double? = nil, postLong: Double? = nil, expiryDate: String? = nil, completion: @escaping (Result<CreatedPost, Error>) -> Void) {
+        
+        // Prepare the URL
+        guard let url = URL(string: "https://api.zigzag.madebysaul.com/posts/?latitude=\(lat)&longitude=\(long)") else {
             print("Invalid URL")
             return
         }
         
+        // Create the Post object
+        let post:  [String: Any] =
+        [
+            "text": text,
+            "author": author,
+            "postLatitude": lat,
+            "postLongitude": long
+        ]
+        
+        // Encode the Post object to JSON using JSONSerialization
+           guard let jsonData = try? JSONSerialization.data(withJSONObject: post, options: []) else {
+               print("Error encoding post data")
+               return
+           }
+        
+        // Configure the request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
         
-        // Request body with updated structure to match Post model
-        let body: [String: Any] = [
-            "text": text,
-            "authorId": authorId,
-            "location": [
-                "latitude": latitude,
-                "longitude": longitude
-            ],
-            "createdAt": ISO8601DateFormatter().string(from: Date()),
-            "updatedAt": ISO8601DateFormatter().string(from: Date())
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
-        
-        // Make the request
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        // Send the request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
             
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                completion(.success(()))
-            } else {
-                let error = NSError(domain: "", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: "Failed to create post"])
-                completion(.failure(error))
+            guard let data = data else {
+                print("No data in response")
+                return
             }
-        }.resume()
+            
+            do {
+                let createdPost = try JSONDecoder().decode(CreatedPost.self, from: data)
+                completion(.success(createdPost))
+            } catch let decodingError {
+                completion(.failure(decodingError))
+            }
+        }
+        
+        task.resume()
     }
     
     // MARK: - Fetch Posts
