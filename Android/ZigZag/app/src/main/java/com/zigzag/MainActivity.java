@@ -106,9 +106,9 @@ public class MainActivity extends AppCompatActivity {
         // Click listener for the tag input
         clickableText.setOnClickListener(v -> {
             closeKeyboard();
-            int distance = 100;
-             if (lastZoomLevel == 15) {
-                distance = 820;
+            int distance = 820;
+             if (lastZoomLevel == 18) {
+                distance = 100;
             }
             else if (lastZoomLevel == 12) {
                 distance = 40000;
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             else if (lastZoomLevel == 8) {
                 distance = 800000;
             }
-            else distance = 100;
+            else distance = 820;
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
@@ -154,8 +154,8 @@ public class MainActivity extends AppCompatActivity {
             zoomOut();
         });
 
-        scaleButton(findViewById(R.id.close));
-        handler.postDelayed(this::zoomIn, 2000);
+        scaleButton(findViewById(R.id.nearby));
+        handler.postDelayed(this::showNearby, 2000);
 
         // Post button
         button.setOnClickListener(new View.OnClickListener() {
@@ -528,8 +528,8 @@ public class MainActivity extends AppCompatActivity {
                     // Determine the distance based on the last zoom level
                     int distance;
                     switch (lastZoomLevel) {
-                        case 15:
-                            distance = 820;
+                        case 18:
+                            distance = 100;
                             break;
                         case 12:
                             distance = 40000;
@@ -538,7 +538,7 @@ public class MainActivity extends AppCompatActivity {
                             distance = 800000;
                             break;
                         default:
-                            distance = 100;
+                            distance = 820;
                             break;
                     }
                     Log.d("it has been called", "onClick: fetched hashtag posts");
@@ -555,7 +555,7 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         postParams.addRule(RelativeLayout.BELOW, backwardTimeImageView.getId());
-        postParams.setMargins(0, 20, 20, 0);
+        postParams.setMargins(0, 20, 33, 0);
         postTextView.setLayoutParams(postParams);
 
         // Create TextView for the post distance
