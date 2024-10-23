@@ -49,9 +49,9 @@ struct FeedView: View {
                         case .createPost:
                             CreatePostView()
                             //TODO: find a way to make transitionBetter
-                        case .tagFilter:
+                        case .tagFilter(let tag):
                             //TODO: add tagView
-                            EmptyView()
+                            TagsView(selectedTag: tag)
                         }
                     }
                     .onAppear {
