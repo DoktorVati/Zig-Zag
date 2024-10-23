@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PostView: View {
+    @EnvironmentObject var navigationManager: NavigationManager
+
     let post: Post  // Accept a Post object
     
     var body: some View {
@@ -56,7 +58,8 @@ struct PostView: View {
                 // Handle hashtags (make them clickable)
                 if post.tags.contains(word) {
                     Button(action: {
-                        print("Tapped on tag: \(word)")
+                        tagAction(String: word)
+                        
                     }) {
                         Text(word)
                             .foregroundColor(.blue)
@@ -75,6 +78,10 @@ struct PostView: View {
                 }
             }
         }
+    }
+    
+    func tagAction(String tag: String) {
+        navigationManager.navigateTo(.tagFilter(String(tag.dropFirst())))
     }
 }
 
