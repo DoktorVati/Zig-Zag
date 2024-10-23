@@ -34,6 +34,21 @@
         android:background="@color/invisible"
         android:inputType="text" />
 
+        <TextView
+            android:id="@+id/clearTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="|Clear text|"
+            android:textAllCaps="true"
+            android:textStyle="italic"
+            android:layout_marginStart="145dp"
+            android:textColor="@color/red"
+            android:background="@color/transparentGrey"
+            android:layout_below="@+id/headerTextView"
+            android:visibility="gone"
+            />
+
+
     </RelativeLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -97,7 +112,7 @@
 
     <!-- Scrollable content -->
     <ScrollView
-        android:contentDescription="This is the scroll content"
+    android:contentDescription="This is the scroll content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2"

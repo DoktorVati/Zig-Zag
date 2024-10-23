@@ -6,4 +6,5 @@
     <color name="invisible">#00FFFFFF</color>
     <color name="timeText">#A8717171</color>
     <color name="blue">#00C6FF</color>
+    <color name="red">#C60D0D</color>
 </resources>

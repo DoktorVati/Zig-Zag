@@ -8,14 +8,18 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -47,6 +51,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -68,12 +74,12 @@ public class MainActivity extends AppCompatActivity {
     // the buttons it wont call the api a million times.
     private double lastLatitude;
     private double lastLongitude;
-    private int lastZoomLevel = -1;
+    private int lastZoomLevel = 1;
     private int zoomLevel = 12; // This is the zoom modifier for the map
     private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler(); // Handler for delays
-
+    TextView clearTagTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         headerTextView = findViewById(R.id.headerTextView);
         headerTextView.setText(DEFAULT_TAG);
+        TextView clearTagTextView = findViewById(R.id.clearTag);
 
         mapImage = findViewById(R.id.mapImage);
 
@@ -99,7 +106,18 @@ public class MainActivity extends AppCompatActivity {
         // Click listener for the tag input
         clickableText.setOnClickListener(v -> {
             closeKeyboard();
-            checkAndFetchPosts(lastLatitude, lastLongitude, 40000);
+            int distance = 100;
+             if (lastZoomLevel == 15) {
+                distance = 820;
+            }
+            else if (lastZoomLevel == 12) {
+                distance = 40000;
+            }
+            else if (lastZoomLevel == 8) {
+                distance = 800000;
+            }
+            else distance = 100;
+            checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
         // Key listener for headerTextView
@@ -184,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-//california is 3801 km away
+    //california is 3801 km away
     private void zoomIn() {
 
         zoomLevel = 18; // Closer zoom
@@ -242,20 +260,29 @@ public class MainActivity extends AppCompatActivity {
     // This is called first when a tag is entered or when they change the radius.
     private void checkAndFetchPosts(double latitude, double longitude, int distance) {
         String userInput = headerTextView.getText().toString().trim();
+        TextView clearTagTextView = findViewById(R.id.clearTag);
 
         // Check if the user has changed the default tag or input is empty
         if (userInput.isEmpty() || userInput.equals(DEFAULT_TAG)) {
             // Fetch all posts in the radius without hashtags
+            clearTagTextView.setVisibility(View.GONE);
             fetchPosts(latitude, longitude, distance);
         } else if (userInput.startsWith("#")) {
             String hashtag = userInput.substring(1);
             // Fetch posts based on the hashtag
+            clearTagTextView.setVisibility(View.VISIBLE);
             fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
         } else {
             String hashtag = userInput;
+            clearTagTextView.setVisibility(View.VISIBLE); // Show the clear tag button
             // Fetch posts based on the input without hashtags
             fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
         }
+        clearTagTextView.setOnClickListener(v -> {
+            headerTextView.setText(DEFAULT_TAG); // Reset headerTextView text to DEFAULT_TAG
+            clearTagTextView.setVisibility(View.GONE); // Hide clear tag after resetting
+            fetchPosts(latitude, longitude, distance);
+        });
     }
     // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
@@ -405,7 +432,6 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // This is the builder for the post message and time that are passed into the post
     private void updateUIWithPost(String text, String currentTime, String distance) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
@@ -416,102 +442,153 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
-        // Create a GridLayout for the message content
-        GridLayout gridLayout = new GridLayout(this);
-        gridLayout.setLayoutParams(new LinearLayout.LayoutParams(
+        // Create a RelativeLayout for the message content
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
-        gridLayout.setColumnCount(4);
-        gridLayout.setRowCount(3);
-        gridLayout.setPadding(0, -5, 0, 0);
 
-        // Create TextView for the time using current time
+        // Create TextView for the current time
         TextView timeTextView = new TextView(this);
         timeTextView.setTextColor(getResources().getColor(R.color.timeText));
         timeTextView.setText(currentTime);
-        timeTextView.setLayoutParams(new GridLayout.LayoutParams(
-                GridLayout.spec(0), GridLayout.spec(0))); // 1st row, 1st column
-
-        // Create TextView for the duration
-        TextView durationTextView = new TextView(this);
-        durationTextView.setTextColor(getResources().getColor(R.color.timeText));
-        durationTextView.setText("10 hours left"); // Modify as needed
-        durationTextView.setLayoutParams(new GridLayout.LayoutParams(
-                GridLayout.spec(0), GridLayout.spec(2))); // 1st row, 2nd column
+        timeTextView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams timeParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        timeTextView.setLayoutParams(timeParams);
 
         // Create ImageView for the time icon
         ImageView backwardTimeImageView = new ImageView(this);
         backwardTimeImageView.setImageResource(R.drawable.backward_time);
         backwardTimeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        GridLayout.LayoutParams imageParams = new GridLayout.LayoutParams(
-                GridLayout.spec(0), GridLayout.spec(1)); // 1st row, 1st column
-        imageParams.width = 48;
-        imageParams.height = 48;
-        imageParams.setMargins(60, 0, 0, 0);
+        backwardTimeImageView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(
+                48, 48);
+        //imageParams.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
+        imageParams.setMargins(275, 0, 0, 0);
         backwardTimeImageView.setLayoutParams(imageParams);
+
+        // Create TextView for the duration
+        TextView durationTextView = new TextView(this);
+        durationTextView.setTextColor(getResources().getColor(R.color.timeText));
+        durationTextView.setText("10 hours left"); // Modify as needed
+        durationTextView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams durationParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        durationParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        durationParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
+        durationParams.setMargins(0, 5, 0, 0); // Reduced margin to decrease gap
+        durationTextView.setLayoutParams(durationParams);
 
         // Create ImageButton for more options
         ImageButton moreButton = new ImageButton(this);
         moreButton.setImageResource(R.drawable.baseline_more_horiz_24);
         moreButton.setScaleX(1f);
         moreButton.setScaleY(1f);
-        moreButton.setScaleType(ImageView.ScaleType.FIT_XY);
+        moreButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
         moreButton.setBackgroundColor(Color.TRANSPARENT);
 
-            // Set layout parameters to match the XML attributes
-        GridLayout.LayoutParams moreButtonParams = new GridLayout.LayoutParams(
-                GridLayout.spec(0), GridLayout.spec(3));
-        moreButtonParams.width = 100;
-        moreButtonParams.height = 160;
-        moreButtonParams.setMargins(0, -60, 20, -30);
-        moreButtonParams.setGravity(Gravity.END);
-        //moreButton.setId(View.generateViewId()); // Generate a unique ID if needed later on
+        moreButton.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams moreButtonParams = new RelativeLayout.LayoutParams(
+                100, 160);
+        //moreButtonParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
+        moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        moreButtonParams.setMargins(0,-60,0,-30);
         moreButton.setLayoutParams(moreButtonParams);
 
         // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
             Toast.makeText(this, "More options clicked!", Toast.LENGTH_SHORT).show();
-            // This is where we will add the delete function later on
         });
-
 
         // Create TextView for the post content
         TextView postTextView = new TextView(this);
-        postTextView.setText(text);
-        postTextView.setTextSize(20);
-        GridLayout.LayoutParams postParams = new GridLayout.LayoutParams(
-                GridLayout.spec(1), GridLayout.spec(0, 4));
-        postParams.width = GridLayout.LayoutParams.WRAP_CONTENT;
-        postParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
-        postTextView.setLayoutParams(postParams);
-        postTextView.setGravity(Gravity.START);
+        SpannableString spannableString = new SpannableString(text);
+        Pattern pattern = Pattern.compile("#\\w+");
+        Matcher matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+            spannableString.setSpan(new ForegroundColorSpan(Color.BLUE), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
+            // Create a ClickableSpan for the hashtag
+            final String hashtag = text.substring(start, end);
+            spannableString.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(View widget) {
+                    // Replace the headerTextView text with the selected hashtag
+                    headerTextView.setText(hashtag); // Ensure headerTextView is defined
+
+                    // Determine the distance based on the last zoom level
+                    int distance;
+                    switch (lastZoomLevel) {
+                        case 15:
+                            distance = 820;
+                            break;
+                        case 12:
+                            distance = 40000;
+                            break;
+                        case 8:
+                            distance = 800000;
+                            break;
+                        default:
+                            distance = 100;
+                            break;
+                    }
+                    Log.d("it has been called", "onClick: fetched hashtag posts");
+                    // Fetch posts with the selected hashtag
+                    checkAndFetchPosts(lastLatitude, lastLongitude, distance);
+                }
+            }, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        }
+        postTextView.setText(spannableString);
+        postTextView.setTextSize(20);
+        postTextView.setMovementMethod(LinkMovementMethod.getInstance()); // Enable links
+        RelativeLayout.LayoutParams postParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        postParams.addRule(RelativeLayout.BELOW, backwardTimeImageView.getId());
+        postParams.setMargins(0, 20, 20, 0);
+        postTextView.setLayoutParams(postParams);
+
+        // Create TextView for the post distance
         TextView postDistanceView = new TextView(this);
         postDistanceView.setTextColor(getResources().getColor(R.color.timeText));
         postDistanceView.setText(distance);
         postDistanceView.setTextSize(14);
-
-        GridLayout.LayoutParams distanceParams = new GridLayout.LayoutParams(
-                GridLayout.spec(2), GridLayout.spec(2));
-        postDistanceView.setGravity(Gravity.END);
-        postDistanceView.setPadding(400, 0, 70, 0);
+        postDistanceView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams distanceParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        distanceParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        distanceParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        distanceParams.addRule(RelativeLayout.BELOW, postTextView.getId());
+        postParams.setMargins(0,25,0,0);
         postDistanceView.setLayoutParams(distanceParams);
 
+        // Add views to the RelativeLayout
+        relativeLayout.addView(timeTextView);
+        relativeLayout.addView(moreButton);
+        relativeLayout.addView(durationTextView);
+        relativeLayout.addView(backwardTimeImageView);
+        relativeLayout.addView(postTextView);
+        relativeLayout.addView(postDistanceView);
 
-        // Add views to the GridLayout
-        gridLayout.addView(timeTextView);
-        gridLayout.addView(backwardTimeImageView);
-        gridLayout.addView(durationTextView);
-        gridLayout.addView(moreButton);
-        gridLayout.addView(postTextView);
-        gridLayout.addView(postDistanceView);
-
-        // Add the GridLayout to the new message group
-        newMessageGroup.addView(gridLayout);
+        // Add the RelativeLayout to the new message group
+        newMessageGroup.addView(relativeLayout);
 
         // and add the new message group to the container
         messageContainer.addView(newMessageGroup);
     }
+
+
 
 
     // Fetches posts based on distance
