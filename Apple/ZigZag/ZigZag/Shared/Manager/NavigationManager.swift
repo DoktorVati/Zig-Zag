@@ -10,7 +10,7 @@ import SwiftUI
 
 enum ZigZagDestination: Hashable {
     case createPost
-    case tagFilter
+    case tagFilter(String)
     
 }
 
