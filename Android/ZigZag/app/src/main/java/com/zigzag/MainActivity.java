@@ -19,11 +19,13 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +51,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -80,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler(); // Handler for delays
     TextView clearTagTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,16 +111,13 @@ public class MainActivity extends AppCompatActivity {
         clickableText.setOnClickListener(v -> {
             closeKeyboard();
             int distance = 100;
-             if (lastZoomLevel == 15) {
+            if (lastZoomLevel == 15) {
                 distance = 820;
-            }
-            else if (lastZoomLevel == 12) {
+            } else if (lastZoomLevel == 12) {
                 distance = 40000;
-            }
-            else if (lastZoomLevel == 8) {
+            } else if (lastZoomLevel == 8) {
                 distance = 800000;
-            }
-            else distance = 100;
+            } else distance = 100;
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
@@ -234,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
         getUserLocation(); // Refresh location to update the map
     }
+
     // Increase scale of the button to show that it is selected.
     private void scaleButton(View button) {
         button.setScaleX(1.2f);
@@ -284,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
             fetchPosts(latitude, longitude, distance);
         });
     }
+
     // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
@@ -375,6 +378,26 @@ public class MainActivity extends AppCompatActivity {
         instructionText.setTextSize(16);
         instructionText.setPadding(0, 10, 0, 0);
         layout.addView(instructionText);
+
+        // Additional duration instructions
+        TextView durationText = new TextView(this);
+        durationText.setText("Select how many days your post will last (up to 30).");
+        durationText.setTextSize(16);
+        durationText.setPadding(0, 10, 0, 0);
+        layout.addView(durationText);
+
+        // Create dropdown menu to select duration
+        Spinner dropdown = new Spinner(this);
+        String[] items = new String[30];
+
+        //Populate the dropdown menu
+        for(int i = 0; i < 30; i++)
+            items[i] = (i + 1) + "";
+
+        //Continue creating the menu
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        dropdown.setAdapter(adapter);
+        layout.addView(dropdown);
 
         // Create the dialog
         new AlertDialog.Builder(this)
@@ -498,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
         //moreButtonParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        moreButtonParams.setMargins(0,-60,0,-30);
+        moreButtonParams.setMargins(0, -60, 0, -30);
         moreButton.setLayoutParams(moreButtonParams);
 
         // Set click listener for the more button
@@ -570,7 +593,7 @@ public class MainActivity extends AppCompatActivity {
         distanceParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         distanceParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         distanceParams.addRule(RelativeLayout.BELOW, postTextView.getId());
-        postParams.setMargins(0,25,0,0);
+        postParams.setMargins(0, 25, 0, 0);
         postDistanceView.setLayoutParams(distanceParams);
 
         // Add views to the RelativeLayout
@@ -587,8 +610,6 @@ public class MainActivity extends AppCompatActivity {
         // and add the new message group to the container
         messageContainer.addView(newMessageGroup);
     }
-
-
 
 
     // Fetches posts based on distance
@@ -619,13 +640,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void handlePostsResponse(String jsonResponse) {
         runOnUiThread(() -> {
             try {
                 Log.d("handlePostsResponse", "Response received");
                 JSONArray postsArray = new JSONArray(jsonResponse);
-                Log.d("This is the",jsonResponse);
+                Log.d("This is the", jsonResponse);
                 messageContainer.removeAllViews(); // Clear previous posts
 
                 for (int i = 0; i < postsArray.length(); i++) {
@@ -681,8 +701,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     // This helps format the time that is received from the Backend API to show simple results
     private String formatTime(String createdAt) {
         try {
@@ -710,9 +728,4 @@ public class MainActivity extends AppCompatActivity {
             return "Unknown time";
         }
     }
-
-
-
-
-
 }
