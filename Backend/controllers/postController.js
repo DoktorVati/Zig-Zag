@@ -69,6 +69,7 @@ async function getPostsByHashtag(
     );
   }
   try {
+    const currentDate = new Date();
     const posts = await Post.findAll({
       include: [
         {
@@ -77,6 +78,14 @@ async function getPostsByHashtag(
             name: {
               [Sequelize.Op.iLike]: hashtag,
             },
+            [Sequelize.Op.or]: [
+              {
+                expiryDate: {
+                  [Sequelize.Op.gt]: currentDate,
+                },
+              },
+              { expiryDate: null },
+            ],
           },
           attributes: [],
         },
@@ -113,7 +122,18 @@ async function getPostsByHashtag(
 
 async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
   try {
+    const currentDate = new Date();
     const posts = await Post.findAll({
+      where: {
+        [Sequelize.Op.or]: [
+          {
+            expiryDate: {
+              [Sequelize.Op.gt]: currentDate,
+            },
+          },
+          { expiryDate: null },
+        ],
+      },
       attributes: {
         include: [
           [
@@ -154,15 +174,31 @@ async function getPostsWithinDistance(
   }
 
   try {
+    const currentDate = new Date();
     const posts = await Post.findAll({
-      where: Sequelize.where(
-        Sequelize.fn(
-          "ST_DistanceSphere",
-          Sequelize.col("location"),
-          Sequelize.literal(`ST_GeomFromText(:coordinates)`)
-        ),
-        { [Sequelize.Op.lte]: distance }
-      ),
+      where: {
+        [Sequelize.Op.and]: [
+          // Get all posts that are within the distance provided and have an expiryDate greater than the currentDate.
+          Sequelize.where(
+            Sequelize.fn(
+              "ST_DistanceSphere",
+              Sequelize.col("location"),
+              Sequelize.literal(`ST_GeomFromText(:coordinates)`)
+            ),
+            { [Sequelize.Op.lte]: distance }
+          ),
+          {
+            [Sequelize.Op.or]: [
+              {
+                expiryDate: {
+                  [Sequelize.Op.gt]: currentDate,
+                },
+              },
+              { expiryDate: null },
+            ],
+          },
+        ],
+      },
       replacements: {
         coordinates: `POINT(${longitude} ${latitude})`,
       },
