@@ -409,6 +409,7 @@ public class MainActivity extends AppCompatActivity {
                     String expiryDate = formatExpiration(duration);
                     if (!userInput.isEmpty()) {
                         addNewPost(userInput, expiryDate);
+                        Log.d("expiryDate", expiryDate);
                     } else {
                         Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
                     }
@@ -422,10 +423,10 @@ public class MainActivity extends AppCompatActivity {
     private void addNewPost(String text, String expiryDate) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
-        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
-                text, "your_user_id_here", lastLatitude, lastLongitude);
+        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
+                text, "your_user_id_here", expiryDate, lastLatitude, lastLongitude);
         // This line below shows the posted zig immediately
-        updateUIWithPost(text, "Just now", "0 feet");
+        updateUIWithPost(text, "Just now", "0 feet", expiryDate);
 
         new Thread(() -> {
             try {
@@ -457,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -499,7 +500,7 @@ public class MainActivity extends AppCompatActivity {
         // Create TextView for the duration
         TextView durationTextView = new TextView(this);
         durationTextView.setTextColor(getResources().getColor(R.color.timeText));
-        durationTextView.setText("10 hours left"); // Modify as needed
+        durationTextView.setText(formatDuration(expiryDate)); // Modify as needed
         durationTextView.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams durationParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -672,8 +673,10 @@ public class MainActivity extends AppCompatActivity {
                     // Convert distance and prepare display string
                     String distanceString = formatDistance(distanceInMeters); // Pass as int
 
+                    String expiryDate = post.getString("expiryDate");
+
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -763,6 +766,35 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("MainActivity", "Error");
             return null;
+        }
+    }
+
+    private String formatDuration(String expiryDate){
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            String expiryMidnight = expiryDate.substring(0, 11) + "24:00:00.000Z";
+            Date date = inputFormat.parse(expiryMidnight);
+
+
+            // Calculate the time difference
+            long diffInMillis = date.getTime() - new Date().getTime();
+            long diffInMinutes = diffInMillis / (1000 * 60);
+            long diffInHours = diffInMinutes / 60;
+            long diffInDays = diffInHours / 24;
+
+            // Generate the appropriate time left string
+            if (diffInMinutes < 1) {
+                return "About to go";
+            } else if (diffInMinutes < 60) {
+                return diffInMinutes + " minute" + (diffInMinutes > 1 ? "s" : "") + " left";
+            } else if (diffInHours < 24) {
+                return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " left";
+            } else {
+                return diffInDays + " day" + (diffInDays > 1 ? "s" : "") + " left";
+            }
+        } catch (Exception e) {
+            Log.e("MainActivity", "Date parsing error: ", e);
+            return "Unknown time";
         }
     }
 
