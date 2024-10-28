@@ -405,8 +405,10 @@ public class MainActivity extends AppCompatActivity {
                 .setView(layout)
                 .setPositiveButton("Post", (dialog, which) -> {
                     String userInput = inputPost.getText().toString().trim();
+                    int duration = Integer.parseInt(dropdown.getSelectedItem().toString());
+                    String expiryDate = formatExpiration(duration);
                     if (!userInput.isEmpty()) {
-                        addNewPost(userInput);
+                        addNewPost(userInput, expiryDate);
                     } else {
                         Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
                     }
@@ -417,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // This adds the post to the API
-    private void addNewPost(String text) {
+    private void addNewPost(String text, String expiryDate) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
@@ -727,5 +729,54 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity", "Date parsing error: ", e);
             return "Unknown time";
         }
+    }
+
+    private String formatExpiration(int duration){
+
+        try {
+            Date currentDate = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(currentDate);
+
+            int month = cal.get(Calendar.MONTH) + 1;
+            int year = cal.get(Calendar.YEAR);
+            int day = cal.get(Calendar.DATE);
+
+            int monthLength = monthLength(month, year);
+
+            int newDate = day + duration;
+            int newMonth = month;
+            int newYear = year;
+
+            while (newDate > monthLength) {
+                newMonth++;
+                newDate -= monthLength;
+                monthLength = monthLength(newMonth, year);
+            }
+
+            if (newMonth > 12) {
+                newYear++;
+                newMonth -= 12;
+            }
+
+            return newYear + "-" + newMonth + "-" + newDate + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date()).substring(10);
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error");
+            return null;
+        }
+    }
+
+    private int monthLength(int month, int year) {
+
+        int febLength;
+        if(year % 4 == 0)
+            febLength = 29;
+        else
+            febLength = 28;
+
+        int[] monthLengths = new int[]{31, febLength, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+        return monthLengths[month];
+
     }
 }
