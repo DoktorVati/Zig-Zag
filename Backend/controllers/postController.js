@@ -130,8 +130,8 @@ async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
         coordinates: `POINT(${longitude} ${latitude})`,
       },
       order: [
-        [Sequelize.literal("distance"), sortOrder],
         ["created_at", "DESC"],
+        [Sequelize.literal("distance"), sortOrder],
       ],
     });
     const formattedPosts = posts.map(formatPost);
