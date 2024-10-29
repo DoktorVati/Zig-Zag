@@ -16,6 +16,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -24,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -535,7 +537,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
-            Toast.makeText(this, "More options clicked!", Toast.LENGTH_SHORT).show();
+            PopupMenu postOptions = new PopupMenu(this, v);
+            postOptions.getMenuInflater().inflate(R.menu.menu_post_options, postOptions.getMenu());
+            postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    if(item.getItemId() == R.id.item_delete)
+                        return true;
+                    return false;
+                }
+            });
+            postOptions.show();
         });
 
         // Create TextView for the post content
