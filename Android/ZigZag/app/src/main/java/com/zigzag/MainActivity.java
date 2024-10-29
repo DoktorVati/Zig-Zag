@@ -381,23 +381,29 @@ public class MainActivity extends AppCompatActivity {
 
         // Additional duration instructions
         TextView durationText = new TextView(this);
-        durationText.setText("Select how many days your post will last (up to 30).");
+        durationText.setText("Select you're post's duration (up to 30 days).");
         durationText.setTextSize(16);
         durationText.setPadding(0, 10, 0, 0);
         layout.addView(durationText);
 
-        // Create dropdown menu to select duration
-        Spinner dropdown = new Spinner(this);
-        String[] items = new String[30];
+        // Create dropdown menu to select duration type
+        Spinner typeDropdown = new Spinner(this);
+        String[] types = new String[]{"minutes", "hours", "days"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
+        typeDropdown.setAdapter(adapter);
+        layout.addView(typeDropdown);
 
-        //Populate the dropdown menu
-        for(int i = 0; i < 30; i++)
-            items[i] = (i + 1) + "";
+        final EditText durationStr = new EditText(this);
+        durationStr.setHint("Input Duration");
+        durationStr.setTextSize(18);
+        durationStr.setTextColor(getResources().getColor(R.color.black));
+        durationStr.setPadding(20, 20, 20, 20); // Padding inside EditText
 
-        //Continue creating the menu
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        dropdown.setAdapter(adapter);
-        layout.addView(dropdown);
+        // Set input type to allow numbers
+        durationStr.setInputType(InputType.TYPE_CLASS_NUMBER);
+        durationStr.setMaxLines(1); // Optional: limit number of lines
+
+        layout.addView(durationStr);
 
         // Create the dialog
         new AlertDialog.Builder(this)
@@ -405,8 +411,8 @@ public class MainActivity extends AppCompatActivity {
                 .setView(layout)
                 .setPositiveButton("Post", (dialog, which) -> {
                     String userInput = inputPost.getText().toString().trim();
-                    int duration = Integer.parseInt(dropdown.getSelectedItem().toString());
-                    String expiryDate = formatExpiration(duration);
+                    int duration = Integer.parseInt(durationStr.getText().toString().trim());
+                    String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
                     if (!userInput.isEmpty()) {
                         addNewPost(userInput, expiryDate);
                         Log.d("expiryDate", expiryDate);
@@ -426,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, "your_user_id_here", expiryDate, lastLatitude, lastLongitude);
         // This line below shows the posted zig immediately
-        updateUIWithPost(text, "Just now", "0 feet", expiryDate);
+        updateUIWithPost(text, "Just now", "0 ft", expiryDate);
 
         new Thread(() -> {
             try {
@@ -734,35 +740,67 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String formatExpiration(int duration){
+    private String formatExpiration(int duration, String type){
+
+        if(type.equals("days"))
+            duration *= (24 * 60);
+        else if(type.equals("hours"))
+            duration *= 60;
+        else
+            ;
 
         try {
             Date currentDate = new Date();
             Calendar cal = Calendar.getInstance();
             cal.setTime(currentDate);
 
-            int month = cal.get(Calendar.MONTH) + 1;
             int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH) + 1;
             int day = cal.get(Calendar.DATE);
-
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            int minute = cal.get(Calendar.MINUTE);
             int monthLength = monthLength(month, year);
 
-            int newDate = day + duration;
-            int newMonth = month;
-            int newYear = year;
+            minute = minute + duration;
 
-            while (newDate > monthLength) {
-                newMonth++;
-                newDate -= monthLength;
-                monthLength = monthLength(newMonth, year);
+            //Cascade the overflow
+            while(minute >= 60){
+                hour++;
+                minute -= 60;
             }
 
-            if (newMonth > 12) {
-                newYear++;
-                newMonth -= 12;
+            while(hour >= 24){
+                day++;
+                hour -= 24;
             }
 
-            return newYear + "-" + newMonth + "-" + newDate + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date()).substring(10);
+            while (day > monthLength) {
+                month++;
+                day -= monthLength;
+                monthLength = monthLength(month, year);
+            }
+
+            if (month > 12) {
+                year++;
+                month -= 12;
+            }
+
+            String monthStr = month + "";
+            String dateStr = day + "";
+            String hourStr = hour + "";
+            String minuteStr = minute + "";
+
+            //Add 0s to one digit numbers
+            if((month + "").length() == 1)
+                monthStr = "0" + month;
+            if((day + "").length() == 1)
+                dateStr = "0" + day;
+            if((hour + "").length() == 1)
+                hourStr = "0" + hour;
+            if((minute + "").length() == 1)
+                minuteStr = "0" + minute;
+
+            return year + "-" + monthStr + "-" + dateStr + "T" + hourStr + ":" + minuteStr + ":00.000Z";
         } catch (Exception e) {
             Log.e("MainActivity", "Error");
             return null;
@@ -772,8 +810,7 @@ public class MainActivity extends AppCompatActivity {
     private String formatDuration(String expiryDate){
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-            String expiryMidnight = expiryDate.substring(0, 11) + "24:00:00.000Z";
-            Date date = inputFormat.parse(expiryMidnight);
+            Date date = inputFormat.parse(expiryDate);
 
 
             // Calculate the time difference
