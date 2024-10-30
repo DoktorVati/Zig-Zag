@@ -27,10 +27,22 @@ struct PostView: View {
                     .foregroundColor(.gray)
             }
             
-            // Post text with clickable hashtags
-            taggableText()
-                .font(.body)
-                .padding(.vertical, 4)
+            // Post text with clickable hashtags using WrappedHStack
+            WrappedHStack(post.words, horizontalSpacing: 2, verticalSpacing: 2) { word in
+                if post.tags.contains(word) {
+                    // Clickable hashtag
+                    Text(word)
+                        .onTapGesture {
+                            tagAction(tag: word)
+                        }
+                        .foregroundStyle(.blue)
+                } else {
+                    // Regular text
+                    Text(word)
+                        .foregroundColor(.primary)
+                }
+            }
+            .padding(.vertical, 4)
             
             HStack {
                 Text("32😭") // Placeholder for reactions, could be dynamic later
@@ -44,43 +56,9 @@ struct PostView: View {
         }
     }
     
-    // Function to build a view with clickable hashtags and normal text
-    @ViewBuilder
-    func taggableText() -> some View {
-        // Using VStack to allow text flow
-        HStack(spacing: 0) {
-            // Start by displaying each word, and handling hashtags as clickable
-            let words = post.words
-            
-            ForEach(words.indices, id: \.self) { index in
-                let word = words[index]
-                
-                // Handle hashtags (make them clickable)
-                if post.tags.contains(word) {
-                    Button(action: {
-                        tagAction(String: word)
-                        
-                    }) {
-                        Text(word)
-                            .foregroundColor(.blue)
-                            .underline()
-                    }
-                } else {
-                    // Display normal words
-                    Text(word)
-                        .foregroundColor(.primary)
-                }
-                
-                // Add space after each word except the last
-                if index < words.count - 1 {
-                    Text(" ")
-                        .foregroundColor(.primary)
-                }
-            }
-        }
-    }
-    
-    func tagAction(String tag: String) {
+    // Action when a hashtag is tapped
+    func tagAction(tag: String) {
+        print("tag: \(tag) tapped")
         navigationManager.navigateTo(.tagFilter(String(tag.dropFirst())))
     }
 }
