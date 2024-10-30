@@ -14,7 +14,7 @@ class FeedViewModel: ObservableObject {
     @Published var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 34.528675, longitude: -83.987841),
         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-    @Published var selectedRadiusIndex: Int? = 0  // Track which button is selected
+    @Published var selectedRadiusIndex: Int? = 1  // Track which button is selected
     
     @Published var isLoading: Bool = false
     
