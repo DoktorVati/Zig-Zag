@@ -56,6 +56,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -434,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, "your_user_id_here", expiryDate, lastLatitude, lastLongitude);
         // This line below shows the posted zig immediately
-        updateUIWithPost(text, "Just now", "0 ft", expiryDate);
+        //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
 
         new Thread(() -> {
             try {
@@ -444,6 +445,7 @@ public class MainActivity extends AppCompatActivity {
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setDoOutput(true);
 
+
                 try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
                     os.write(input, 0, input.length);
@@ -452,9 +454,8 @@ public class MainActivity extends AppCompatActivity {
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     runOnUiThread(() -> {
+
                         Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
-                        // Call the method to update the UI with the new post
-                        //updateUIWithPost(text, currentTime);
                     });
                 } else {
                     //runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
@@ -464,9 +465,18 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
             }
         }).start();
+        int distance = 100;
+        if (lastZoomLevel == 15) {
+            distance = 820;
+        } else if (lastZoomLevel == 12) {
+            distance = 40000;
+        } else if (lastZoomLevel == 8) {
+            distance = 800000;
+        } else distance = 100;
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -542,8 +552,14 @@ public class MainActivity extends AppCompatActivity {
             postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    if(item.getItemId() == R.id.item_delete)
+                    if(item.getItemId() == R.id.item_delete) {
+                        try {
+                            deletePost(id);
+                        } catch (IOException e) {
+                            Log.e("Delete", "Failed to delete");
+                        }
                         return true;
+                    }
                     return false;
                 }
             });
@@ -672,6 +688,7 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < postsArray.length(); i++) {
                     JSONObject post = postsArray.getJSONObject(i);
 
+                    int id = post.getInt("id");
                     String text = post.getString("text"); // Get the post text
                     String createdAt = post.getString("createdAt"); // Get the createdAt time
 
@@ -694,7 +711,7 @@ public class MainActivity extends AppCompatActivity {
                     String expiryDate = post.getString("expiryDate");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -706,6 +723,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void deletePost(int id) throws IOException{
+
+        URL url = new URL("http://api.zigzag.madebysaul.com/posts/" + id);
+        HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+        httpCon.setDoOutput(true);
+        httpCon.setRequestProperty("Content-Type", "application/json");
+        httpCon.setRequestMethod("DELETE");
+        httpCon.connect();
+
+        int distance = 100;
+        if (lastZoomLevel == 15) {
+            distance = 820;
+        } else if (lastZoomLevel == 12) {
+            distance = 40000;
+        } else if (lastZoomLevel == 8) {
+            distance = 800000;
+        } else distance = 100;
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
+    }
 
     private String formatDistance(double meters) {
         // Convert meters to miles
@@ -728,6 +764,7 @@ public class MainActivity extends AppCompatActivity {
     private String formatTime(String createdAt) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = inputFormat.parse(createdAt);
 
             // Calculate the time difference
@@ -764,6 +801,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             Date currentDate = new Date();
             Calendar cal = Calendar.getInstance();
+            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
             cal.setTime(currentDate);
 
             int year = cal.get(Calendar.YEAR);
@@ -822,6 +860,7 @@ public class MainActivity extends AppCompatActivity {
     private String formatDuration(String expiryDate){
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = inputFormat.parse(expiryDate);
 
 
