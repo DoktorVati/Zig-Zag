@@ -25,6 +25,45 @@ struct Post: Codable, Identifiable {
         return extractWords()
     }
     
+    // Time until the post expires
+    var timeUntilExpires: String {
+        guard let expiryDate = expiryDate else {
+            return "No expiry date"
+        }
+        
+        // Create an ISO8601 Date Formatter
+        let formatter = ISO8601DateFormatter()
+        
+        // Convert the expiryDate string to a Date object
+        guard let expiryDateAsDate = formatter.date(from: expiryDate) else {
+            return "Invalid expiry date"
+        }
+        
+        // Get the current date
+        let currentDate = Date()
+        
+        // Calculate the time interval between the current date and the expiry date
+        let timeInterval = expiryDateAsDate.timeIntervalSince(currentDate)
+        
+        if timeInterval <= 0 {
+            return "Expired"
+        }
+        
+        // Convert the time interval to hours, minutes, or days
+        let hours = timeInterval / 3600
+        let minutes = (timeInterval.truncatingRemainder(dividingBy: 3600)) / 60
+        let days = timeInterval / (3600 * 24)
+        
+        // Return a human-readable string based on the time left
+        if days >= 1 {
+            return "\(Int(days)) day(s) left"
+        } else if hours >= 1 {
+            return "\(Int(hours)) hour(s) left"
+        } else {
+            return "\(Int(minutes)) minute(s) left"
+        }
+    }
+    
     // Function to extract hashtags
     private func extractTags(from text: String) -> [String] {
         // Regular expression pattern for matching hashtags with two or more characters
