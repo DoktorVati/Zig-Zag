@@ -78,18 +78,20 @@ async function getPostsByHashtag(
             name: {
               [Sequelize.Op.iLike]: hashtag,
             },
-            [Sequelize.Op.or]: [
-              {
-                expiryDate: {
-                  [Sequelize.Op.gt]: currentDate,
-                },
-              },
-              { expiryDate: null },
-            ],
           },
           attributes: [],
         },
       ],
+      where: {
+        [Sequelize.Op.or]: [
+          {
+            expiryDate: {
+              [Sequelize.Op.gt]: currentDate,
+            },
+          },
+          { expiryDate: null },
+        ],
+      },
       attributes: {
         include: [
           [
@@ -106,8 +108,8 @@ async function getPostsByHashtag(
         coordinates: `POINT(${longitude} ${latitude})`,
       },
       order: [
-        [Sequelize.literal("distance"), "ASC"],
         ["created_at", "DESC"],
+        [Sequelize.literal("distance"), "ASC"],
       ],
     });
 
@@ -215,8 +217,8 @@ async function getPostsWithinDistance(
         ],
       },
       order: [
-        [Sequelize.literal("distance"), sortOrder],
         ["created_at", "DESC"],
+        [Sequelize.literal("distance"), sortOrder],
       ],
     });
 
