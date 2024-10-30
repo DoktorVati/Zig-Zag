@@ -5,6 +5,8 @@
     <color name="transparentGrey">#23707070</color>
     <color name="invisible">#00FFFFFF</color>
     <color name="timeText">#A8717171</color>
-    <color name="blue">#00C6FF</color>
+    <color name="blue">#23C6F4</color>
+    <color name="darkBlue">#084151</color>
     <color name="red">#C60D0D</color>
+    <color name="grey">#B1B1B1</color>
 </resources>

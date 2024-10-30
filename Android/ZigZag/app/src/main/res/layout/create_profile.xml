@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:textAlignment="center"
     android:padding="16dp"
-    android:background="@color/white">
+    android:background="@color/white"
+    >
 
     <TextView
         android:id="@+id/title"
@@ -17,80 +18,72 @@
         android:gravity="center"
         android:text="Create Your Profile"
         android:textSize="40sp"
+        android:textColor="@color/black"
         android:textStyle="bold"
         />
 
-    <TextView
-        android:id="@+id/userName"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginTop="175dp"
-        android:gravity="center"
-        android:hint="Enter your Username: "
-        android:textSize="18dp" />
+
 
     <EditText
-        android:id="@+id/userNameText"
+        android:id="@+id/userName"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_marginStart="60dp"
-        android:background="@color/transparentGrey"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:textStyle="bold|italic"
+        android:background="@drawable/edittext_background"
         android:gravity="center"
-        android:layout_toRightOf="@+id/userName"
-
         android:layout_marginTop="175dp"
-        android:hint="Enter Here"
+        android:hint="Username:"
         android:textSize="18dp"
         />
 
-    <TextView
-        android:id="@+id/phoneNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_below="@+id/userName"
-        android:layout_marginTop="40dp"
-        android:textSize="18dp"
-        android:gravity="center"
-        android:hint="Enter your Phone Number:  " />
-
     <EditText
-        android:id="@+id/phoneNumberText"
+        android:id="@+id/phoneNumber"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_below="@id/userNameText"
+        android:layout_below="@id/userName"
         android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="40dp"
         android:layout_marginBottom="20dp"
-        android:layout_toRightOf="@+id/phoneNumber"
-        android:background="@color/transparentGrey"
+        android:textStyle="bold|italic"
+        android:background="@drawable/edittext_background"
         android:gravity="center"
-        android:hint="Enter Here"
+        android:hint="Phone Number: "
         android:textSize="18dp" />
 
     <TextView
-        android:layout_below="@id/phoneNumber"
-        android:id="@+id/phoneNumberInputText"
+        android:id="@+id/codeInputText"
         android:layout_width="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_height="40dp"
         android:gravity="center"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="185dp"
         android:textSize="20dp"
         android:text="Enter the 8 digit code sent to your device"
         />
+    <TextView
+        android:id="@+id/formatNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="110dp"
+        android:text="Format: 123-456-7890"
+        android:layout_below="@+id/phoneNumber"
+        />
 
     <EditText
-        android:id="@+id/phoneNumberInput"
+        android:id="@+id/CodeInput"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_below="@id/phoneNumberInputText"
-        android:layout_marginStart="20dp"
+        android:layout_below="@id/codeInputText"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-
-        android:background="@color/transparentGrey"
+        android:background="@drawable/edittext_background"
         android:gravity="center"
-        android:hint="Enter here"
+        android:textStyle="italic|bold"
+        android:hint="Enter 8 digit code:"
         android:textSize="22dp" />
 
 
@@ -103,7 +96,8 @@
         android:gravity="center"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="200dp"
-        android:background="@color/transparentGrey"
+        android:background="@color/blue"
         android:text="Create Profile"
+        android:textColor="@color/white"
         />
 </RelativeLayout>
