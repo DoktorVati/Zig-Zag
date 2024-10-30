@@ -44,10 +44,21 @@ class FeedViewModel: ObservableObject {
         region = MKCoordinateRegion(center: userLocation.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
     }
     
+    func decodeDistanceIndex() -> Distance {
+        switch selectedRadiusIndex {
+        case 0: return .local
+        case 1: return .building
+        case 2: return .neighborhood
+        case 3: return .global
+        default: return .local
+        }
+    }
+    
     func fetchPosts() {
         isLoading = true
         guard let location = LocationManager.shared.location else { return }
-        APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { result in
+        let distance = decodeDistanceIndex().rawValue
+        APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, distance: distance) { result in
             DispatchQueue.main.async {
                 self.isLoading = false
                 switch result {

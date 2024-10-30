@@ -93,8 +93,8 @@ class APIManager {
     }
     
     // MARK: - Fetch Posts
-    func fetchPosts(latitude: Double, longitude: Double, completion: @escaping (Result<[Post], Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/posts?latitude=\(latitude)&longitude=\(longitude)") else {
+    func fetchPosts(latitude: Double, longitude: Double, distance: String, completion: @escaping (Result<[Post], Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/posts?latitude=\(latitude)&longitude=\(longitude)&distance=\(distance)") else {
             print("Invalid URL")
             return
         }
@@ -189,4 +189,11 @@ class APIManager {
             }
         }.resume()
     }
+}
+
+enum Distance: String {
+    case local = "80"
+    case building = "820"
+    case neighborhood = "40000"
+    case global = "800000"
 }
