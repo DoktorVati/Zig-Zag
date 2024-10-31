@@ -49,6 +49,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -725,12 +726,37 @@ public class MainActivity extends AppCompatActivity {
 
     private void deletePost(int id) throws IOException{
 
-        URL url = new URL("http://api.zigzag.madebysaul.com/posts/" + id);
+        /*URL url = new URL("http://api.zigzag.madebysaul.com/posts/" + id);
+        Log.d("Delete URL", url.toString());
         HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-        httpCon.setDoOutput(true);
-        httpCon.setRequestProperty("Content-Type", "application/json");
         httpCon.setRequestMethod("DELETE");
-        httpCon.connect();
+        httpCon.setRequestProperty("Content-Type", "application/json");
+        httpCon.setDoOutput(true);*/
+
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + id);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("DELETE");
+
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                        Log.d("Delete", "Ladies and Gentlemen, we got 'em");
+                    } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                        Log.e("Delete", "Where is it?");
+                    } else {
+                        Log.e("Delete", "I don't even know, man");
+                    }
+                    connection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
 
         int distance = 100;
         if (lastZoomLevel == 15) {
