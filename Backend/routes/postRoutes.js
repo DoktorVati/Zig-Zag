@@ -1,12 +1,17 @@
 const {
+  createComment,
+  getCommentsByPostId,
+} = require("../controllers/commentController");
+const {
   createPost,
   getPost,
-  getPosts,
   deletePost,
   getPostsByHashtag,
   getPostsWithinDistance,
   getAllPosts,
 } = require("../controllers/postController");
+
+const { Post } = require("../models");
 
 const router = require("express").Router();
 
@@ -162,5 +167,57 @@ router.delete("/:id", param("id").isNumeric(), async (req, res) => {
     });
   }
 });
+
+//
+// HANDLE COMMENTS HERE
+//
+
+router.get("/:id/comments", param("id").isNumeric(), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const comments = await getCommentsByPostId(id);
+    return res.status(200).json(comments);
+  } catch (error) {
+    return res.status(500).json({
+      message: `There was an error fetching comments for POST ${id}.`,
+      error: error,
+    });
+  }
+});
+
+router.post(
+  "/:id/comments",
+  param("postId").isNumeric(),
+  body("text").isString().notEmpty(),
+  body("author").isString().notEmpty(),
+  async (req, res) => {
+    const { id: postId } = req.params;
+    const { text, author } = req.body;
+
+    try {
+      const post = await Post.findOne({ where: { id: postId } });
+
+      if (post) {
+        // Post exists, okay to create comment
+        const createdComment = await createComment(postId, text, author);
+
+        return res.status(201).json(createdComment);
+      } else {
+        return res.status(404).json({ error: "Post not found" });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        message: "Server Error",
+        error,
+      });
+    }
+  }
+);
 
 module.exports = router;
