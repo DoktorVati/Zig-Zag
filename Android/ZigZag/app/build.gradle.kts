@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -36,6 +37,7 @@ dependencies {
     implementation ("com.google.android.gms:play-services-location:19.0.1")
     implementation ("com.github.bumptech.glide:glide:4.14.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.google.firebase:firebase-auth:23.1.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
