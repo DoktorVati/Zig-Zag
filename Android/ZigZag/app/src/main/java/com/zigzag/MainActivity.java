@@ -86,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
     private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler(); // Handler for delays
+
+    //Current universal user ID
+    private String my_user_id = "your_user_id_here";
     TextView clearTagTextView;
 
     @Override
@@ -466,6 +469,8 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
             }
         }).start();
+
+        //Refresh posts
         int distance = 100;
         if (lastZoomLevel == 15) {
             distance = 820;
@@ -477,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -553,15 +558,18 @@ public class MainActivity extends AppCompatActivity {
             postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    if(item.getItemId() == R.id.item_delete) {
-                        try {
-                            deletePost(id);
-                        } catch (IOException e) {
-                            Log.e("Delete", "Failed to delete");
+                //    if(my_user_id.equals(authorID)) {
+                        if (item.getItemId() == R.id.item_delete) {
+                            try {
+                                deletePost(id);
+                            } catch (IOException e) {
+                                Log.e("Delete", "Failed to delete");
+                            }
+                            return true;
                         }
-                        return true;
-                    }
-                    return false;
+                        return false;
+                //    }
+                //    return false;
                 }
             });
             postOptions.show();
@@ -690,6 +698,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject post = postsArray.getJSONObject(i);
 
                     int id = post.getInt("id");
+                    String authorID = post.getString("authorId");
                     String text = post.getString("text"); // Get the post text
                     String createdAt = post.getString("createdAt"); // Get the createdAt time
 
@@ -712,7 +721,7 @@ public class MainActivity extends AppCompatActivity {
                     String expiryDate = post.getString("expiryDate");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -726,22 +735,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void deletePost(int id) throws IOException{
 
-        /*URL url = new URL("http://api.zigzag.madebysaul.com/posts/" + id);
-        Log.d("Delete URL", url.toString());
-        HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-        httpCon.setRequestMethod("DELETE");
-        httpCon.setRequestProperty("Content-Type", "application/json");
-        httpCon.setDoOutput(true);*/
-
         Thread thread = new Thread(new Runnable() {
 
             @Override
             public void run() {
                 try {
+
+                    //Delete the specified post
                     URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + id);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("DELETE");
 
+                    //Check response from api
                     int responseCode = connection.getResponseCode();
                     if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
                         Log.d("Delete", "Ladies and Gentlemen, we got 'em");
@@ -758,6 +763,7 @@ public class MainActivity extends AppCompatActivity {
         });
         thread.start();
 
+        //Refresh the posts
         int distance = 100;
         if (lastZoomLevel == 15) {
             distance = 820;
@@ -839,27 +845,32 @@ public class MainActivity extends AppCompatActivity {
 
             minute = minute + duration;
 
+            Log.d("Time", minute + "minutes");
             //Cascade the overflow
             while(minute >= 60){
                 hour++;
                 minute -= 60;
             }
+            Log.d("Time", hour + "hours");
 
             while(hour >= 24){
                 day++;
                 hour -= 24;
             }
+            Log.d("Time", day + "days");
 
             while (day > monthLength) {
                 month++;
                 day -= monthLength;
                 monthLength = monthLength(month, year);
             }
+            Log.d("Time", month + "months");
 
             if (month > 12) {
                 year++;
                 month -= 12;
             }
+            Log.d("Time", year + "years");
 
             String monthStr = month + "";
             String dateStr = day + "";
@@ -922,7 +933,7 @@ public class MainActivity extends AppCompatActivity {
 
         int[] monthLengths = new int[]{31, febLength, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-        return monthLengths[month];
+        return monthLengths[month-1];
 
     }
 }
