@@ -10,6 +10,8 @@ import SwiftUI
 
 enum ZigZagDestination: Hashable {
     case createPost
+    case tagFilter(String)
+    
 }
 
 class NavigationManager: ObservableObject {

@@ -2,6 +2,7 @@ package com.zigzag;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
-
+    private String UserId;
 
     // These variables are for caching the previous locations so that if the user spams
     // the buttons it wont call the api a million times.
@@ -95,6 +96,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // Link to activity_main.xml layout
+
+        // Retrieve the phone number from the intent
+        Intent intent = getIntent();
+        UserId = intent.getStringExtra("USER_ID");
 
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
@@ -117,14 +122,20 @@ public class MainActivity extends AppCompatActivity {
         // Click listener for the tag input
         clickableText.setOnClickListener(v -> {
             closeKeyboard();
-            int distance = 100;
-            if (lastZoomLevel == 15) {
-                distance = 820;
-            } else if (lastZoomLevel == 12) {
+
+            int distance = 820;
+             if (lastZoomLevel == 18) {
+                distance = 100;
+            }
+            else if (lastZoomLevel == 12) {
+
                 distance = 40000;
             } else if (lastZoomLevel == 8) {
                 distance = 800000;
-            } else distance = 100;
+
+            }
+            else distance = 820;
+
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
@@ -162,8 +173,8 @@ public class MainActivity extends AppCompatActivity {
             zoomOut();
         });
 
-        scaleButton(findViewById(R.id.close));
-        handler.postDelayed(this::zoomIn, 2000);
+        scaleButton(findViewById(R.id.nearby));
+        handler.postDelayed(this::showNearby, 2000);
 
         // Post button
         button.setOnClickListener(new View.OnClickListener() {
@@ -436,8 +447,10 @@ public class MainActivity extends AppCompatActivity {
     private void addNewPost(String text, String expiryDate) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
+
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
-                text, "your_user_id_here", expiryDate, lastLatitude, lastLongitude);
+                text, UserId, expiryDate, lastLatitude, lastLongitude);
+
         // This line below shows the posted zig immediately
         //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
 
@@ -597,8 +610,8 @@ public class MainActivity extends AppCompatActivity {
                     // Determine the distance based on the last zoom level
                     int distance;
                     switch (lastZoomLevel) {
-                        case 15:
-                            distance = 820;
+                        case 18:
+                            distance = 100;
                             break;
                         case 12:
                             distance = 40000;
@@ -607,7 +620,7 @@ public class MainActivity extends AppCompatActivity {
                             distance = 800000;
                             break;
                         default:
-                            distance = 100;
+                            distance = 820;
                             break;
                     }
                     Log.d("it has been called", "onClick: fetched hashtag posts");
@@ -624,7 +637,7 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         postParams.addRule(RelativeLayout.BELOW, backwardTimeImageView.getId());
-        postParams.setMargins(0, 20, 20, 0);
+        postParams.setMargins(0, 20, 33, 0);
         postTextView.setLayoutParams(postParams);
 
         // Create TextView for the post distance
