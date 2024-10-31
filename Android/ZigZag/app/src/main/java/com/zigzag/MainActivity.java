@@ -2,6 +2,7 @@ package com.zigzag;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -84,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // Link to activity_main.xml layout
+
+        // Retrieve the phone number from the intent
+        Intent intent = getIntent();
+        String userPhone = intent.getStringExtra("USER_PHONE");
 
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);

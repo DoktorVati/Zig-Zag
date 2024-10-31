@@ -61,7 +61,7 @@
         android:gravity="center"
         android:layout_marginTop="185dp"
         android:textSize="20dp"
-        android:text="Enter the 8 digit code sent to your device"
+        android:text="Enter the 6 digit code sent to your device"
         />
     <TextView
         android:id="@+id/formatNumber"
@@ -69,7 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
         android:layout_marginStart="110dp"
-        android:text="Format: 123-456-7890"
+        android:text="Format: +123 123-456-7890"
         android:layout_below="@+id/phoneNumber"
         />
 
@@ -83,9 +83,19 @@
         android:background="@drawable/edittext_background"
         android:gravity="center"
         android:textStyle="italic|bold"
-        android:hint="Enter 8 digit code:"
+        android:hint="Enter 6 digit code:"
         android:textSize="22dp" />
 
+    <TextView
+        android:id="@+id/incorrectCodeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Incorrect code. Please try again."
+        android:layout_below="@id/CodeInput"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/holo_red_light"
+        android:visibility="gone" /> <!-- Initially hidden -->
 
     <Button
         android:id="@+id/create_profile_button"
