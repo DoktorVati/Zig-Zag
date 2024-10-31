@@ -17,14 +17,18 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,12 +50,15 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,7 +87,11 @@ public class MainActivity extends AppCompatActivity {
     private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler(); // Handler for delays
+
+    //Current universal user ID
+    private String my_user_id = "your_user_id_here";
     TextView clearTagTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,17 +122,20 @@ public class MainActivity extends AppCompatActivity {
         // Click listener for the tag input
         clickableText.setOnClickListener(v -> {
             closeKeyboard();
+
             int distance = 820;
              if (lastZoomLevel == 18) {
                 distance = 100;
             }
             else if (lastZoomLevel == 12) {
+
                 distance = 40000;
-            }
-            else if (lastZoomLevel == 8) {
+            } else if (lastZoomLevel == 8) {
                 distance = 800000;
+
             }
             else distance = 820;
+
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
@@ -239,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
 
         getUserLocation(); // Refresh location to update the map
     }
+
     // Increase scale of the button to show that it is selected.
     private void scaleButton(View button) {
         button.setScaleX(1.2f);
@@ -289,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
             fetchPosts(latitude, longitude, distance);
         });
     }
+
     // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
@@ -381,14 +397,43 @@ public class MainActivity extends AppCompatActivity {
         instructionText.setPadding(0, 10, 0, 0);
         layout.addView(instructionText);
 
+        // Additional duration instructions
+        TextView durationText = new TextView(this);
+        durationText.setText("Select you're post's duration (up to 30 days).");
+        durationText.setTextSize(16);
+        durationText.setPadding(0, 10, 0, 0);
+        layout.addView(durationText);
+
+        // Create dropdown menu to select duration type
+        Spinner typeDropdown = new Spinner(this);
+        String[] types = new String[]{"minutes", "hours", "days"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
+        typeDropdown.setAdapter(adapter);
+        layout.addView(typeDropdown);
+
+        final EditText durationStr = new EditText(this);
+        durationStr.setHint("Input Duration");
+        durationStr.setTextSize(18);
+        durationStr.setTextColor(getResources().getColor(R.color.black));
+        durationStr.setPadding(20, 20, 20, 20); // Padding inside EditText
+
+        // Set input type to allow numbers
+        durationStr.setInputType(InputType.TYPE_CLASS_NUMBER);
+        durationStr.setMaxLines(1); // Optional: limit number of lines
+
+        layout.addView(durationStr);
+
         // Create the dialog
         new AlertDialog.Builder(this)
                 .setTitle("Create a New Post")
                 .setView(layout)
                 .setPositiveButton("Post", (dialog, which) -> {
                     String userInput = inputPost.getText().toString().trim();
+                    int duration = Integer.parseInt(durationStr.getText().toString().trim());
+                    String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
                     if (!userInput.isEmpty()) {
-                        addNewPost(userInput);
+                        addNewPost(userInput, expiryDate);
+                        Log.d("expiryDate", expiryDate);
                     } else {
                         Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
                     }
@@ -399,13 +444,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     // This adds the post to the API
-    private void addNewPost(String text) {
+    private void addNewPost(String text, String expiryDate) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
-        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
-                text, UserId, lastLatitude, lastLongitude);
+
+        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
+                text, UserId, expiryDate, lastLatitude, lastLongitude);
+
         // This line below shows the posted zig immediately
-        updateUIWithPost(text, "Just now", "0 feet");
+        //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
 
         new Thread(() -> {
             try {
@@ -415,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setDoOutput(true);
 
+
                 try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
                     os.write(input, 0, input.length);
@@ -423,9 +471,8 @@ public class MainActivity extends AppCompatActivity {
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     runOnUiThread(() -> {
+
                         Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
-                        // Call the method to update the UI with the new post
-                        //updateUIWithPost(text, currentTime);
                     });
                 } else {
                     //runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
@@ -435,9 +482,20 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
             }
         }).start();
+
+        //Refresh posts
+        int distance = 100;
+        if (lastZoomLevel == 15) {
+            distance = 820;
+        } else if (lastZoomLevel == 12) {
+            distance = 40000;
+        } else if (lastZoomLevel == 8) {
+            distance = 800000;
+        } else distance = 100;
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -479,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
         // Create TextView for the duration
         TextView durationTextView = new TextView(this);
         durationTextView.setTextColor(getResources().getColor(R.color.timeText));
-        durationTextView.setText("10 hours left"); // Modify as needed
+        durationTextView.setText(formatDuration(expiryDate)); // Modify as needed
         durationTextView.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams durationParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -503,12 +561,31 @@ public class MainActivity extends AppCompatActivity {
         //moreButtonParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        moreButtonParams.setMargins(0,-60,0,-30);
+        moreButtonParams.setMargins(0, -60, 0, -30);
         moreButton.setLayoutParams(moreButtonParams);
 
         // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
-            Toast.makeText(this, "More options clicked!", Toast.LENGTH_SHORT).show();
+            PopupMenu postOptions = new PopupMenu(this, v);
+            postOptions.getMenuInflater().inflate(R.menu.menu_post_options, postOptions.getMenu());
+            postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                //    if(my_user_id.equals(authorID)) {
+                        if (item.getItemId() == R.id.item_delete) {
+                            try {
+                                deletePost(id);
+                            } catch (IOException e) {
+                                Log.e("Delete", "Failed to delete");
+                            }
+                            return true;
+                        }
+                        return false;
+                //    }
+                //    return false;
+                }
+            });
+            postOptions.show();
         });
 
         // Create TextView for the post content
@@ -575,7 +652,7 @@ public class MainActivity extends AppCompatActivity {
         distanceParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         distanceParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         distanceParams.addRule(RelativeLayout.BELOW, postTextView.getId());
-        postParams.setMargins(0,25,0,0);
+        postParams.setMargins(0, 25, 0, 0);
         postDistanceView.setLayoutParams(distanceParams);
 
         // Add views to the RelativeLayout
@@ -592,8 +669,6 @@ public class MainActivity extends AppCompatActivity {
         // and add the new message group to the container
         messageContainer.addView(newMessageGroup);
     }
-
-
 
 
     // Fetches posts based on distance
@@ -624,18 +699,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void handlePostsResponse(String jsonResponse) {
         runOnUiThread(() -> {
             try {
                 Log.d("handlePostsResponse", "Response received");
                 JSONArray postsArray = new JSONArray(jsonResponse);
-                Log.d("This is the",jsonResponse);
+                Log.d("This is the", jsonResponse);
                 messageContainer.removeAllViews(); // Clear previous posts
 
                 for (int i = 0; i < postsArray.length(); i++) {
                     JSONObject post = postsArray.getJSONObject(i);
 
+                    int id = post.getInt("id");
+                    String authorID = post.getString("authorId");
                     String text = post.getString("text"); // Get the post text
                     String createdAt = post.getString("createdAt"); // Get the createdAt time
 
@@ -655,8 +731,10 @@ public class MainActivity extends AppCompatActivity {
                     // Convert distance and prepare display string
                     String distanceString = formatDistance(distanceInMeters); // Pass as int
 
+                    String expiryDate = post.getString("expiryDate");
+
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -668,6 +746,47 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void deletePost(int id) throws IOException{
+
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+
+                    //Delete the specified post
+                    URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + id);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("DELETE");
+
+                    //Check response from api
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                        Log.d("Delete", "Ladies and Gentlemen, we got 'em");
+                    } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                        Log.e("Delete", "Where is it?");
+                    } else {
+                        Log.e("Delete", "I don't even know, man");
+                    }
+                    connection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+
+        //Refresh the posts
+        int distance = 100;
+        if (lastZoomLevel == 15) {
+            distance = 820;
+        } else if (lastZoomLevel == 12) {
+            distance = 40000;
+        } else if (lastZoomLevel == 8) {
+            distance = 800000;
+        } else distance = 100;
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
+    }
 
     private String formatDistance(double meters) {
         // Convert meters to miles
@@ -686,12 +805,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     // This helps format the time that is received from the Backend API to show simple results
     private String formatTime(String createdAt) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = inputFormat.parse(createdAt);
 
             // Calculate the time difference
@@ -716,8 +834,119 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private String formatExpiration(int duration, String type){
+
+        if(type.equals("days"))
+            duration *= (24 * 60);
+        else if(type.equals("hours"))
+            duration *= 60;
+        else
+            ;
+
+        try {
+            Date currentDate = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+            cal.setTime(currentDate);
+
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH) + 1;
+            int day = cal.get(Calendar.DATE);
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            int minute = cal.get(Calendar.MINUTE);
+            int monthLength = monthLength(month, year);
+
+            minute = minute + duration;
+
+            Log.d("Time", minute + "minutes");
+            //Cascade the overflow
+            while(minute >= 60){
+                hour++;
+                minute -= 60;
+            }
+            Log.d("Time", hour + "hours");
+
+            while(hour >= 24){
+                day++;
+                hour -= 24;
+            }
+            Log.d("Time", day + "days");
+
+            while (day > monthLength) {
+                month++;
+                day -= monthLength;
+                monthLength = monthLength(month, year);
+            }
+            Log.d("Time", month + "months");
+
+            if (month > 12) {
+                year++;
+                month -= 12;
+            }
+            Log.d("Time", year + "years");
+
+            String monthStr = month + "";
+            String dateStr = day + "";
+            String hourStr = hour + "";
+            String minuteStr = minute + "";
+
+            //Add 0s to one digit numbers
+            if((month + "").length() == 1)
+                monthStr = "0" + month;
+            if((day + "").length() == 1)
+                dateStr = "0" + day;
+            if((hour + "").length() == 1)
+                hourStr = "0" + hour;
+            if((minute + "").length() == 1)
+                minuteStr = "0" + minute;
+
+            return year + "-" + monthStr + "-" + dateStr + "T" + hourStr + ":" + minuteStr + ":00.000Z";
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error");
+            return null;
+        }
+    }
+
+    private String formatDuration(String expiryDate){
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = inputFormat.parse(expiryDate);
 
 
+            // Calculate the time difference
+            long diffInMillis = date.getTime() - new Date().getTime();
+            long diffInMinutes = diffInMillis / (1000 * 60);
+            long diffInHours = diffInMinutes / 60;
+            long diffInDays = diffInHours / 24;
 
+            // Generate the appropriate time left string
+            if (diffInMinutes < 1) {
+                return "About to go";
+            } else if (diffInMinutes < 60) {
+                return diffInMinutes + " minute" + (diffInMinutes > 1 ? "s" : "") + " left";
+            } else if (diffInHours < 24) {
+                return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " left";
+            } else {
+                return diffInDays + " day" + (diffInDays > 1 ? "s" : "") + " left";
+            }
+        } catch (Exception e) {
+            Log.e("MainActivity", "Date parsing error: ", e);
+            return "Unknown time";
+        }
+    }
 
+    private int monthLength(int month, int year) {
+
+        int febLength;
+        if(year % 4 == 0)
+            febLength = 29;
+        else
+            febLength = 28;
+
+        int[] monthLengths = new int[]{31, febLength, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+        return monthLengths[month-1];
+
+    }
 }
