@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
-
+    private String UserId;
 
     // These variables are for caching the previous locations so that if the user spams
     // the buttons it wont call the api a million times.
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Retrieve the phone number from the intent
         Intent intent = getIntent();
-        String userPhone = intent.getStringExtra("USER_PHONE");
+        UserId = intent.getStringExtra("USER_ID");
 
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
@@ -403,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
-                text, "your_user_id_here", lastLatitude, lastLongitude);
+                text, UserId, lastLatitude, lastLongitude);
         // This line below shows the posted zig immediately
         updateUIWithPost(text, "Just now", "0 feet");
 

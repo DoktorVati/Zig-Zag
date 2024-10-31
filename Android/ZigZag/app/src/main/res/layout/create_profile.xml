@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:gravity="center"
-        android:text="Create Your Profile"
+        android:text="Sign Up / Sign In"
         android:textSize="40sp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -33,8 +33,9 @@
         android:textStyle="bold|italic"
         android:background="@drawable/edittext_background"
         android:gravity="center"
+        android:textColor="@color/black"
         android:layout_marginTop="175dp"
-        android:hint="Username:"
+        android:hint="Username"
         android:textSize="18dp"
         />
 
@@ -45,12 +46,13 @@
         android:layout_below="@id/userName"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
+        android:textColor="@color/black"
         android:layout_marginTop="40dp"
         android:layout_marginBottom="20dp"
         android:textStyle="bold|italic"
         android:background="@drawable/edittext_background"
         android:gravity="center"
-        android:hint="Phone Number: "
+        android:hint="Phone Number "
         android:textSize="18dp" />
 
     <TextView
@@ -61,15 +63,17 @@
         android:gravity="center"
         android:layout_marginTop="185dp"
         android:textSize="20dp"
-        android:text="Enter the 6 digit code sent to your device"
+        android:text="Enter the code we sent to (Phone #)."
         />
+
     <TextView
         android:id="@+id/formatNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:layout_marginStart="110dp"
-        android:text="Format: +123 123-456-7890"
+        android:layout_centerHorizontal="true"
+
+        android:text="Format: +1 1234567890"
         android:layout_below="@+id/phoneNumber"
         />
 
@@ -82,8 +86,9 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/edittext_background"
         android:gravity="center"
+        android:textColor="@color/black"
         android:textStyle="italic|bold"
-        android:hint="Enter 6 digit code:"
+        android:hint="Enter code"
         android:textSize="22dp" />
 
     <TextView
@@ -95,7 +100,21 @@
         android:gravity="center"
         android:layout_centerHorizontal="true"
         android:textColor="@android:color/holo_red_light"
-        android:visibility="gone" /> <!-- Initially hidden -->
+        android:visibility="gone" />
+    <Button
+        android:id="@+id/sendCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/CodeInput"
+        android:textSize="25dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"
+        android:background="@color/blue"
+        android:text="Submit"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        />
 
     <Button
         android:id="@+id/create_profile_button"
@@ -107,7 +126,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="200dp"
         android:background="@color/blue"
-        android:text="Create Profile"
+        android:text="Sign Up / Sign In"
         android:textColor="@color/white"
         />
 </RelativeLayout>
