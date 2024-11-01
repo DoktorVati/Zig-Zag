@@ -1,14 +1,15 @@
 package com.zigzag;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -19,9 +20,12 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,7 +37,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -50,7 +53,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         // Retrieve the phone number from the intent
         Intent intent = getIntent();
         UserId = intent.getStringExtra("USER_ID");
-
+        my_user_id = UserId;
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
 
@@ -370,77 +372,62 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // This is what comes up when they click the post button.
     private void showInputDialog() {
-        // Create a LinearLayout to hold the EditText for the post
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(40, 40, 40, 40); // Add padding for a nicer look
+        // Create a full-screen dialog
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_create_post);
 
-        // Create an EditText for the post message
-        final EditText inputPost = new EditText(this);
-        inputPost.setHint("What's on your mind?");
-        inputPost.setTextSize(18);
-        inputPost.setTextColor(getResources().getColor(R.color.black));
-        inputPost.setPadding(20, 20, 20, 20); // Padding inside EditText
+        // Set the dialog to full-screen
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        // Set input type to allow text and emojis
-        inputPost.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_VARIATION_NORMAL);
-        inputPost.setMaxLines(3); // Optional: limit number of lines
+        // Initialize views
+        EditText inputPost = dialog.findViewById(R.id.inputPost);
+        Spinner typeDropdown = dialog.findViewById(R.id.typeDropdown);
+        EditText durationStr = dialog.findViewById(R.id.durationStr);
+        Button postButton = dialog.findViewById(R.id.postButton);
+        ImageButton cancelButton = dialog.findViewById(R.id.cancelButton);
 
-        layout.addView(inputPost);
-
-        // Additional instructions
-        TextView instructionText = new TextView(this);
-        instructionText.setText("You can also add a tag (e.g., #tagname) at the end.");
-        instructionText.setTextSize(16);
-        instructionText.setPadding(0, 10, 0, 0);
-        layout.addView(instructionText);
-
-        // Additional duration instructions
-        TextView durationText = new TextView(this);
-        durationText.setText("Select you're post's duration (up to 30 days).");
-        durationText.setTextSize(16);
-        durationText.setPadding(0, 10, 0, 0);
-        layout.addView(durationText);
-
-        // Create dropdown menu to select duration type
-        Spinner typeDropdown = new Spinner(this);
+        // Set up the dropdown menu
         String[] types = new String[]{"minutes", "hours", "days"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
-        layout.addView(typeDropdown);
 
-        final EditText durationStr = new EditText(this);
-        durationStr.setHint("Input Duration");
-        durationStr.setTextSize(18);
-        durationStr.setTextColor(getResources().getColor(R.color.black));
-        durationStr.setPadding(20, 20, 20, 20); // Padding inside EditText
+        // Set button listeners
+        postButton.setOnClickListener(v -> {
+            String userInput = inputPost.getText().toString().trim();
+            int duration;
 
-        // Set input type to allow numbers
-        durationStr.setInputType(InputType.TYPE_CLASS_NUMBER);
-        durationStr.setMaxLines(1); // Optional: limit number of lines
+            try {
+                duration = Integer.parseInt(durationStr.getText().toString().trim());
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        layout.addView(durationStr);
+            String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
+            if (!userInput.isEmpty()) {
+                addNewPost(userInput, expiryDate);
+                dialog.dismiss();
+                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId); // Ensure UserId is initialized
+            } else {
+                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        // Create the dialog
-        new AlertDialog.Builder(this)
-                .setTitle("Create a New Post")
-                .setView(layout)
-                .setPositiveButton("Post", (dialog, which) -> {
-                    String userInput = inputPost.getText().toString().trim();
-                    int duration = Integer.parseInt(durationStr.getText().toString().trim());
-                    String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
-                    if (!userInput.isEmpty()) {
-                        addNewPost(userInput, expiryDate);
-                        Log.d("expiryDate", expiryDate);
-                    } else {
-                        Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Show the dialog
+        try {
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception for debugging
+            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
+
+
 
 
     // This adds the post to the API
@@ -493,6 +480,7 @@ public class MainActivity extends AppCompatActivity {
             distance = 800000;
         } else distance = 100;
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
+        //updateUIWithPost(text,"Just Now");
     }
 
     private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID) {
