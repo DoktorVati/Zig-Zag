@@ -12,7 +12,7 @@
     <!-- Vertical line of the plus sign -->
     <item android:top="50dp" android:bottom="50dp" android:left="25dp" android:right="25dp">
         <shape android:shape="rectangle">
-            <size android:width="10dp" android:height="10dp"/> <!-- Adjust size as needed -->
+            <size android:width="5dp" android:height="5dp"/> <!-- Adjust size as needed -->
             <solid android:color="@color/white"/> <!-- Plus sign color -->
         </shape>
     </item>
@@ -20,7 +20,7 @@
     <!-- Horizontal line of the plus sign -->
     <item android:left="50dp" android:right="50dp" android:top="25dp" android:bottom="25dp">
         <shape android:shape="rectangle">
-            <size android:width="10dp" android:height="10dp"/> <!-- Adjust size as needed -->
+            <size android:width="5dp" android:height="5dp"/> <!-- Adjust size as needed -->
             <solid android:color="@color/white"/> <!-- Plus sign color -->
         </shape>
     </item>

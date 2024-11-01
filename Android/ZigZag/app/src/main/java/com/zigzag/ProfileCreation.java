@@ -41,10 +41,14 @@ public class ProfileCreation extends AppCompatActivity {
     private TextView codeInputLabel;
     private Button createProfileButton;
     private Button sendCodeButton;
+    private static final int REQUEST_CODE_POST_NOTIFICATIONS = 100;
+    private static final int REQUEST_CODE_LOCATION = 101; // Add this line
+
     private FirebaseAuth mAuth;
     private String verificationId;
-    private static final int REQUEST_CODE_POST_NOTIFICATIONS = 100;
-    private static final int REQUEST_CODE_LOCATION = 101;
+
+    private static String siteKey = "6LdOhXIqAAAAAMbv6v-F63wzU4JmjpmJn8R3oVWo"; // reCAPTCHA v3 site key
+    private static String secretKey = "6LdOhXIqAAAAABLKWT9VZxaTVBJltebeObNCeH98"; // reCAPTCHA v3 secret key
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +60,7 @@ public class ProfileCreation extends AppCompatActivity {
         // Check if the user is already signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            switchToMainActivity(currentUser.getUid()); // Use UUID instead of phone number
+            switchToMainActivity(currentUser.getUid());
             return;
         }
 
@@ -89,7 +93,7 @@ public class ProfileCreation extends AppCompatActivity {
             public void onClick(View v) {
                 String phoneNumber = phoneNumberText.getText().toString().trim();
                 if (!phoneNumber.isEmpty()) {
-                    sendVerificationCode(phoneNumber);
+                    verifyRecaptchaAndSendCode(phoneNumber);
                 } else {
                     Toast.makeText(ProfileCreation.this, "Please enter a valid phone number.", Toast.LENGTH_SHORT).show();
                 }
@@ -110,6 +114,115 @@ public class ProfileCreation extends AppCompatActivity {
 
         requestLocationPermissions();
         requestNotificationPermissions();
+    }
+
+    private void verifyRecaptchaAndSendCode(String phoneNumber) {
+        // Use your own server to verify the reCAPTCHA token
+        String token = ""; // You would typically obtain this from your backend after the user interaction with reCAPTCHA v3
+        // Make an HTTP request to your server to verify the token
+        // Here, simulate a successful token verification
+        if (isRecaptchaTokenValid(token)) {
+            sendVerificationCode(phoneNumber); // Call to send verification code
+        } else {
+            Toast.makeText(ProfileCreation.this, "reCAPTCHA verification failed. Invalid token.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isRecaptchaTokenValid(String token) {
+        // Placeholder for actual token verification logic
+        // You will need to call your server to validate the token against Google’s reCAPTCHA verification API
+        return true; // Simulate success for this example
+    }
+
+    private void sendVerificationCode(String phoneNumber) {
+        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
+                .setPhoneNumber(phoneNumber)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(this)
+                .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    @Override
+                    public void onVerificationCompleted(PhoneAuthCredential credential) {
+                        signInWithPhoneAuthCredential(credential);
+                    }
+
+                    @Override
+                    public void onVerificationFailed(@NonNull FirebaseException e) {
+                        Toast.makeText(ProfileCreation.this, "Phone Number Format: +1 123-456-7890", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onCodeSent(String vId, PhoneAuthProvider.ForceResendingToken token) {
+                        verificationId = vId;
+                        hideKeyboard(createProfileButton);
+                        showCodeInput(phoneNumber);
+                        formatText.setVisibility(View.GONE);
+                        userNameText.setVisibility(View.GONE);
+                        phoneNumberText.setVisibility(View.GONE);
+                        createProfileButton.setVisibility(View.GONE);
+                    }
+                })
+                .build();
+        PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    private void verifyCode(String code) {
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+        signInWithPhoneAuthCredential(credential);
+    }
+
+    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = task.getResult().getUser();
+                            createUser(user);
+                        } else {
+                            Toast.makeText(ProfileCreation.this, "Verification failed.", Toast.LENGTH_SHORT).show();
+                            incorrectCodeText.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+    }
+
+    private void createUser(FirebaseUser user) {
+        String userName = userNameText.getText().toString().trim();
+        String phoneNumber = user.getPhoneNumber();
+        switchToMainActivity(user.getUid());
+    }
+
+    private void switchToMainActivity(String userId) {
+        Intent intent = new Intent(ProfileCreation.this, MainActivity.class);
+        intent.putExtra("USER_ID", userId);
+        startActivity(intent);
+        finish();
+    }
+
+    private void clearInputs() {
+        userNameText.setText("");
+        phoneNumberText.setText("");
+        codeInput.setText("");
+    }
+
+    private void hideCodeInput() {
+        codeInput.setVisibility(View.GONE);
+        codeInputLabel.setVisibility(View.GONE);
+        sendCodeButton.setVisibility(View.GONE);
+    }
+
+    private void showCodeInput(String phoneNumber) {
+        codeInput.setVisibility(View.VISIBLE);
+        codeInputLabel.setVisibility(View.VISIBLE);
+        sendCodeButton.setVisibility(View.VISIBLE);
+        codeInputLabel.setText("Enter the code we sent to " + phoneNumber + ".");
+    }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     private void requestLocationPermissions() {
@@ -146,105 +259,6 @@ public class ProfileCreation extends AppCompatActivity {
                     // Notification permission granted
                 }
                 break;
-        }
-    }
-
-    private void clearInputs() {
-        userNameText.setText("");
-        phoneNumberText.setText("");
-        codeInput.setText("");
-    }
-
-    private void hideCodeInput() {
-        codeInput.setVisibility(View.GONE);
-        codeInputLabel.setVisibility(View.GONE);
-        sendCodeButton.setVisibility(View.GONE);
-    }
-
-    private void showCodeInput(String phoneNumber) {
-        codeInput.setVisibility(View.VISIBLE);
-        codeInputLabel.setVisibility(View.VISIBLE);
-        sendCodeButton.setVisibility(View.VISIBLE);
-        codeInputLabel.setText("Enter the code we sent to " + phoneNumber + "."); // Set text first
-
-    }
-
-    private void sendVerificationCode(String phoneNumber) {
-        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
-                .setPhoneNumber(phoneNumber)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(this)
-                .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    @Override
-                    public void onVerificationCompleted(PhoneAuthCredential credential) {
-                        // Automatically verify code and log in or create user
-                        signInWithPhoneAuthCredential(credential);
-                    }
-
-                    @Override
-                    public void onVerificationFailed(@NonNull FirebaseException e) {
-                        Toast.makeText(ProfileCreation.this, "Phone Number Format: +1 123-456-7890 ", Toast.LENGTH_LONG).show();
-                    }
-
-                    @Override
-                    public void onCodeSent(String vId, PhoneAuthProvider.ForceResendingToken token) {
-                        verificationId = vId;
-
-                        hideKeyboard(createProfileButton);
-                        showCodeInput(phoneNumber);
-
-                        formatText.setVisibility(View.GONE);
-                        userNameText.setVisibility(View.GONE);
-                        phoneNumberText.setVisibility(View.GONE);
-                        createProfileButton.setVisibility(View.GONE);
-                    }
-                })
-                .build();
-        PhoneAuthProvider.verifyPhoneNumber(options);
-    }
-
-    private void verifyCode(String code) {
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-        signInWithPhoneAuthCredential(credential);
-    }
-
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = task.getResult().getUser();
-                            createUser(user);  // Create user with the phone number
-                        } else {
-                            Toast.makeText(ProfileCreation.this, "Verification failed.", Toast.LENGTH_SHORT).show();
-                            incorrectCodeText.setVisibility(View.VISIBLE);
-                        }
-                    }
-                });
-    }
-
-    private void createUser(FirebaseUser user) {
-        // Here you can save additional user information, if required
-        String userName = userNameText.getText().toString().trim();
-        String phoneNumber = user.getPhoneNumber();
-
-        //Toast.makeText(this, "User created successfully: " + userName + ", Phone: " + phoneNumber, Toast.LENGTH_SHORT).show();
-
-        switchToMainActivity(user.getUid()); // Pass UUID instead of phone number
-    }
-
-    private void switchToMainActivity(String userId) {
-        Intent intent = new Intent(ProfileCreation.this, MainActivity.class);
-        intent.putExtra("USER_ID", userId); // Use "USER_ID" as the key for UUID
-        startActivity(intent);
-        finish();
-    }
-
-    private void hideKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }
