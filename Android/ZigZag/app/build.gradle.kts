@@ -3,9 +3,11 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
 android {
     namespace = "com.zigzag"
     compileSdk = 34
+
 
     defaultConfig {
         applicationId = "com.zigzag"
@@ -14,8 +16,10 @@ android {
         versionCode = 5
         versionName = "1.13"
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
 
     buildTypes {
         release {
@@ -29,9 +33,11 @@ android {
     }
 }
 
+
 dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
     implementation ("org.json:json:20210307")
+
 
     implementation ("com.google.android.gms:play-services-maps:19.0.0")
     implementation ("com.google.android.gms:play-services-location:19.0.1")
@@ -39,8 +45,10 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.google.firebase:firebase-auth:23.1.0")
     implementation("com.google.android.gms:play-services-safetynet:18.1.0")
-    implementation("com.google.android.gms:play-services-recaptcha:16.0.0") // Add this line
+    implementation("com.google.android.gms:play-services-recaptcha:16.0.0")
+    implementation("com.google.firebase:firebase-database:21.0.0") // Add this line
     annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
+
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
@@ -52,4 +60,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("com.google.android.gms:play-services-auth:20.2.0") // If using Play Services
 }
+
+
 
