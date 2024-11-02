@@ -1,5 +1,6 @@
 package com.zigzag;
 
+
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
@@ -36,9 +37,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -46,10 +49,12 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -64,14 +69,17 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
 
 public class MainActivity extends AppCompatActivity {
     private RelativeLayout mapImage;
     private EditText headerTextView;
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
+
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
@@ -79,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton button;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
     private String UserId;
+
 
     // These variables are for caching the previous locations so that if the user spams
     // the buttons it wont call the api a million times.
@@ -90,30 +99,39 @@ public class MainActivity extends AppCompatActivity {
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler(); // Handler for delays
 
+
     //Current universal user ID
     private String my_user_id = "your_user_id_here";
     TextView clearTagTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // Link to activity_main.xml layout
 
+
         // Retrieve the phone number from the intent
         Intent intent = getIntent();
         UserId = intent.getStringExtra("USER_ID");
         my_user_id = UserId;
+
+
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
+
 
         headerTextView = findViewById(R.id.headerTextView);
         headerTextView.setText(DEFAULT_TAG);
         TextView clearTagTextView = findViewById(R.id.clearTag);
 
+
         mapImage = findViewById(R.id.mapImage);
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocation();
+
 
         // This is the TextView for the tag input
         TextView clickableText = new TextView(this);
@@ -125,21 +143,26 @@ public class MainActivity extends AppCompatActivity {
         clickableText.setOnClickListener(v -> {
             closeKeyboard();
 
+
             int distance = 820;
-             if (lastZoomLevel == 18) {
+            if (lastZoomLevel == 18) {
                 distance = 100;
             }
             else if (lastZoomLevel == 12) {
+
 
                 distance = 40000;
             } else if (lastZoomLevel == 8) {
                 distance = 800000;
 
+
             }
             else distance = 820;
 
+
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
+
 
         // Key listener for headerTextView
         headerTextView.setOnEditorActionListener((v, actionId, event) -> {
@@ -151,11 +174,13 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
+
         findViewById(R.id.close).setOnClickListener(v -> {
             resetButtonScales();
             scaleButton(v);
             zoomIn();
         });
+
 
         findViewById(R.id.nearby).setOnClickListener(v -> {
             resetButtonScales();
@@ -163,11 +188,13 @@ public class MainActivity extends AppCompatActivity {
             showNearby();
         });
 
+
         findViewById(R.id.userArea).setOnClickListener(v -> {
             resetButtonScales();
             scaleButton(v);
             zoomToUserArea();
         });
+
 
         findViewById(R.id.global).setOnClickListener(v -> {
             resetButtonScales();
@@ -175,8 +202,10 @@ public class MainActivity extends AppCompatActivity {
             zoomOut();
         });
 
+
         scaleButton(findViewById(R.id.nearby));
         handler.postDelayed(this::showNearby, 2000);
+
 
         // Post button
         button.setOnClickListener(new View.OnClickListener() {
@@ -187,7 +216,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void getUserLocation() {
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.getLastLocation()
@@ -203,7 +234,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+
+
     }
+
+
 
 
     private void updateMap(double latitude, double longitude) {
@@ -215,23 +250,30 @@ public class MainActivity extends AppCompatActivity {
         lastLongitude = longitude;
         lastZoomLevel = zoomLevel;
 
+
         String apiKey = /*null*/key;
         String url = "https://maps.googleapis.com/maps/api/staticmap?center="
                 + latitude + "," + longitude + "&zoom=" + zoomLevel + "&size=200x200&key=" + apiKey;
         loadImageAsBackground(url);
 
+
     }
+
+
 
 
     //california is 3801 km away
     private void zoomIn() {
 
+
         zoomLevel = 18; // Closer zoom
         //fetchPosts(lastLatitude, lastLongitude, 100);
         checkAndFetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
 
+
         getUserLocation(); // Refresh location to update the map
     }
+
 
     private void showNearby() {
         zoomLevel = 15; // Default nearby zoom
@@ -240,21 +282,26 @@ public class MainActivity extends AppCompatActivity {
         getUserLocation(); // Refresh location to update the map
     }
 
+
     private void zoomToUserArea() {
         zoomLevel = 12; // User area zoom
         //fetchPosts(lastLatitude, lastLongitude, 40000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
 
+
         getUserLocation(); // Refresh location to update the map
     }
+
 
     private void zoomOut() {
         zoomLevel = 8; // Further zoom out
         //fetchPosts(lastLatitude, lastLongitude, 800000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
 
+
         getUserLocation(); // Refresh location to update the map
     }
+
 
     // Increase scale of the button to show that it is selected.
     private void scaleButton(View button) {
@@ -262,27 +309,34 @@ public class MainActivity extends AppCompatActivity {
         button.setScaleY(1.2f);
     }
 
+
     //this will set the buttons back to normal scale
     private void resetButtonScales() {
+
 
         // Reset scale for all buttons
         findViewById(R.id.close).setScaleX(0.8f);
         findViewById(R.id.close).setScaleY(0.8f);
 
+
         findViewById(R.id.nearby).setScaleX(0.8f);
         findViewById(R.id.nearby).setScaleY(0.8f);
 
+
         findViewById(R.id.userArea).setScaleX(0.8f);
         findViewById(R.id.userArea).setScaleY(0.8f);
+
 
         findViewById(R.id.global).setScaleX(0.8f);
         findViewById(R.id.global).setScaleY(0.8f);
     }
 
+
     // This is called first when a tag is entered or when they change the radius.
     private void checkAndFetchPosts(double latitude, double longitude, int distance) {
         String userInput = headerTextView.getText().toString().trim();
         TextView clearTagTextView = findViewById(R.id.clearTag);
+
 
         // Check if the user has changed the default tag or input is empty
         if (userInput.isEmpty() || userInput.equals(DEFAULT_TAG)) {
@@ -307,17 +361,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
 
+
         Log.d("FetchPosts", "Request URL: " + url);
+
 
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .url(url) // Ensure this URL uses https
                     .build();
+
 
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -334,6 +392,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     // This closes the android keyboard after entering / returning
     private void closeKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -341,6 +401,7 @@ public class MainActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
     }
+
 
     // Sets mapImage to the Google Maps Image API
     private void loadImageAsBackground(String url) {
@@ -352,12 +413,14 @@ public class MainActivity extends AppCompatActivity {
                         mapImage.setBackground(resource);
                     }
 
+
                     @Override
                     public void onLoadCleared(@Nullable Drawable placeholder) {
                         // Handle placeholder if needed
                     }
                 });
     }
+
 
     // Request perms for location usage
     @Override
@@ -372,15 +435,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void showInputDialog() {
         // Create a full-screen dialog
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_create_post);
 
+
         // Set the dialog to full-screen
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
 
         // Initialize views
         EditText inputPost = dialog.findViewById(R.id.inputPost);
@@ -389,15 +455,18 @@ public class MainActivity extends AppCompatActivity {
         Button postButton = dialog.findViewById(R.id.postButton);
         ImageButton cancelButton = dialog.findViewById(R.id.cancelButton);
 
+
         // Set up the dropdown menu
         String[] types = new String[]{"minutes", "hours", "days"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
 
+
         // Set button listeners
         postButton.setOnClickListener(v -> {
             String userInput = inputPost.getText().toString().trim();
             int duration;
+
 
             try {
                 duration = Integer.parseInt(durationStr.getText().toString().trim());
@@ -405,6 +474,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
                 return;
             }
+
 
             String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
             if (!userInput.isEmpty()) {
@@ -416,7 +486,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
+
 
         // Show the dialog
         try {
@@ -430,16 +502,24 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
+
+
     // This adds the post to the API
     private void addNewPost(String text, String expiryDate) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
 
 
+
+
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, UserId, expiryDate, lastLatitude, lastLongitude);
 
+
         // This line below shows the posted zig immediately
         //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
+
 
         new Thread(() -> {
             try {
@@ -450,14 +530,18 @@ public class MainActivity extends AppCompatActivity {
                 connection.setDoOutput(true);
 
 
+
+
                 try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
                     os.write(input, 0, input.length);
                 }
 
+
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     runOnUiThread(() -> {
+
 
                         Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
                     });
@@ -469,6 +553,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
             }
         }).start();
+
 
         //Refresh posts
         int distance = 100;
@@ -483,6 +568,7 @@ public class MainActivity extends AppCompatActivity {
         //updateUIWithPost(text,"Just Now");
     }
 
+
     private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
@@ -493,11 +579,13 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
+
         // Create a RelativeLayout for the message content
         RelativeLayout relativeLayout = new RelativeLayout(this);
         relativeLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+
 
         // Create TextView for the current time
         TextView timeTextView = new TextView(this);
@@ -511,6 +599,7 @@ public class MainActivity extends AppCompatActivity {
         timeParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         timeTextView.setLayoutParams(timeParams);
 
+
         // Create ImageView for the time icon
         ImageView backwardTimeImageView = new ImageView(this);
         backwardTimeImageView.setImageResource(R.drawable.backward_time);
@@ -521,6 +610,7 @@ public class MainActivity extends AppCompatActivity {
         //imageParams.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
         imageParams.setMargins(275, 0, 0, 0);
         backwardTimeImageView.setLayoutParams(imageParams);
+
 
         // Create TextView for the duration
         TextView durationTextView = new TextView(this);
@@ -535,6 +625,7 @@ public class MainActivity extends AppCompatActivity {
         durationParams.setMargins(0, 5, 0, 0); // Reduced margin to decrease gap
         durationTextView.setLayoutParams(durationParams);
 
+
         // Create ImageButton for more options
         ImageButton moreButton = new ImageButton(this);
         moreButton.setImageResource(R.drawable.baseline_more_horiz_24);
@@ -542,6 +633,7 @@ public class MainActivity extends AppCompatActivity {
         moreButton.setScaleY(1f);
         moreButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
         moreButton.setBackgroundColor(Color.TRANSPARENT);
+
 
         moreButton.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams moreButtonParams = new RelativeLayout.LayoutParams(
@@ -552,6 +644,7 @@ public class MainActivity extends AppCompatActivity {
         moreButtonParams.setMargins(0, -60, 0, -30);
         moreButton.setLayoutParams(moreButtonParams);
 
+
         // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
             PopupMenu postOptions = new PopupMenu(this, v);
@@ -559,22 +652,23 @@ public class MainActivity extends AppCompatActivity {
             postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                //    if(my_user_id.equals(authorID)) {
-                        if (item.getItemId() == R.id.item_delete) {
-                            try {
-                                deletePost(id);
-                            } catch (IOException e) {
-                                Log.e("Delete", "Failed to delete");
-                            }
-                            return true;
+                    //    if(my_user_id.equals(authorID)) {
+                    if (item.getItemId() == R.id.item_delete) {
+                        try {
+                            deletePost(id);
+                        } catch (IOException e) {
+                            Log.e("Delete", "Failed to delete");
                         }
-                        return false;
-                //    }
-                //    return false;
+                        return true;
+                    }
+                    return false;
+                    //    }
+                    //    return false;
                 }
             });
             postOptions.show();
         });
+
 
         // Create TextView for the post content
         TextView postTextView = new TextView(this);
@@ -587,6 +681,7 @@ public class MainActivity extends AppCompatActivity {
             spannableString.setSpan(new ForegroundColorSpan(Color.BLUE), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             spannableString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
+
             // Create a ClickableSpan for the hashtag
             final String hashtag = text.substring(start, end);
             spannableString.setSpan(new ClickableSpan() {
@@ -594,6 +689,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View widget) {
                     // Replace the headerTextView text with the selected hashtag
                     headerTextView.setText(hashtag); // Ensure headerTextView is defined
+
 
                     // Determine the distance based on the last zoom level
                     int distance;
@@ -617,6 +713,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
+
         }
         postTextView.setText(spannableString);
         postTextView.setTextSize(20);
@@ -627,6 +724,7 @@ public class MainActivity extends AppCompatActivity {
         postParams.addRule(RelativeLayout.BELOW, backwardTimeImageView.getId());
         postParams.setMargins(0, 20, 33, 0);
         postTextView.setLayoutParams(postParams);
+
 
         // Create TextView for the post distance
         TextView postDistanceView = new TextView(this);
@@ -643,6 +741,7 @@ public class MainActivity extends AppCompatActivity {
         postParams.setMargins(0, 25, 0, 0);
         postDistanceView.setLayoutParams(distanceParams);
 
+
         // Add views to the RelativeLayout
         relativeLayout.addView(timeTextView);
         relativeLayout.addView(moreButton);
@@ -651,12 +750,16 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(postTextView);
         relativeLayout.addView(postDistanceView);
 
+
         // Add the RelativeLayout to the new message group
         newMessageGroup.addView(relativeLayout);
+
 
         // and add the new message group to the container
         messageContainer.addView(newMessageGroup);
     }
+
+
 
 
     // Fetches posts based on distance
@@ -664,11 +767,13 @@ public class MainActivity extends AppCompatActivity {
         String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
         Log.d("FetchPosts", "Request URL: " + url + " latitude: " + latitude + " longitude: " + longitude + " distance: " + distance);
 
+
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .url(url)
                     .build();
+
 
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -687,6 +792,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     private void handlePostsResponse(String jsonResponse) {
         runOnUiThread(() -> {
             try {
@@ -695,31 +802,40 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("This is the", jsonResponse);
                 messageContainer.removeAllViews(); // Clear previous posts
 
+
                 for (int i = 0; i < postsArray.length(); i++) {
                     JSONObject post = postsArray.getJSONObject(i);
+
 
                     int id = post.getInt("id");
                     String authorID = post.getString("authorId");
                     String text = post.getString("text"); // Get the post text
                     String createdAt = post.getString("createdAt"); // Get the createdAt time
 
+
                     // Access the location object and then access the distance
                     JSONObject location = post.getJSONObject("location");
                     String distanceInMetersStr = location.getString("distance"); // Get the distance as a string
 
+
                     // Log the distance string
                     Log.d("Distance check", "Distance string: " + distanceInMetersStr);
+
 
                     // Convert the distance string to an integer
                     double distanceInMeters = Double.parseDouble(distanceInMetersStr);
 
+
                     // Format the createdAt time
                     String formattedTime = formatTime(createdAt);
+
 
                     // Convert distance and prepare display string
                     String distanceString = formatDistance(distanceInMeters); // Pass as int
 
+
                     String expiryDate = post.getString("expiryDate");
+
 
                     // Update the UI with the post, formatted time, and distance
                     updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID);
@@ -734,18 +850,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void deletePost(int id) throws IOException{
 
+
         Thread thread = new Thread(new Runnable() {
+
 
             @Override
             public void run() {
                 try {
 
+
                     //Delete the specified post
                     URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + id);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("DELETE");
+
 
                     //Check response from api
                     int responseCode = connection.getResponseCode();
@@ -764,6 +885,7 @@ public class MainActivity extends AppCompatActivity {
         });
         thread.start();
 
+
         //Refresh the posts
         int distance = 100;
         if (lastZoomLevel == 15) {
@@ -776,12 +898,15 @@ public class MainActivity extends AppCompatActivity {
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
+
     private String formatDistance(double meters) {
         // Convert meters to miles
         double miles = meters * 0.000621371;
 
+
         // Log the distance in meters and calculated miles
         Log.d("DistanceLogger", "Distance in meters: " + meters + ", calculated miles: " + miles);
+
 
         if (miles < 0.1) {
             double feet = meters * 3.28084; // Convert meters to feet
@@ -793,6 +918,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     // This helps format the time that is received from the Backend API to show simple results
     private String formatTime(String createdAt) {
         try {
@@ -800,11 +927,13 @@ public class MainActivity extends AppCompatActivity {
             inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = inputFormat.parse(createdAt);
 
+
             // Calculate the time difference
             long diffInMillis = new Date().getTime() - date.getTime();
             long diffInMinutes = diffInMillis / (1000 * 60);
             long diffInHours = diffInMinutes / 60;
             long diffInDays = diffInHours / 24;
+
 
             // Generate the appropriate time ago string
             if (diffInMinutes < 1) {
@@ -822,7 +951,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private String formatExpiration(int duration, String type){
+
 
         if(type.equals("days"))
             duration *= (24 * 60);
@@ -831,11 +962,13 @@ public class MainActivity extends AppCompatActivity {
         else
             ;
 
+
         try {
             Date currentDate = new Date();
             Calendar cal = Calendar.getInstance();
             cal.setTimeZone(TimeZone.getTimeZone("UTC"));
             cal.setTime(currentDate);
+
 
             int year = cal.get(Calendar.YEAR);
             int month = cal.get(Calendar.MONTH) + 1;
@@ -844,7 +977,9 @@ public class MainActivity extends AppCompatActivity {
             int minute = cal.get(Calendar.MINUTE);
             int monthLength = monthLength(month, year);
 
+
             minute = minute + duration;
+
 
             Log.d("Time", minute + "minutes");
             //Cascade the overflow
@@ -854,11 +989,13 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d("Time", hour + "hours");
 
+
             while(hour >= 24){
                 day++;
                 hour -= 24;
             }
             Log.d("Time", day + "days");
+
 
             while (day > monthLength) {
                 month++;
@@ -867,16 +1004,19 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d("Time", month + "months");
 
+
             if (month > 12) {
                 year++;
                 month -= 12;
             }
             Log.d("Time", year + "years");
 
+
             String monthStr = month + "";
             String dateStr = day + "";
             String hourStr = hour + "";
             String minuteStr = minute + "";
+
 
             //Add 0s to one digit numbers
             if((month + "").length() == 1)
@@ -888,12 +1028,14 @@ public class MainActivity extends AppCompatActivity {
             if((minute + "").length() == 1)
                 minuteStr = "0" + minute;
 
+
             return year + "-" + monthStr + "-" + dateStr + "T" + hourStr + ":" + minuteStr + ":00.000Z";
         } catch (Exception e) {
             Log.e("MainActivity", "Error");
             return null;
         }
     }
+
 
     private String formatDuration(String expiryDate){
         try {
@@ -902,11 +1044,14 @@ public class MainActivity extends AppCompatActivity {
             Date date = inputFormat.parse(expiryDate);
 
 
+
+
             // Calculate the time difference
             long diffInMillis = date.getTime() - new Date().getTime();
             long diffInMinutes = diffInMillis / (1000 * 60);
             long diffInHours = diffInMinutes / 60;
             long diffInDays = diffInHours / 24;
+
 
             // Generate the appropriate time left string
             if (diffInMinutes < 1) {
@@ -924,7 +1069,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private int monthLength(int month, int year) {
+
 
         int febLength;
         if(year % 4 == 0)
@@ -932,9 +1079,12 @@ public class MainActivity extends AppCompatActivity {
         else
             febLength = 28;
 
+
         int[] monthLengths = new int[]{31, febLength, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
+
         return monthLengths[month-1];
+
 
     }
 }
