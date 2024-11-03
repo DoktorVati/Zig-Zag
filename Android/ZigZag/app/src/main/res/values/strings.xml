@@ -7,6 +7,15 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+        <string-array name="country_codes">
+            <item>+1 - United States</item>
+            <item>+44 - United Kingdom</item>
+            <item>+91 - India</item>
+            <item>+49 - Germany</item>
+            <item>+81 - Japan</item>
+            <!-- Add more country codes as needed -->
+        </string-array>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

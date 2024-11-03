@@ -8,13 +8,13 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,18 +23,26 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 
-
 import java.util.concurrent.TimeUnit;
-
-
 public class ProfileCreation extends AppCompatActivity {
     private EditText userNameText;
     private EditText emailText;
     private EditText phoneNumberText;
     private EditText codeInput;
+    private EditText password;
+    private PhoneAuthProvider.ForceResendingToken resendToken;
     private TextView codeInputLabel;
+    private TextView phoneLabel;
+    private TextView passwordLabel;
+    private TextView emailLabel;
+    private TextView usernameLabel;
     private Button createProfileButton;
     private Button sendCodeButton;
+    private Button showPasswordButton;
+    private LinearLayout phoneLayout;
+    private LinearLayout passwordlayout;
+    private ImageButton backButton;
+    private ImageButton backButton2;
     private TextView incorrectCodeText;
 
 
@@ -46,8 +54,10 @@ public class ProfileCreation extends AppCompatActivity {
     private static final String KEY_CODE_INPUT_VISIBLE = "isCodeInputVisible";
     private static final String KEY_INCORRECT_CODE_VISIBLE = "isIncorrectCodeVisible";
     private static final String KEY_EMAIL = "email";
+    private static final String KEY_PASSWORD = "password";
     private static final String KEY_PHONE_NUMBER = "phoneNumber";
     private static final String KEY_VERIFICATION_ID = "verificationId";
+
 
 
     @Override
@@ -57,16 +67,26 @@ public class ProfileCreation extends AppCompatActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
-
-
         userNameText = findViewById(R.id.userName);
+        usernameLabel = findViewById(R.id.usernameLabel);
         emailText = findViewById(R.id.email);
+        emailLabel = findViewById(R.id.emailLabel);
+        password = findViewById(R.id.password);
+        passwordlayout = findViewById(R.id.passwordLayout);
         phoneNumberText = findViewById(R.id.phoneNumber);
+        phoneLabel = findViewById(R.id.phoneLabel);
+        phoneLayout = findViewById(R.id.phoneNumberLayout);
+
         codeInput = findViewById(R.id.CodeInput);
         codeInputLabel = findViewById(R.id.codeInputText);
         createProfileButton = findViewById(R.id.create_profile_button);
         sendCodeButton = findViewById(R.id.sendCode);
         incorrectCodeText = findViewById(R.id.incorrectCodeText);
+        showPasswordButton = findViewById(R.id.showPasswordButton);
+        backButton = findViewById(R.id.cancelButton);
+        backButton2 = findViewById(R.id.cancelButton2);
+
+        passwordLabel = findViewById(R.id.passwordLabel);
 
 
         setInputFilters();
@@ -74,7 +94,9 @@ public class ProfileCreation extends AppCompatActivity {
 
         createProfileButton.setOnClickListener(v -> sendVerificationCode());
         sendCodeButton.setOnClickListener(v -> verifyCode());
-
+        showPasswordButton.setOnClickListener(v -> togglePasswordVisibility());
+        backButton.setOnClickListener(v -> backToLogin());
+        backButton2.setOnClickListener(v -> hideCodeInput());
 
         // Restore visibility states and input values
         restoreVisibilityStates();
@@ -131,20 +153,26 @@ public class ProfileCreation extends AppCompatActivity {
         editor.putString(KEY_EMAIL, emailText.getText().toString().trim());
         editor.putString(KEY_PHONE_NUMBER, phoneNumberText.getText().toString().trim());
         editor.putString(KEY_VERIFICATION_ID, verificationId); // Save verification ID
+        editor.putString(KEY_PASSWORD, password.getText().toString().trim());
         editor.apply();
     }
 
-
+    private void backToLogin()
+    {
+        //hideCodeInput();
+        Intent intent = new Intent(ProfileCreation.this, ProfileLogin.class);
+        startActivity(intent);
+        finish();
+    }
     private void restoreInputValues() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String email = prefs.getString(KEY_EMAIL, "");
         String phoneNumber = prefs.getString(KEY_PHONE_NUMBER, "");
-        verificationId = prefs.getString(KEY_VERIFICATION_ID, null); // Restore verification ID
-
+        String passwordText = prefs.getString(KEY_PASSWORD, ""); // Retrieve the password
 
         emailText.setText(email);
         phoneNumberText.setText(phoneNumber);
-
+        password.setText(passwordText); // Restore the password
 
         // If we have a verification ID, show the code input
         if (verificationId != null) {
@@ -171,7 +199,7 @@ public class ProfileCreation extends AppCompatActivity {
 
         PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
                 .setPhoneNumber(phoneNumber)
-                .setTimeout(60L, TimeUnit.SECONDS)
+                .setTimeout(30L, TimeUnit.SECONDS)
                 .setActivity(this)
                 .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     @Override
@@ -203,8 +231,16 @@ public class ProfileCreation extends AppCompatActivity {
         codeInputLabel.setVisibility(View.VISIBLE);
         sendCodeButton.setVisibility(View.VISIBLE);
         codeInputLabel.setText("Enter the code sent to " + phoneNumber);
+        backButton2.setVisibility(View.VISIBLE);
 
-
+        backButton.setVisibility(View.GONE);
+        password.setVisibility(View.GONE);
+        passwordLabel.setVisibility(View.GONE);
+        phoneLabel.setVisibility(View.GONE);
+        usernameLabel.setVisibility(View.GONE);
+        emailLabel.setVisibility(View.GONE);
+        phoneLayout.setVisibility(View.GONE);
+        passwordlayout.setVisibility(View.GONE);
         userNameText.setVisibility(View.GONE);
         emailText.setVisibility(View.GONE);
         phoneNumberText.setVisibility(View.GONE);
@@ -248,7 +284,11 @@ public class ProfileCreation extends AppCompatActivity {
 
     private void createUserAccount(String email, PhoneAuthCredential credential) {
         // Use a secure password in real applications
-        String password = "defaultPassword"; // Replace with a secure password handling mechanism
+        String password = this.password.getText().toString().trim(); // Use the password from the EditText
+        if (password.isEmpty()) {
+            Toast.makeText(this, "Please enter a password.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -274,18 +314,19 @@ public class ProfileCreation extends AppCompatActivity {
 
 
 
-    private void createUserAccount(String email) {
-        // Use a secure password in real applications
-        String password = "defaultPassword";
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(ProfileCreation.this, "User account created successfully!", Toast.LENGTH_SHORT).show();
-                        switchToMainActivity(mAuth.getCurrentUser().getUid());
-                    } else {
-                        Toast.makeText(ProfileCreation.this, "Failed to create user: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private void togglePasswordVisibility() {
+        // Toggle the password visibility
+        if (password.getTransformationMethod() != null) {
+            // If the password is currently hidden, show it
+            password.setTransformationMethod(null);
+            showPasswordButton.setText("Hide");
+        } else {
+            // If the password is currently visible, hide it
+            password.setTransformationMethod(new android.text.method.PasswordTransformationMethod());
+            showPasswordButton.setText("Show");
+        }
+        // Move the cursor to the end of the text
+        password.setSelection(password.getText().length());
     }
 
 
@@ -301,6 +342,20 @@ public class ProfileCreation extends AppCompatActivity {
         codeInput.setVisibility(View.GONE);
         codeInputLabel.setVisibility(View.GONE);
         sendCodeButton.setVisibility(View.GONE);
+        backButton2.setVisibility(View.GONE);
+
+        backButton.setVisibility(View.VISIBLE);
+        password.setVisibility(View.VISIBLE);
+        phoneLabel.setVisibility(View.VISIBLE);
+        usernameLabel.setVisibility(View.VISIBLE);
+        emailLabel.setVisibility(View.VISIBLE);
+        phoneLayout.setVisibility(View.VISIBLE);
+        passwordlayout.setVisibility(View.VISIBLE);
+        passwordLabel.setVisibility(View.VISIBLE);
+        userNameText.setVisibility(View.VISIBLE);
+        emailText.setVisibility(View.VISIBLE);
+        phoneNumberText.setVisibility(View.VISIBLE);
+        createProfileButton.setVisibility(View.VISIBLE);
     }
 
 
