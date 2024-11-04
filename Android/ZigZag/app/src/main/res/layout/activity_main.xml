@@ -217,14 +217,13 @@
 
         </LinearLayout>
     </ScrollView>
-    <!-- Change drawable to correct one -->
     <ImageButton
         android:contentDescription="profile"
         android:id="@+id/profileButton"
         android:layout_margin="10dp"
         android:layout_gravity="end|top"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="50dp"
+        android:layout_height="55dp"
         android:scaleY="0.9"
         android:scaleX="0.9"
         android:scaleType="fitXY"

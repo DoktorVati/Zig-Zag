@@ -37,24 +37,26 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -68,7 +70,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
+    private ImageButton profileButton;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
     private String UserId;
 
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //Current universal user ID
-    private String my_user_id = "your_user_id_here";
+    private String my_user_id;
     TextView clearTagTextView;
 
 
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main); // Link to activity_main.xml layout
 
 
-        // Retrieve the phone number from the intent
+        // Retrieve the UUID from the intent
         Intent intent = getIntent();
         UserId = intent.getStringExtra("USER_ID");
         my_user_id = UserId;
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
-
+        profileButton = findViewById(R.id.profileButton);
 
         headerTextView = findViewById(R.id.headerTextView);
         headerTextView.setText(DEFAULT_TAG);
@@ -214,6 +216,18 @@ public class MainActivity extends AppCompatActivity {
                 showInputDialog();
             }
         });
+
+
+        // Profile button
+        profileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProfileDialog();
+            }
+        });
+
+
+
     }
 
 
@@ -1079,12 +1093,77 @@ public class MainActivity extends AppCompatActivity {
         else
             febLength = 28;
 
-
         int[] monthLengths = new int[]{31, febLength, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-
         return monthLengths[month-1];
-
-
     }
+
+    private void showProfileDialog() {
+        // Create a full-screen dialog
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_show_profile);
+
+        // Set the dialog to full-screen
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // Initialize views
+        TextView emailTextView = dialog.findViewById(R.id.emailTextView);
+        TextView phoneTextView = dialog.findViewById(R.id.phoneTextView);
+        ImageButton closeButton = dialog.findViewById(R.id.closeButton);
+
+        // Assume we have a method to get current user's ID
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // Retrieve user details from Firebase
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("ProfileDialog", "DataSnapshot: " + dataSnapshot.toString());
+
+                if (dataSnapshot.exists()) {
+                    String email = dataSnapshot.child("email").getValue(String.class);
+                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
+
+                    // Handle null values
+                    if (email == null) {
+                        email = "Email not available";
+                    }
+                    if (phoneNumber == null) {
+                        phoneNumber = "Phone number not available";
+                    }
+
+                    // Set email and phone number
+                    emailTextView.setText(email);
+                    phoneTextView.setText(phoneNumber);
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "User details not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Error retrieving user data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        // Set button listener to close the dialog
+        closeButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Show the dialog
+        try {
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
 }
