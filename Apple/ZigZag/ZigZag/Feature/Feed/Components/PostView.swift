@@ -16,10 +16,10 @@ struct PostView: View {
         VStack(alignment: .leading) {
             HStack(spacing: 4) {
                 // Simulate time since post creation
-                Text("1 HOUR AGO ⏲️")  // You can add a real-time formatter here later
+                Text("\(post.timeSinceCreated) ⏲️")  // You can add a real-time formatter here later
                     .font(.caption)
                     .foregroundColor(.gray)
-                Text("21 HOURS")
+                Text(post.timeUntilExpires)
                     .font(.caption)
                     .foregroundColor(.gray)
                 Spacer()
@@ -45,8 +45,8 @@ struct PostView: View {
             .padding(.vertical, 4)
             
             HStack {
-                Text("32😭") // Placeholder for reactions, could be dynamic later
-                Text("16🔥") // Placeholder for reactions, could be dynamic later
+//                Text("32😭") // Placeholder for reactions, could be dynamic later
+//                Text("16🔥") // Placeholder for reactions, could be dynamic later
                 Spacer()
                 // Display post location or some other data
                 Text(post.location.distanceString)
@@ -65,7 +65,7 @@ struct PostView: View {
 
 #Preview {
     // Example post data
-    let samplePost = Post(id: 12, authorId: "Test Author", text: "This room gets #hot as #hell This room gets #hot as #hell", expiryDate: "1-1-2", createdAt: "23:00", updatedAt: "33", location: Location(longitude: 34, latitude: 43, distance: 23))
+    let samplePost = Post(id: 12, authorId: "Test Author", text: "This room gets #hot as #hell This room gets #hot as #hell", expiryDate: Date().addingTimeInterval(3600).ISO8601Format(), createdAt: Date().addingTimeInterval(-3600).ISO8601Format(), updatedAt: "33", location: Location(longitude: 34, latitude: 43, distance: 23))
     
     List {
         Section {
