@@ -1,6 +1,7 @@
 package com.zigzag;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+
 public class ProfileLogin extends AppCompatActivity {
     private EditText emailEditText;
     private EditText passwordEditText;
@@ -20,7 +22,8 @@ public class ProfileLogin extends AppCompatActivity {
     private Button showPasswordButton;
 
     private FirebaseAuth mAuth;
-
+    private static final String PREFS_NAME = "MyPrefs";
+    private static final String KEY_FIRST_LAUNCH = "first_launch";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +31,18 @@ public class ProfileLogin extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+
+        // Check if this is the first launch after install
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean isFirstLaunch = prefs.getBoolean(KEY_FIRST_LAUNCH, true);
+
+        if (isFirstLaunch) {
+            // If this is the first launch, log out any current user
+            mAuth.signOut();
+            // Update the preference to false
+            prefs.edit().putBoolean(KEY_FIRST_LAUNCH, false).apply();
+        }
+
 
         // Check if user is already logged in
         FirebaseUser currentUser = mAuth.getCurrentUser();
