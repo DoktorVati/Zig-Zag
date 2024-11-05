@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-
 public class ProfileLogin extends AppCompatActivity {
     private EditText emailEditText;
     private EditText passwordEditText;
@@ -22,12 +21,15 @@ public class ProfileLogin extends AppCompatActivity {
     private Button showPasswordButton;
 
     private FirebaseAuth mAuth;
-    private static final String PREFS_NAME = "MyPrefs";
+    static final String PREFS_NAME = "MyPrefs";
     private static final String KEY_FIRST_LAUNCH = "first_launch";
+    static final String KEY_EMAIL = "key_email"; // Add key for email
+    static final String KEY_PASSWORD = "key_password"; // Add key for password
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_profile); // Ensure this layout includes your login UI
+        setContentView(R.layout.login_profile);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -37,19 +39,15 @@ public class ProfileLogin extends AppCompatActivity {
         boolean isFirstLaunch = prefs.getBoolean(KEY_FIRST_LAUNCH, true);
 
         if (isFirstLaunch) {
-            // If this is the first launch, log out any current user
             mAuth.signOut();
-            // Update the preference to false
             prefs.edit().putBoolean(KEY_FIRST_LAUNCH, false).apply();
         }
-
 
         // Check if user is already logged in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // User is signed in, navigate to MainActivity
             switchToMainActivity(currentUser.getUid());
-            return; // Exit the onCreate method early
+            return;
         }
 
         emailEditText = findViewById(R.id.email);
@@ -65,7 +63,6 @@ public class ProfileLogin extends AppCompatActivity {
         });
 
         showPasswordButton.setOnClickListener(v -> togglePasswordVisibility());
-
         signupButton.setOnClickListener(v -> switchToCreateProfile());
     }
 
@@ -74,46 +71,54 @@ public class ProfileLogin extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         Intent intent = new Intent(ProfileLogin.this, ProfileCreation.class);
-        intent.putExtra("EMAIL", email); // Pass email to ProfileCreation
-        intent.putExtra("PASSWORD", password); // Pass password to ProfileCreation
+        intent.putExtra("EMAIL", email);
+        intent.putExtra("PASSWORD", password);
         startActivity(intent);
         finish();
     }
 
-    // Method to log in a user with email and password
     private void performLogin(String email, String password) {
         if (!isValidEmail(email)) {
             Toast.makeText(this, "Please enter a valid email address.", Toast.LENGTH_SHORT).show();
-            return; // Exit if the email is not valid
+            return;
         }
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success, get the current user
                         FirebaseUser user = mAuth.getCurrentUser();
                         Log.d("ProfileLogin", "signInWithEmail:success");
+
+                        // Save email and password to SharedPreferences
+                        saveInputValues(email, password);
+
                         switchToMainActivity(user.getUid());
                     } else {
-                        // If sign in fails, log the error
                         Log.w("ProfileLogin", "signInWithEmail:failure", task.getException());
                         Toast.makeText(ProfileLogin.this, "Incorrect Username or Password: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+    private void saveInputValues(String email, String password) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_EMAIL, email);
+        editor.putString(KEY_PASSWORD, password);
+        editor.apply();
+
+        Log.d("PrefsDebug", "Saved Email: " + email);
+        Log.d("PrefsDebug", "Saved Password: " + password); // Be cautious with logging passwords
+    }
+
     private void togglePasswordVisibility() {
-        // Toggle the password visibility
         if (passwordEditText.getTransformationMethod() != null) {
-            // If the password is currently hidden, show it
             passwordEditText.setTransformationMethod(null);
             showPasswordButton.setText("Hide");
         } else {
-            // If the password is currently visible, hide it
             passwordEditText.setTransformationMethod(new android.text.method.PasswordTransformationMethod());
             showPasswordButton.setText("Show");
         }
-        // Move the cursor to the end of the text
         passwordEditText.setSelection(passwordEditText.getText().length());
     }
 
@@ -124,7 +129,6 @@ public class ProfileLogin extends AppCompatActivity {
         finish();
     }
 
-    // Method to validate email format
     private boolean isValidEmail(String email) {
         String emailPattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}";
         return email.matches(emailPattern);

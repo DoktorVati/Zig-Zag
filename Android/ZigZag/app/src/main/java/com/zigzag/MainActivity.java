@@ -1,10 +1,16 @@
 package com.zigzag;
 
 
+import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
+import static com.zigzag.ProfileLogin.KEY_EMAIL;
+import static com.zigzag.ProfileLogin.PREFS_NAME;
+
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -46,12 +52,11 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -117,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         UserId = intent.getStringExtra("USER_ID");
         my_user_id = UserId;
+        FirebaseApp.initializeApp(this);
 
 
         messageContainer = findViewById(R.id.messageContainer);
@@ -1111,48 +1117,38 @@ public class MainActivity extends AppCompatActivity {
         // Initialize views
         TextView emailTextView = dialog.findViewById(R.id.emailTextView);
         TextView phoneTextView = dialog.findViewById(R.id.phoneTextView);
+        LinearLayout signOut = dialog.findViewById(R.id.SignOutLayout);
+        LinearLayout deleteAccountLayout = dialog.findViewById(R.id.DeleteAccountLayout);
         ImageButton closeButton = dialog.findViewById(R.id.closeButton);
 
-        // Assume we have a method to get current user's ID
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        // Retrieve user details from Firebase
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("ProfileDialog", "DataSnapshot: " + dataSnapshot.toString());
-
-                if (dataSnapshot.exists()) {
-                    String email = dataSnapshot.child("email").getValue(String.class);
-                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
-
-                    // Handle null values
-                    if (email == null) {
-                        email = "Email not available";
-                    }
-                    if (phoneNumber == null) {
-                        phoneNumber = "Phone number not available";
-                    }
-
-                    // Set email and phone number
-                    emailTextView.setText(email);
-                    phoneTextView.setText(phoneNumber);
-
-                } else {
-                    Toast.makeText(getApplicationContext(), "User details not found", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Error retrieving user data", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        // Load email and phone number from SharedPreferences
+        loadInputValues(emailTextView, phoneTextView);
 
         // Set button listener to close the dialog
         closeButton.setOnClickListener(v -> dialog.dismiss());
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Handle click for deleting account
+        deleteAccountLayout.setOnClickListener(v -> {
+            // Show confirmation dialog for account deletion
+            showDeleteConfirmationDialog(currentUser);
+        });
+
+        // Sign out functionality
+        signOut.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.clear();
+            editor.apply();
+            startActivity(new Intent(this, ProfileLogin.class));
+            finish();
+        });
 
         // Show the dialog
         try {
@@ -1161,6 +1157,119 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showDeleteConfirmationDialog(FirebaseUser currentUser) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account?")
+                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                    // Proceed with account deletion
+                    deleteAccount(currentUser);
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void deleteAccount(FirebaseUser currentUser) {
+        // Re-authenticate the user before deleting the account
+        reAuthenticateUser(currentUser);
+    }
+
+    private void reAuthenticateUser(FirebaseUser currentUser) {
+        // Get email from the current user
+        String email = currentUser.getEmail();
+
+        // Retrieve the password from SharedPreferences (replace "user_prefs" with your SharedPreferences file name)
+        SharedPreferences sharedPreferences = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
+        String storedPassword = sharedPreferences.getString("password", null);
+
+        // Check if email and password exist
+        if (email != null && storedPassword != null && !storedPassword.isEmpty()) {
+            // Create the AuthCredential using the email and password
+            AuthCredential credential = EmailAuthProvider.getCredential(email, storedPassword);
+
+            // Re-authenticate the user with the email and password
+            currentUser.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
+                if (reAuthTask.isSuccessful()) {
+                    // Now that the user is re-authenticated, proceed to delete the account
+                    deleteUserFromAuth(currentUser);
+                } else {
+                    // If re-authentication fails, notify the user
+                    Toast.makeText(this, "Re-authentication failed. Please log in again.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            // If no email or password is found, prompt the user to log in again
+            Toast.makeText(this, "Error: Missing credentials. Please log in again.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    private void deleteUserFromAuth(FirebaseUser currentUser) {
+        //clear all saved info about user
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();  // Clear all preferences
+        editor.apply();  // Apply changes to SharedPreferences
+
+        SharedPreferences sharedPreferences2 = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = sharedPreferences2.edit();
+        editor2.clear();  // Clear all preferences
+        editor2.apply();  // Apply changes to SharedPreferences
+        // Step 3: Delete the Firebase Authentication user (email, password, phone number, etc.)
+        currentUser.delete().addOnCompleteListener(deleteTask -> {
+            if (deleteTask.isSuccessful()) {
+                // If the deletion is successful, show a success message
+                Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+
+
+
+
+
+                // Sign the user out after successful deletion
+                FirebaseAuth.getInstance().signOut();
+
+
+                // Navigate to the login screen or exit the app
+                startActivity(new Intent(this, ProfileLogin.class));
+                finish();
+            } else {
+                // If deleting the Firebase Authentication user fails
+                Toast.makeText(this, "Failed to delete account from Authentication. Please try again later.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
+
+
+
+
+
+
+    // Updated loadInputValues method to accept TextViews as parameters
+    private void loadInputValues(TextView emailTextView, TextView phoneTextView) {
+        SharedPreferences prefs = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
+        String email = prefs.getString(KEY_EMAIL, "Email not available");
+
+        if (email == "Email not available")
+        {
+            SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String emails = prefs2.getString(KEY_EMAIL, "Email not available");
+            emailTextView.setText("Email:    " + emails);
+
+        }
+        else
+        {
+            emailTextView.setText("Email:    " + email);
+
+        }
+        SharedPreferences prefs2 = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
+        String phoneNumber = prefs2.getString(KEY_PHONE_NUMBER, "Phone number not available");
+
+        phoneTextView.setText("Phone Number:     " + phoneNumber);
     }
 
 

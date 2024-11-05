@@ -18,24 +18,97 @@
         android:layout_marginEnd="0dp"/>
 
     <TextView
-        android:id="@+id/emailTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:text="Email: "
+        android:text="Profile"
+        android:textSize="40sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/emailTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "Email: "
+        android:layout_marginTop="60dp"
+        android:textSize="20dp"
         android:textColor="@color/black"
-        android:textStyle="bold" />
+        />
 
     <TextView
         android:id="@+id/phoneTextView"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:text = "Phone Number: "
+        android:textSize="20dp"
+        android:textColor="@color/black"
+        />
+
+    <!-- Sign Out Section -->
+    <LinearLayout
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/SignOutLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
-        android:text="Phone#: "
-        android:layout_marginTop="10dp"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:orientation="horizontal"
+        android:layout_marginTop="100dp"
+        android:padding="10dp"
+        android:background="@color/transparentGrey">
 
+        <ImageView
+            android:id="@+id/signOutIcon"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/baseline_person_24"
+            android:contentDescription="Sign Out Icon"
+            android:layout_marginEnd="8dp" />
 
+        <TextView
+            android:id="@+id/signOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Sign Out"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+          />
+    </LinearLayout>
+
+    <!-- Delete Account Section -->
+    <LinearLayout
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/DeleteAccountLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+
+        android:layout_marginTop="150dp"
+        android:background="@color/transparentGrey">
+
+        <ImageView
+            android:id="@+id/deleteAccountIcon"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/baseline_delete_forever_24"
+            android:contentDescription="Delete Account Icon"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/deleteAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="Delete Account (Warning! This action is permanent)"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </LinearLayout>
