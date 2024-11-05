@@ -1,0 +1,171 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="20dp">
+
+
+    <!-- Cancel Button as an Arrow Icon -->
+    <ImageButton
+        android:id="@+id/cancelButton"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="0dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Cancel"
+        android:scaleType="fitXY"
+
+
+        android:src="@drawable/baseline_arrow_back_24" />
+
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@id/cancelButton"
+        android:paddingBottom="16dp"
+        android:text="Comments"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:id="@+id/scrollContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="290dp"
+        android:layout_marginBottom="0dp"
+        android:layout_weight="2"
+        android:background="@color/invisible"
+        android:contentDescription="This is the scroll content">
+
+        <LinearLayout
+            android:id="@+id/Comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <!-- Message Groups
+              <LinearLayout
+                android:layout_weight="0"
+                android:id="@+id/messageGroup1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/rounded_posts_shape">
+
+                <GridLayout
+                    android:layout_weight="1"
+                    android:layout_marginStart="0dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="-5dp"
+                    android:orientation="vertical"
+                    android:padding="0dp"
+                    android:columnCount="4"
+                    android:rowCount="3">
+
+                    <TextView
+                        android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="1 hour ago" />
+
+                    <ImageView android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:src="@drawable/backward_time"
+                        android:layout_height="20dp"
+                        android:layout_width="20dp"
+                        android:background="@color/invisible"
+                        android:layout_marginLeft="150dp"
+                        ></ImageView>
+
+                    <TextView
+                        android:layout_rowSpan="0"
+                        android:layout_columnSpan="1"
+                        android:textColor="@color/timeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:layout_marginLeft="90dp"
+                        android:text="21 hours" />
+
+                    <ImageButton
+                        android:contentDescription="Button for more"
+                        android:id="@+id/moreButton1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="1"
+                        android:layout_gravity="end"
+                        android:background="@color/invisible"
+                        android:scaleType="fitXY"
+                        android:scaleX="1.5"
+                        android:scaleY="1.5"
+                        android:src="@drawable/baseline_more_horiz_24" />
+
+                    <TextView
+                        android:layout_rowSpan="1"
+                        android:layout_columnSpan="4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="This app is awesome! this app is awesome"
+                        android:textSize="20sp" />
+
+                    <TextView android:layout_columnSpan="1"
+
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="100 feet"
+                        />
+                </GridLayout>
+            </LinearLayout>
+
+-->
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/OPContainer"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="50dp"
+        android:orientation="vertical"></LinearLayout>
+
+
+    <!-- Post Duration Instructions -->
+
+
+    <!-- Duration Type Dropdown -->
+
+
+    <!-- Duration Input Field -->
+
+
+    <!-- Post Content Input Field -->
+
+
+    <!-- Tag Instructions -->
+
+
+    <!-- Post Button -->
+
+
+</RelativeLayout>

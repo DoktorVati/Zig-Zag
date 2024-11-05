@@ -513,7 +513,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void showCommentsDialog() {
+        // Create a full-screen dialog
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_comments);
 
+        // Set the dialog to full-screen
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        ImageButton cancelButton = dialog.findViewById(R.id.cancelButton);
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Show the dialog
+        try {
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception for debugging
+            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
 
 
@@ -595,7 +616,8 @@ public class MainActivity extends AppCompatActivity {
 
         newMessageGroup.setOnClickListener(v -> {
            Log.d("Comments", "Comments Clicked");
-           fetchComments(id);
+           showCommentsDialog();
+           fetchComments(id, lastLatitude, lastLongitude);
         });
 
         // Create a RelativeLayout for the message content
@@ -811,11 +833,11 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void fetchComments(int postId){
+    private void fetchComments(int postId, double latitude, double longitude){
 
-        String opUrl = "https://api.zigzag.madebysaul.com/posts/" + postId + "?";
+        String opUrl = "https://api.zigzag.madebysaul.com/posts/" + postId + "?" + "latitude=" + latitude + "&longitude=" + longitude;
         String url = "https://api.zigzag.madebysaul.com/posts/" + postId + "/comments";
-        Log.d("FetchComments", "Request opURL" + opUrl);
+        Log.d("FetchComments", "Request opURL: " + opUrl);
         Log.d("FetchComments", "Request URL: " + url);
 
         //Fetch original post
@@ -828,7 +850,7 @@ public class MainActivity extends AppCompatActivity {
 
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String jsonResponse = response.body().string();
+                    String jsonResponse = "[" + response.body().string() + "]";
                     handlePostsResponse(jsonResponse);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
@@ -928,8 +950,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("handleCommentsResponse", "Comments received");
                 JSONArray postsArray = new JSONArray(jsonResponse);
                 Log.d("This is the", jsonResponse);
-                messageContainer.removeAllViews(); // Clear previous posts
-
 
                 for (int i = 0; i < postsArray.length(); i++) {
                     JSONObject post = postsArray.getJSONObject(i);
