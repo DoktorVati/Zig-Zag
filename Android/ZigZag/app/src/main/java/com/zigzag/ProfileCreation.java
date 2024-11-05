@@ -1,6 +1,7 @@
 package com.zigzag;
 
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -23,9 +24,12 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 
+import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 public class ProfileCreation extends AppCompatActivity {
     private EditText userNameText;
+    private TextView textInputError;
+
     private EditText emailText;
     private EditText phoneNumberText;
     private EditText codeInput;
@@ -50,14 +54,16 @@ public class ProfileCreation extends AppCompatActivity {
     private String verificationId;
 
 
-    private static final String PREFS_NAME = "ProfileCreationPrefs";
+    static final String PREFS_NAME = "ProfileCreationPrefs";
     private static final String KEY_CODE_INPUT_VISIBLE = "isCodeInputVisible";
     private static final String KEY_INCORRECT_CODE_VISIBLE = "isIncorrectCodeVisible";
-    private static final String KEY_EMAIL = "email";
+    static final String KEY_EMAIL = "email";
     private static final String KEY_PASSWORD = "password";
-    private static final String KEY_PHONE_NUMBER = "phoneNumber";
+    static final String KEY_PHONE_NUMBER = "phoneNumber";
     private static final String KEY_VERIFICATION_ID = "verificationId";
 
+    private EditText birthDateInput;
+    private TextView birthdayLabel;
 
 
     @Override
@@ -87,6 +93,7 @@ public class ProfileCreation extends AppCompatActivity {
         backButton2 = findViewById(R.id.cancelButton2);
 
         passwordLabel = findViewById(R.id.passwordLabel);
+        textInputError = findViewById(R.id.textInputError);
 
 
         setInputFilters();
@@ -97,7 +104,15 @@ public class ProfileCreation extends AppCompatActivity {
         showPasswordButton.setOnClickListener(v -> togglePasswordVisibility());
         backButton.setOnClickListener(v -> backToLogin());
         backButton2.setOnClickListener(v -> hideCodeInput());
+        birthDateInput = findViewById(R.id.birthDateInput);
+        birthdayLabel = findViewById(R.id.birthDateLabel);
 
+        birthDateInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog();
+            }
+        });
         // Restore visibility states and input values
         restoreVisibilityStates();
         restoreInputValues();
@@ -185,17 +200,30 @@ public class ProfileCreation extends AppCompatActivity {
         String email = emailText.getText().toString().trim();
         String userName = userNameText.getText().toString().trim();
         String phoneNumber = phoneNumberText.getText().toString().trim();
+        String birthDate = birthDateInput.getText().toString().trim();
 
-
-        if (email.isEmpty() || userName.isEmpty() || phoneNumber.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+        if (email.isEmpty() || userName.isEmpty() || phoneNumber.isEmpty() || birthDate.isEmpty()) {
+            // Set the error message in the TextView and make it visible
+            textInputError.setText("Please fill in all fields.");
+            textInputError.setVisibility(View.VISIBLE);
             return;
+        } else {
+            // Hide the error message if all fields are filled
+            textInputError.setVisibility(View.GONE);
         }
 
+        // Check if the user is at least 13 years old
+        if (!isAgeValid(birthDate)) {
+            textInputError.setText("You must be at least 13 years old to sign up.");
+            textInputError.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            // Hide the error message if all fields are filled
+            textInputError.setVisibility(View.GONE);
+        }
 
         // Save the email and phone number before sending the verification code
         saveInputValues();
-
 
         PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
                 .setPhoneNumber(phoneNumber)
@@ -207,12 +235,10 @@ public class ProfileCreation extends AppCompatActivity {
                         linkPhoneNumber(credential, email);  // Pass email to link
                     }
 
-
                     @Override
                     public void onVerificationFailed(@NonNull FirebaseException e) {
                         Toast.makeText(ProfileCreation.this, "Verification failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
-
 
                     @Override
                     public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken token) {
@@ -225,6 +251,31 @@ public class ProfileCreation extends AppCompatActivity {
         PhoneAuthProvider.verifyPhoneNumber(options);
     }
 
+    private boolean isAgeValid(String birthDate) {
+        try {
+            String[] parts = birthDate.split("/");
+            int day = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]) - 1; // Month is 0-based in Calendar
+            int year = Integer.parseInt(parts[2]);
+
+            Calendar birthDateCalendar = Calendar.getInstance();
+            birthDateCalendar.set(year, month, day);
+
+            Calendar today = Calendar.getInstance();
+            int age = today.get(Calendar.YEAR) - birthDateCalendar.get(Calendar.YEAR);
+
+            // Adjust age if birthday has not occurred this year
+            if (today.get(Calendar.DAY_OF_YEAR) < birthDateCalendar.get(Calendar.DAY_OF_YEAR)) {
+                age--;
+            }
+
+            return age >= 13; // Valid if age is 13 or older
+        } catch (Exception e) {
+            return false; // If there's an error parsing the date, consider it invalid
+        }
+    }
+
+
 
     private void showCodeInput(String phoneNumber) {
         codeInput.setVisibility(View.VISIBLE);
@@ -233,6 +284,8 @@ public class ProfileCreation extends AppCompatActivity {
         codeInputLabel.setText("Enter the code sent to " + phoneNumber);
         backButton2.setVisibility(View.VISIBLE);
 
+        birthdayLabel.setVisibility(View.GONE);
+        birthDateInput.setVisibility(View.GONE);
         backButton.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
         passwordLabel.setVisibility(View.GONE);
@@ -344,6 +397,8 @@ public class ProfileCreation extends AppCompatActivity {
         sendCodeButton.setVisibility(View.GONE);
         backButton2.setVisibility(View.GONE);
 
+        birthdayLabel.setVisibility(View.VISIBLE);
+        birthDateInput.setVisibility(View.VISIBLE);
         backButton.setVisibility(View.VISIBLE);
         password.setVisibility(View.VISIBLE);
         phoneLabel.setVisibility(View.VISIBLE);
@@ -358,7 +413,23 @@ public class ProfileCreation extends AppCompatActivity {
         createProfileButton.setVisibility(View.VISIBLE);
     }
 
+    private void showDatePickerDialog() {
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    // Format month to be 1-based (January is 0)
+                    String formattedDate = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                    birthDateInput.setText(formattedDate);
+                },
+                year, month, day);
+
+        datePickerDialog.show();
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

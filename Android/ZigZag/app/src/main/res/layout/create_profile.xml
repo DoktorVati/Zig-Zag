@@ -56,7 +56,7 @@
         android:layout_marginStart="20dp"
 
         android:paddingStart="12dp"
-        android:layout_marginTop="70dp"/>
+        android:layout_marginTop="20dp"/>
 
     <EditText
         android:id="@+id/userName"
@@ -192,6 +192,43 @@
             android:textColorHint="@color/black"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/birthDateLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date of Birth"
+        android:layout_below="@id/phoneNumberLayout"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"/>
+
+    <EditText
+        android:id="@+id/birthDateInput"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/birthDateLabel"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:hint="Select your birth date"
+        android:focusable="false"
+        android:clickable="true"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
+
+<TextView
+    android:id="@+id/textInputError"
+    android:layout_width="match_parent"
+    android:layout_height="30dp"
+    android:layout_below="@id/birthDateInput"
+    android:visibility="gone"
+    android:textSize="16dp"
+    android:gravity="center"
+    android:textColor="@color/red"
+    android:layout_margin="10dp"
+    android:text="One or more Inputs are invalid"
+    />
 
 
     <TextView
@@ -205,9 +242,6 @@
         android:visibility="gone"
         android:text="Enter the code we sent to (Phone #)."
         />
-
-
-
 
 
     <EditText
@@ -259,7 +293,7 @@
         android:id="@+id/create_profile_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/phoneNumberLayout"
+        android:layout_below="@+id/birthDateInput"
         android:textSize="25dp"
         android:gravity="center"
         android:layout_centerHorizontal="true"
