@@ -599,6 +599,10 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
+        newMessageGroup.setOnClickListener(v -> {
+           Log.d("Comments", "Comments Clicked");
+           fetchComments(id);
+        });
 
         // Create a RelativeLayout for the message content
         RelativeLayout relativeLayout = new RelativeLayout(this);
@@ -672,18 +676,18 @@ public class MainActivity extends AppCompatActivity {
             postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    //    if(my_user_id.equals(authorID)) {
-                    if (item.getItemId() == R.id.item_delete) {
-                        try {
-                            deletePost(id);
-                        } catch (IOException e) {
-                            Log.e("Delete", "Failed to delete");
+                    if(my_user_id.equals(authorID)) {
+                        if (item.getItemId() == R.id.item_delete) {
+                            try {
+                                deletePost(id);
+                            } catch (IOException e) {
+                                Log.e("Delete", "Failed to delete");
+                            }
+                            return true;
                         }
-                        return true;
+                        return false;
                     }
                     return false;
-                    //    }
-                    //    return false;
                 }
             });
             postOptions.show();
@@ -779,7 +783,9 @@ public class MainActivity extends AppCompatActivity {
         messageContainer.addView(newMessageGroup);
     }
 
-
+    private void updateUIWithComments(String text){
+        Log.d("Comments", "We made it to the end");
+    }
 
 
     // Fetches posts based on distance
@@ -811,7 +817,59 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    private void fetchComments(int postId){
 
+        String opUrl = "https://api.zigzag.madebysaul.com/posts/" + postId + "?";
+        String url = "https://api.zigzag.madebysaul.com/posts/" + postId + "/comments";
+        Log.d("FetchComments", "Request opURL" + opUrl);
+        Log.d("FetchComments", "Request URL: " + url);
+
+        //Fetch original post
+        new Thread(() -> {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(opUrl)
+                    .build();
+
+
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String jsonResponse = response.body().string();
+                    handlePostsResponse(jsonResponse);
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "No response body";
+                    Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
+                }
+            } catch (IOException e) {
+                Log.e("MainActivity", "Network error fetching posts: " + e.getMessage(), e);
+            } catch (Exception e) {
+                Log.e("MainActivity", "Exception fetching posts: " + e.getMessage(), e);
+            }
+        }).start();
+
+        //Fetch comments
+        new Thread(() -> {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String jsonResponse = response.body().string();
+                    handleCommentsResponse(jsonResponse);
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "No response body";
+                    Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
+                }
+            } catch (IOException e) {
+                Log.e("MainActivity", "Network error fetching posts: " + e.getMessage(), e);
+            } catch (Exception e) {
+                Log.e("MainActivity", "Exception fetching posts: " + e.getMessage(), e);
+            }
+        }).start();
+    }
 
 
     private void handlePostsResponse(String jsonResponse) {
@@ -870,6 +928,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void handleCommentsResponse(String jsonResponse){
+        runOnUiThread(() -> {
+            try {
+                Log.d("handleCommentsResponse", "Comments received");
+                JSONArray postsArray = new JSONArray(jsonResponse);
+                Log.d("This is the", jsonResponse);
+                messageContainer.removeAllViews(); // Clear previous posts
+
+
+                for (int i = 0; i < postsArray.length(); i++) {
+                    JSONObject post = postsArray.getJSONObject(i);
+
+                    String text = post.getString("text"); // Get the post text
+
+                    // Update the UI with the post, formatted time, and distance
+                    updateUIWithComments(text);
+                }
+            } catch (JSONException e) {
+                Log.e("MainActivity", "JSON Parsing Error: ", e);
+            } catch (NumberFormatException e) {
+                Log.e("MainActivity", "Distance conversion error: ", e);
+            } catch (Exception e) {
+                Log.e("MainActivity", "General error: ", e);
+            }
+        });
+
+    }
 
     private void deletePost(int id) throws IOException{
 
