@@ -1,5 +1,5 @@
 const sequelize = require("../config/database");
-const { Post, Hashtag } = require("../models");
+const { Post, Hashtag, Comment } = require("../models");
 const Sequelize = require("sequelize");
 
 function extractHashtags(content) {
@@ -44,11 +44,17 @@ async function getPost(id, latitude, longitude) {
             ),
             "distance",
           ],
+          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
         ],
       },
+      include: [{
+        model: Comment,
+        attributes: []
+      }],
       replacements: {
         coordinates: `POINT(${longitude} ${latitude})`,
       },
+      group: ['Post.id']
     });
 
     return formatPost(post);
@@ -81,6 +87,10 @@ async function getPostsByHashtag(
           },
           attributes: [],
         },
+        {
+          model: Comment,
+          attributes: []
+        }
       ],
       where: {
         [Sequelize.Op.or]: [
@@ -102,6 +112,7 @@ async function getPostsByHashtag(
             ),
             "distance",
           ],
+          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
         ],
       },
       replacements: {
@@ -111,6 +122,7 @@ async function getPostsByHashtag(
         ["created_at", "DESC"],
         [Sequelize.literal("distance"), "ASC"],
       ],
+      group: ['Post.id']
     });
 
     const formattedPosts = posts.map(formatPost);
@@ -136,6 +148,10 @@ async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
           { expiryDate: null },
         ],
       },
+      include: [{
+        model: Comment,
+        attributes: []
+      }],
       attributes: {
         include: [
           [
@@ -145,6 +161,7 @@ async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
               Sequelize.literal(`ST_GeomFromText(:coordinates)`)
             ),
             "distance",
+            [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
           ],
         ],
       },
@@ -155,6 +172,7 @@ async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
         ["created_at", "DESC"],
         [Sequelize.literal("distance"), sortOrder],
       ],
+      group: ['Post.id']
     });
     const formattedPosts = posts.map(formatPost);
     return formattedPosts;
@@ -180,7 +198,7 @@ async function getPostsWithinDistance(
     const posts = await Post.findAll({
       where: {
         [Sequelize.Op.and]: [
-          // Get all posts that are within the distance provided and have an expiryDate greater than the currentDate.
+          // Filter for posts within the specified distance and valid expiry dates
           Sequelize.where(
             Sequelize.fn(
               "ST_DistanceSphere",
@@ -191,11 +209,7 @@ async function getPostsWithinDistance(
           ),
           {
             [Sequelize.Op.or]: [
-              {
-                expiryDate: {
-                  [Sequelize.Op.gt]: currentDate,
-                },
-              },
+              { expiryDate: { [Sequelize.Op.gt]: currentDate } },
               { expiryDate: null },
             ],
           },
@@ -204,6 +218,12 @@ async function getPostsWithinDistance(
       replacements: {
         coordinates: `POINT(${longitude} ${latitude})`,
       },
+      include: [
+        {
+          model: Comment,
+          attributes: [], // We don’t need individual comment details, just the count
+        },
+      ],
       attributes: {
         include: [
           [
@@ -214,8 +234,10 @@ async function getPostsWithinDistance(
             ),
             "distance",
           ],
+          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount'],
         ],
       },
+      group: ['Post.id'],
       order: [
         ["created_at", "DESC"],
         [Sequelize.literal("distance"), sortOrder],
