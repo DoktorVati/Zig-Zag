@@ -189,7 +189,36 @@ class APIManager {
             }
         }.resume()
     }
+    
+    func fetchPostComments(postId: Int, completion: @escaping (Result<[Comment], Error>) -> Void) {
+        guard let url = URL(string: "\(baseURL)/posts/\(postId)/comments") else {
+            print("Invalid URL")
+            return
+            
+        }
+        
+        session.dataTask(with: url) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                let error = NSError(domain: "", code: 500, userInfo: [NSLocalizedDescriptionKey: "No data received"])
+                completion(.failure(error))
+                return
+            }
+            
+            do {
+                let comments = try JSONDecoder().decode([Comment].self, from: data)
+                completion(.success(comments))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
 }
+
 
 enum Distance: String {
     case local = "80"

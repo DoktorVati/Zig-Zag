@@ -44,15 +44,16 @@ struct PostView: View {
             }
             .padding(.vertical, 4)
             
-            HStack {
-                Text("32😭") // Placeholder for reactions, could be dynamic later
-                Text("16🔥") // Placeholder for reactions, could be dynamic later
-                Spacer()
-                // Display post location or some other data
-                Text(post.location.distanceString)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
+            // Removed as we won't be doing reactions anymore - Saul Almanzar
+//            HStack {
+//                Text("32😭") // Placeholder for reactions, could be dynamic later
+//                Text("16🔥") // Placeholder for reactions, could be dynamic later
+//                Spacer()
+//                // Display post location or some other data
+//                Text(post.location.distanceString)
+//                    .font(.caption)
+//                    .foregroundColor(.gray)
+//            }
         }
     }
     
