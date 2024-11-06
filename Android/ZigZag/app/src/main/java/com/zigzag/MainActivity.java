@@ -57,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Comment;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -87,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private ImageButton profileButton;
+    private LinearLayout OPContainer;
+    private LinearLayout CommentsContainer;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
     private String UserId;
 
@@ -395,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
                     Log.d("FetchPosts", "Received response: " + jsonResponse);
-                    handlePostsResponse(jsonResponse);
+                    handlePostsResponse(jsonResponse, messageContainer);
                 } else {
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message());
                 }
@@ -494,7 +497,7 @@ public class MainActivity extends AppCompatActivity {
             if (!userInput.isEmpty()) {
                 addNewPost(userInput, expiryDate);
                 dialog.dismiss();
-                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId); // Ensure UserId is initialized
+                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer); // Ensure UserId is initialized
             } else {
                 Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
             }
@@ -513,7 +516,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showCommentsDialog() {
+    private void showCommentsDialog(int id) {
         // Create a full-screen dialog
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -523,9 +526,23 @@ public class MainActivity extends AppCompatActivity {
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        OPContainer = dialog.findViewById((R.id.OPContainer));
+        CommentsContainer = dialog.findViewById((R.id.Comments));
         ImageButton cancelButton = dialog.findViewById(R.id.cancelButton);
+        EditText inputReply = dialog.findViewById(R.id.CommentText);
+        Button replyButton = dialog.findViewById((R.id.PostComment));
 
         cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        replyButton.setOnClickListener(v -> {
+            String userInput = inputReply.getText().toString().trim();
+
+            if (!userInput.isEmpty()) {
+                addNewComment(userInput, id);
+            } else {
+                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Show the dialog
         try {
@@ -536,18 +553,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
-
-
-
     // This adds the post to the API
     private void addNewPost(String text, String expiryDate) {
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
-
-
-
-
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
                 text, UserId, expiryDate, lastLatitude, lastLongitude);
 
@@ -603,8 +611,50 @@ public class MainActivity extends AppCompatActivity {
         //updateUIWithPost(text,"Just Now");
     }
 
+    private void addNewComment(String text, int id) {
+        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\"}", text, UserId);
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID) {
+
+        // This line below shows the posted zig immediately
+        //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
+
+
+        new Thread(() -> {
+            try {
+                URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + id + "/comments");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setDoOutput(true);
+
+                try (OutputStream os = connection.getOutputStream()) {
+                    byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    runOnUiThread(() -> {
+
+
+                        Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    //runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+
+
+        //Refresh posts
+        fetchComments(id, lastLatitude, lastLongitude);
+    }
+
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -616,7 +666,7 @@ public class MainActivity extends AppCompatActivity {
 
         newMessageGroup.setOnClickListener(v -> {
            Log.d("Comments", "Comments Clicked");
-           showCommentsDialog();
+           showCommentsDialog(id);
            fetchComments(id, lastLatitude, lastLongitude);
         });
 
@@ -796,10 +846,46 @@ public class MainActivity extends AppCompatActivity {
 
 
         // and add the new message group to the container
-        messageContainer.addView(newMessageGroup);
+        layout.addView(newMessageGroup);
     }
 
     private void updateUIWithComments(String text){
+    // Create a new message group layout
+        LinearLayout newMessageGroup = new LinearLayout(this);
+        LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        messageGroupLayoutParams.setMargins(10, 0, 10, 30);
+        newMessageGroup.setLayoutParams(messageGroupLayoutParams);
+        newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
+
+        // Create a RelativeLayout for the message content
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        // Create TextView for the post content
+        TextView postTextView = new TextView(this);
+        SpannableString spannableString = new SpannableString(text);
+        postTextView.setText(spannableString);
+        postTextView.setTextSize(20);
+        postTextView.setMovementMethod(LinkMovementMethod.getInstance()); // Enable links
+        RelativeLayout.LayoutParams postParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        postParams.setMargins(0, 20, 33, 0);
+        postTextView.setLayoutParams(postParams);
+
+
+        relativeLayout.addView(postTextView);
+
+        // Add the RelativeLayout to the new message group
+        newMessageGroup.addView(relativeLayout);
+
+
+        // and add the new message group to the container
+        CommentsContainer.addView(newMessageGroup);
         Log.d("Comments", "We made it to the end");
     }
 
@@ -820,7 +906,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
-                    handlePostsResponse(jsonResponse);
+                    handlePostsResponse(jsonResponse, messageContainer);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
@@ -839,6 +925,8 @@ public class MainActivity extends AppCompatActivity {
         String url = "https://api.zigzag.madebysaul.com/posts/" + postId + "/comments";
         Log.d("FetchComments", "Request opURL: " + opUrl);
         Log.d("FetchComments", "Request URL: " + url);
+        OPContainer.removeAllViews();
+        CommentsContainer.removeAllViews();
 
         //Fetch original post
         new Thread(() -> {
@@ -851,7 +939,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = "[" + response.body().string() + "]";
-                    handlePostsResponse(jsonResponse);
+                    handlePostsResponse(jsonResponse, OPContainer);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
@@ -888,13 +976,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void handlePostsResponse(String jsonResponse) {
+    private void handlePostsResponse(String jsonResponse, LinearLayout layout) {
         runOnUiThread(() -> {
             try {
                 Log.d("handlePostsResponse", "Response received");
                 JSONArray postsArray = new JSONArray(jsonResponse);
                 Log.d("This is the", jsonResponse);
-                messageContainer.removeAllViews(); // Clear previous posts
+                layout.removeAllViews(); // Clear previous posts
 
 
                 for (int i = 0; i < postsArray.length(); i++) {
@@ -932,7 +1020,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
