@@ -62,7 +62,6 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Comment;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -155,9 +154,9 @@ public class MainActivity extends AppCompatActivity {
             closeKeyboard();
 
 
-            int distance = 820;
+            int distance = 5000;
             if (lastZoomLevel == 18) {
-                distance = 100;
+                distance = 800;
             }
             else if (lastZoomLevel == 12) {
 
@@ -168,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             }
-            else distance = 820;
+            else distance = 5000;
 
 
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
@@ -289,9 +288,9 @@ public class MainActivity extends AppCompatActivity {
     private void zoomIn() {
 
 
-        zoomLevel = 18; // Closer zoom
+        zoomLevel = 15; // Closer zoom
         //fetchPosts(lastLatitude, lastLongitude, 100);
-        checkAndFetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 800); // Distance is in meters
 
 
         getUserLocation(); // Refresh location to update the map
@@ -299,15 +298,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void showNearby() {
-        zoomLevel = 15; // Default nearby zoom
+        zoomLevel = 13; // Default nearby zoom
         //fetchPosts(lastLatitude, lastLongitude, 820);
-        checkAndFetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 5000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
 
     private void zoomToUserArea() {
-        zoomLevel = 12; // User area zoom
+        zoomLevel = 11; // User area zoom
         //fetchPosts(lastLatitude, lastLongitude, 40000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
 
@@ -317,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void zoomOut() {
-        zoomLevel = 8; // Further zoom out
+        zoomLevel = 7; // Further zoom out
         //fetchPosts(lastLatitude, lastLongitude, 800000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
 
@@ -605,14 +604,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh posts
-        int distance = 100;
-        if (lastZoomLevel == 15) {
-            distance = 820;
-        } else if (lastZoomLevel == 12) {
+        int distance = 800;
+        if (lastZoomLevel == 13) {
+            distance = 5000;
+        } else if (lastZoomLevel == 11) {
             distance = 40000;
-        } else if (lastZoomLevel == 8) {
+        } else if (lastZoomLevel == 7) {
             distance = 800000;
-        } else distance = 100;
+        } else distance = 800;
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         //updateUIWithPost(text,"Just Now");
     }
@@ -671,9 +670,9 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
         newMessageGroup.setOnClickListener(v -> {
-           Log.d("Comments", "Comments Clicked");
-           showCommentsDialog(id);
-           fetchComments(id, lastLatitude, lastLongitude);
+            Log.d("Comments", "Comments Clicked");
+            showCommentsDialog(id);
+            fetchComments(id, lastLatitude, lastLongitude);
         });
 
         // Create a RelativeLayout for the message content
@@ -790,17 +789,17 @@ public class MainActivity extends AppCompatActivity {
                     // Determine the distance based on the last zoom level
                     int distance;
                     switch (lastZoomLevel) {
-                        case 18:
-                            distance = 100;
+                        case 15:
+                            distance = 800;
                             break;
-                        case 12:
+                        case 11:
                             distance = 40000;
                             break;
-                        case 8:
+                        case 7:
                             distance = 800000;
                             break;
                         default:
-                            distance = 820;
+                            distance = 5000;
                             break;
                     }
                     Log.d("it has been called", "onClick: fetched hashtag posts");
@@ -856,7 +855,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUIWithComments(String text){
-    // Create a new message group layout
+        // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1100,14 +1099,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh the posts
-        int distance = 100;
-        if (lastZoomLevel == 15) {
-            distance = 820;
-        } else if (lastZoomLevel == 12) {
+        int distance = 800;
+        if (lastZoomLevel == 13) {
+            distance = 5000;
+        } else if (lastZoomLevel == 11) {
             distance = 40000;
-        } else if (lastZoomLevel == 8) {
+        } else if (lastZoomLevel == 7) {
             distance = 800000;
-        } else distance = 100;
+        } else distance = 800;
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
@@ -1416,13 +1415,8 @@ public class MainActivity extends AppCompatActivity {
                 // If the deletion is successful, show a success message
                 Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_SHORT).show();
 
-
-
-
-
                 // Sign the user out after successful deletion
                 FirebaseAuth.getInstance().signOut();
-
 
                 // Navigate to the login screen or exit the app
                 startActivity(new Intent(this, ProfileLogin.class));
@@ -1435,19 +1429,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
-
-
-
     // Updated loadInputValues method to accept TextViews as parameters
     private void loadInputValues(TextView emailTextView, TextView phoneTextView) {
         SharedPreferences prefs = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
         String email = prefs.getString(KEY_EMAIL, "Email not available");
 
-        if (email == "Email not available")
+        if (prefs.getString(KEY_EMAIL, "Email not available") == "Email not available")
         {
             SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             String emails = prefs2.getString(KEY_EMAIL, "Email not available");
