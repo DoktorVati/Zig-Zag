@@ -33,7 +33,15 @@ class APIManager {
         let updatedAt: String
         let location: CreatedLocation
     }
-    
+//    
+//    struct CreatedComment: Codable {
+//        let id: Int
+//        let postId: Int
+//        let authorId: String
+//        let updatedAt: String
+//        let createdAt: String
+//    }
+//    
     struct CreatedLocation: Codable {
         let latitude: Double
         let longitude: Double
@@ -216,6 +224,56 @@ class APIManager {
                 completion(.failure(error))
             }
         }.resume()
+    }
+    
+    func createComment(postId: Int, text: String, author: String, completion: @escaping (Result<Comment, Error>) -> Void) {
+        
+        // Prepare the URL
+        guard let url = URL(string: "https://api.zigzag.madebysaul.com/posts/\(postId)/comments") else {
+            print("Invalid URL")
+            return
+        }
+        
+        // Create the Comment object
+        let comment:  [String: Any] =
+        [
+            "text": text,
+            "author": author,
+        ]
+        
+        // Encode the Comment object to JSON using JSONSerialization
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: comment, options: []) else {
+            print("Error encoding post data")
+            return
+        }
+        
+        // Configure the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+        
+        // Send the request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                print("No data in response")
+                return
+            }
+            
+            do {
+                let createdComment = try JSONDecoder().decode(Comment.self, from: data)
+                completion(.success(createdComment))
+            } catch let decodingError {
+                completion(.failure(decodingError))
+            }
+        }
+        
+        task.resume()
     }
 }
 
