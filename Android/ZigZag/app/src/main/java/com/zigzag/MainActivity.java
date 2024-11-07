@@ -1469,26 +1469,30 @@ public class MainActivity extends AppCompatActivity {
 
     // Updated loadInputValues method to accept TextViews as parameters
     private void loadInputValues(TextView emailTextView, TextView phoneTextView) {
+        // First preference: ProfileCreationPrefs
         SharedPreferences prefs = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
-        String email = prefs.getString(KEY_EMAIL, "Email not available");
+        String email = prefs.getString(KEY_EMAIL, null); // Use null as a fallback value if not found
+        String phoneNumber = prefs.getString(KEY_PHONE_NUMBER, null); // Use null as fallback
 
-        if (prefs.getString(KEY_EMAIL, "Email not available") == "Email not available")
-        {
+        // If no email found in the first preference, check the second one
+        if (email == null || email.equals("Email not available")) {
             SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String emails = prefs2.getString(KEY_EMAIL, "Email not available");
-            emailTextView.setText("Email:    " + emails);
-
+            email = prefs2.getString(KEY_EMAIL, "Email not available");
         }
-        else
-        {
-            emailTextView.setText("Email:    " + email);
 
+        // Set email value in TextView
+        emailTextView.setText("Email:    " + email);
+
+        // If no phone number found in the first preference, check the second one
+        if (phoneNumber == null || phoneNumber.equals("Phone number not available")) {
+            SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            phoneNumber = prefs2.getString(KEY_PHONE_NUMBER, "Phone number not available");
         }
-        SharedPreferences prefs2 = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
-        String phoneNumber = prefs2.getString(KEY_PHONE_NUMBER, "Phone number not available");
 
+        // Set phone number value in TextView
         phoneTextView.setText("Phone Number:     " + phoneNumber);
     }
+
 
 
 
