@@ -116,10 +116,10 @@
         <ImageButton
             android:id="@+id/sortingButton"
             android:src="@drawable/baseline_filter_list_24"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:scaleType="fitXY"
-            android:background="@color/invisible"
+            android:background="@color/transparentGrey"
             android:layout_gravity="bottom|center_horizontal"
             />
 
