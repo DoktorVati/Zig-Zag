@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private ImageButton profileButton;
+    private ImageButton sortingButton;
     private LinearLayout OPContainer;
     private LinearLayout CommentsContainer;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
@@ -130,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
         messageContainer = findViewById(R.id.messageContainer);
         button = findViewById(R.id.button);
         profileButton = findViewById(R.id.profileButton);
+
+        sortingButton = findViewById(R.id.sortingButton);
 
         headerTextView = findViewById(R.id.headerTextView);
         headerTextView.setText(DEFAULT_TAG);
@@ -234,7 +237,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        // Sorting button
+        sortingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){showSortingDialog();}
+        });
 
     }
 
@@ -1485,5 +1492,51 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private void showSortingDialog() {
+        // Create an array with the options
+        final String[] options = {"Recent", "Close", "Hot"};
+
+        // Create an AlertDialog.Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Sort Posts") // Title of the dialog
+                .setItems(options, (dialog, which) -> {
+                    // Check which option was selected
+                    switch (which) {
+                        case 0:
+                            showRecent(); // Call method for "Show Recent"
+                            break;
+                        case 1:
+                            showClose(); // Call method for "Show Close"
+                            break;
+                        case 2:
+                            showHot(); // Call method for "Show Hot"
+                            break;
+                        default:
+                            break;
+                    }
+                })
+                .setCancelable(true); // Allows the dialog to be canceled by clicking outside
+
+        // Show the dialog
+        builder.create().show();
+    }
+
+    // Method for "Show Recent"
+    private void showRecent() {
+        // Implement the logic for showing recent posts
+        Log.d("Sorting", "Showing Recent Posts");
+    }
+
+    // Method for "Show Close"
+    private void showClose() {
+        // Implement the logic for showing close posts
+        Log.d("Sorting", "Showing Close Posts");
+    }
+
+    // Method for "Show Hot"
+    private void showHot() {
+        // Implement the logic for showing hot posts
+        Log.d("Sorting", "Showing Hot Posts");
+    }
 
 }
