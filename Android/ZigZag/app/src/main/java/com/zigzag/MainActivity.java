@@ -497,12 +497,12 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-
+            String commentCount = "0";
             String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
             if (!userInput.isEmpty()) {
                 addNewPost(userInput, expiryDate);
                 dialog.dismiss();
-                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer); // Ensure UserId is initialized
+                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount); // Ensure UserId is initialized
             } else {
                 Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
             }
@@ -659,7 +659,7 @@ public class MainActivity extends AppCompatActivity {
         fetchComments(id, lastLatitude, lastLongitude);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout, String commentAmount) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -837,6 +837,35 @@ public class MainActivity extends AppCompatActivity {
         postDistanceView.setLayoutParams(distanceParams);
 
 
+
+
+        // Create an imageview for the comment icon
+        ImageView commentIcon = new ImageView(this);
+        commentIcon.setImageResource(R.drawable.baseline_comment_24);
+        commentIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        commentIcon.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams imageParamsComment = new RelativeLayout.LayoutParams(
+                58, 58);
+        imageParamsComment.addRule(RelativeLayout.BELOW, postTextView.getId());
+        imageParamsComment.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        imageParamsComment.setMargins(0, 180, 0, 0);
+        commentIcon.setLayoutParams(imageParamsComment);
+
+        // Create TextView for the post's comments
+        TextView commentTextView = new TextView(this);
+        commentTextView.setTextColor(getResources().getColor(R.color.timeText));
+        commentTextView.setText(commentAmount);
+        commentTextView.setTextSize(14);
+        commentTextView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams commentTextParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        commentTextParams.addRule(RelativeLayout.BELOW, postTextView.getId());
+        commentTextParams.addRule(RelativeLayout.ALIGN_RIGHT, commentIcon.getId());
+        commentTextParams.setMargins(0, 180, -35, 0);
+        commentTextView.setLayoutParams(commentTextParams);
+
+
         // Add views to the RelativeLayout
         relativeLayout.addView(timeTextView);
         relativeLayout.addView(moreButton);
@@ -844,6 +873,8 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(backwardTimeImageView);
         relativeLayout.addView(postTextView);
         relativeLayout.addView(postDistanceView);
+        relativeLayout.addView(commentIcon);
+        relativeLayout.addView(commentTextView);
 
 
         // Add the RelativeLayout to the new message group
@@ -1022,10 +1053,10 @@ public class MainActivity extends AppCompatActivity {
 
 
                     String expiryDate = post.getString("expiryDate");
-
+                    String commentCount = post.getString("commentCount");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout, commentCount);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
