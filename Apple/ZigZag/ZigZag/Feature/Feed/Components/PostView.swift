@@ -96,7 +96,7 @@ struct PostView: View {
 #Preview {
     // Example post data
 
-    let samplePost = Post(id: 12, authorId: "Test Author", text: "This room gets #hot as #hell This room gets #hot as #hell", expiryDate: Date().addingTimeInterval(3600).ISO8601Format(), createdAt: Date().addingTimeInterval(-3600).ISO8601Format(), updatedAt: "33", location: Location(longitude: 34, latitude: 43, distance: 23, commentCount: 10))
+    let samplePost = Post(id: 12, authorId: "Test Author", text: "This room gets #hot as #hell This room gets #hot as #hell", expiryDate: Date().addingTimeInterval(3600).ISO8601Format(), createdAt: Date().addingTimeInterval(-3600).ISO8601Format(), updatedAt: "33", location: Location(longitude: 34, latitude: 43, distance: 23), commentCount: 13)
 
     
     List {
