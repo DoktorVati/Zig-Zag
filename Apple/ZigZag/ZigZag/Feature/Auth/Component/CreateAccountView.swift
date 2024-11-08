@@ -11,6 +11,9 @@ struct CreateAccountView: View {
     @EnvironmentObject var viewModel: AuthenticationViewModel
     @EnvironmentObject var navigationManager: AuthNavigationManager
     
+    
+    @FocusState private var isTextFieldFocused: Bool
+    
     @State private var dateOfBirth = Date() // Default to current date
     
     var body: some View {
@@ -32,7 +35,7 @@ struct CreateAccountView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                        )
+                        ).focused($isTextFieldFocused)
                         .onChange(of: viewModel.username, perform: { _ in viewModel.validateUsername() })
                     if let error = viewModel.usernameError {
                         Text(error)
@@ -55,6 +58,7 @@ struct CreateAccountView: View {
                         )
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
+                        .focused($isTextFieldFocused)
                         .onChange(of: viewModel.email, perform: { _ in viewModel.validateEmail() })
                     if let error = viewModel.emailError {
                         Text(error)
@@ -70,8 +74,9 @@ struct CreateAccountView: View {
                     HStack {
                         if viewModel.isPasswordVisible {
                             TextField("Enter your password", text: $viewModel.password)
+                                .focused($isTextFieldFocused)
                         } else {
-                            SecureField("Enter your password", text: $viewModel.password)
+                            SecureField("Enter your password", text: $viewModel.password).focused($isTextFieldFocused)
                         }
                         Button(action: {
                             viewModel.togglePasswordVisibility()
@@ -108,6 +113,7 @@ struct CreateAccountView: View {
                                 .stroke(Color.gray.opacity(0.5), lineWidth: 1)
                         )
                         .keyboardType(.phonePad)
+                        .focused($isTextFieldFocused)
                         .onChange(of: viewModel.phoneNumber, perform: { _ in viewModel.validatePhoneNumber() })
                     if let error = viewModel.phoneNumberError {
                         Text(error)
@@ -176,9 +182,12 @@ struct CreateAccountView: View {
                 
                 Spacer()
             }
+            
             .padding()
             .navigationBarBackButtonHidden(true)
             .environmentObject(navigationManager)
+        }.onTapGesture {
+            isTextFieldFocused = false;
         }
     }
 }
