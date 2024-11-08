@@ -50,7 +50,7 @@ class CreatePostViewModel: ObservableObject {
                 lat: location.coordinate.latitude,
                 long: location.coordinate.longitude,
                 text: text,
-                author: "Daniel",
+                author: FirebaseManager.shared.uid ?? "",
                 expiryDate: selectedExpiryDate
             ) {post in
                 print("Post Created: \(post)")
