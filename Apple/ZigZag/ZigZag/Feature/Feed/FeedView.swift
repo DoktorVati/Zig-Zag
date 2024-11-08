@@ -36,9 +36,14 @@ struct FeedView: View {
                     VStack {
                         List(viewModel.posts) { post in
                             Section {
-                                PostView(post: post) {
+
+                                NavigationLink(destination: PostDetailView(post: post)) {
+                                    PostView(post: post) {
                                     viewModel.fetchPosts()
+
                                 }
+                                }
+                                    
                             }
                         }
                         .refreshable {

@@ -16,6 +16,7 @@ struct Post: Codable, Identifiable {
     let createdAt: String
     let updatedAt: String
     let location: Location
+    let commentCount: Int
     
     var tags: [String] {
         return extractTags(from: text)

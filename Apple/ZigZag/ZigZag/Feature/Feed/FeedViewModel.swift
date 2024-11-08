@@ -63,6 +63,8 @@ class FeedViewModel: ObservableObject {
                 self.isLoading = false
                 switch result {
                 case .success(let fetchedPosts):
+                    print("Successfully fetched posts")
+                    
                     self.posts = fetchedPosts
                 case .failure(let error):
                     print("Error fetching posts: \(error.localizedDescription)")
