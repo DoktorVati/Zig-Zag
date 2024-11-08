@@ -9,8 +9,11 @@ import SwiftUI
 
 struct PostView: View {
     @EnvironmentObject var navigationManager: NavigationManager
-
+    
     let post: Post  // Accept a Post object
+    
+    var refreshAction: (() -> Void)?
+    
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -23,8 +26,37 @@ struct PostView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                 Spacer()
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.gray)
+                
+                
+                Menu {
+                    
+                    if let userId = FirebaseManager.shared.uid, userId == post.authorId {
+                        Button {
+                            APIManager.shared.deletePost(postId: post.id) { _ in
+                            }
+                            refreshAction?()
+                        } label: {
+                            Label("Delete", systemImage: "trash.fill")
+                                .foregroundStyle(.red)
+                            
+                        }
+                    }
+                    
+                    Button {
+                        //TODO: report posts
+                        refreshAction?()
+                    } label: {
+                        Label("Report", systemImage: "megaphone.fill")
+                    }
+                    
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(.gray)
+                        .padding(20) // Adds padding to increase tappable area
+                        .contentShape(Rectangle()) // Expands the tappable area without resizing the view
+                        .frame(width: 20, height: 20, alignment: .center) // Keeps the icon itself small
+                }
+                
             }
             
             // Post text with clickable hashtags using WrappedHStack
@@ -45,8 +77,8 @@ struct PostView: View {
             .padding(.vertical, 4)
             
             HStack {
-//                Text("32😭") // Placeholder for reactions, could be dynamic later
-//                Text("16🔥") // Placeholder for reactions, could be dynamic later
+                //                Text("32😭") // Placeholder for reactions, could be dynamic later
+                //                Text("16🔥") // Placeholder for reactions, could be dynamic later
                 Spacer()
                 // Display post location or some other data
                 Text(post.location.distanceString)
