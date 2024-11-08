@@ -10,6 +10,8 @@ import SwiftUI
 struct SignInView: View {
     @StateObject var viewModel = AuthenticationViewModel()
     @StateObject var navigationManager = AuthNavigationManager()
+    
+    @FocusState private var isTextFieldFocused: Bool
 
     var body: some View {
         NavigationStack(path: $navigationManager.path) {
@@ -32,6 +34,7 @@ struct SignInView: View {
                     )
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
+                    .focused($isTextFieldFocused)
                 
                 // Password Field with Show Toggle
                 Text("Password")
@@ -39,8 +42,10 @@ struct SignInView: View {
                 HStack {
                     if viewModel.isPasswordVisible {
                         TextField("Enter your password", text: $viewModel.password)
+                            .focused($isTextFieldFocused)
                     } else {
                         SecureField("Enter your password", text: $viewModel.password)
+                            .focused($isTextFieldFocused)
                     }
                     Button(action: {
                         viewModel.togglePasswordVisibility()
@@ -102,6 +107,9 @@ struct SignInView: View {
             }
         
             }
+        .onTapGesture {
+            isTextFieldFocused = false;
+        }
         .environmentObject(navigationManager)
         .environmentObject(viewModel)
         }
