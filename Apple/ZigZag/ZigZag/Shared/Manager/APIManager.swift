@@ -57,13 +57,17 @@ class APIManager {
         }
         
         // Create the Post object
-        let post:  [String: Any] =
+        var post:  [String: Any] =
         [
             "text": text,
             "author": author,
             "postLatitude": lat,
-            "postLongitude": long
+            "postLongitude": long,
         ]
+        
+        if let expiryDate = expiryDate {
+            post["expiryDate"] = expiryDate
+        }
         
         // Encode the Post object to JSON using JSONSerialization
         guard let jsonData = try? JSONSerialization.data(withJSONObject: post, options: []) else {

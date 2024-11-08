@@ -12,6 +12,7 @@ struct CreatePostView: View {
     @StateObject var viewModel = CreatePostViewModel()
     
     @EnvironmentObject var navigationManager: NavigationManager
+    @EnvironmentObject var auth: FirebaseManager
     
     @State private var postText: String = ""
     @State private var timerSet = false
@@ -51,33 +52,54 @@ struct CreatePostView: View {
                     Spacer()
                 }
                 
+                ExpiryDateButtonsView()
+                
                 Spacer()
-                
-                // POST Button
-                Button(action: {
-                    guard let location = LocationManager.shared.location else { return }
-                    if !postText.isEmpty {
-                        APIManager.shared.createPost(lat: location.coordinate.latitude, long: location.coordinate.longitude, text: postText, author: "Daniel", completion: {_ in print("Post Created")})
-                    }
-                    navigationManager.navigateBackToRoot()
-                }) {
-                    Text("POST")
-                        .font(.title2)
-                        .bold()
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-                
             }
+            .environmentObject(viewModel)
             .padding(.horizontal)
-            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing){
+                    Button(action: {
+                        viewModel.createPost(text: postText)
+                        navigationManager.navigateBackToRoot()
+                    }) {
+                        Text("POST")
+                            //.font(.title2)
+                            .bold()
+                            .frame(maxWidth: .infinity)
+                            .padding(4)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                }
+            }
+//            .navigationBarBackButtonHidden(true)
+        
+        // POST Button
+        ZStack(alignment: .bottom){
+            Button(action: {
+                viewModel.createPost(text: postText)
+                navigationManager.navigateBackToRoot()
+            }) {
+                Text("POST")
+                    .font(.title2)
+                    .bold()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+        }
     }
 }
 
 #Preview {
-    CreatePostView()
+    NavigationStack {
+        CreatePostView()
+            .environmentObject(CreatePostViewModel())
+    }
 }

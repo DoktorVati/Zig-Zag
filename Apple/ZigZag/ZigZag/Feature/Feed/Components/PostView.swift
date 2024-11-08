@@ -9,22 +9,54 @@ import SwiftUI
 
 struct PostView: View {
     @EnvironmentObject var navigationManager: NavigationManager
-
+    
     let post: Post  // Accept a Post object
+    
+    var refreshAction: (() -> Void)?
+    
     
     var body: some View {
         VStack(alignment: .leading) {
             HStack(spacing: 4) {
                 // Simulate time since post creation
-                Text("1 HOUR AGO ⏲️")  // You can add a real-time formatter here later
+                Text("\(post.timeSinceCreated) ⏲️")  // You can add a real-time formatter here later
                     .font(.caption)
                     .foregroundColor(.gray)
-                Text("21 HOURS")
+                Text(post.timeUntilExpires)
                     .font(.caption)
                     .foregroundColor(.gray)
                 Spacer()
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.gray)
+                
+                
+                Menu {
+                    
+                    if let userId = FirebaseManager.shared.uid, userId == post.authorId {
+                        Button {
+                            APIManager.shared.deletePost(postId: post.id) { _ in
+                            }
+                            refreshAction?()
+                        } label: {
+                            Label("Delete", systemImage: "trash.fill")
+                                .foregroundStyle(.red)
+                            
+                        }
+                    }
+                    
+                    Button {
+                        //TODO: report posts
+                        refreshAction?()
+                    } label: {
+                        Label("Report", systemImage: "megaphone.fill")
+                    }
+                    
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(.gray)
+                        .padding(20) // Adds padding to increase tappable area
+                        .contentShape(Rectangle()) // Expands the tappable area without resizing the view
+                        .frame(width: 20, height: 20, alignment: .center) // Keeps the icon itself small
+                }
+                
             }
             
             // Post text with clickable hashtags using WrappedHStack
@@ -63,7 +95,9 @@ struct PostView: View {
 
 #Preview {
     // Example post data
-    let samplePost = Post(id: 12, authorId: "Test Author", text: "This room gets #hot as #hell This room gets #hot as #hell", expiryDate: "1-1-2", createdAt: "23:00", updatedAt: "33", location: Location(longitude: 34, latitude: 43, distance: 23), commentCount: 10)
+
+    let samplePost = Post(id: 12, authorId: "Test Author", text: "This room gets #hot as #hell This room gets #hot as #hell", expiryDate: Date().addingTimeInterval(3600).ISO8601Format(), createdAt: Date().addingTimeInterval(-3600).ISO8601Format(), updatedAt: "33", location: Location(longitude: 34, latitude: 43, distance: 23, commentCount: 10))
+
     
     List {
         Section {

@@ -26,6 +26,33 @@ struct Post: Codable, Identifiable {
         return extractWords()
     }
     
+    var timeSinceCreated: String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        let currentDate = Date()
+        
+        guard let timeInterval = formatter.date(from: createdAt)?.timeIntervalSince(currentDate) else {
+            return "Invalid created date"
+        }
+            
+        // Convert the time interval to hours, minutes, or days
+        let hours = abs(timeInterval / 3600)
+        let minutes = abs((timeInterval.truncatingRemainder(dividingBy: 3600)) / 60)
+        let days = abs(timeInterval / (3600 * 24))
+        
+        // Return a human-readable string based on the time left
+        if days >= 1 {
+            return "\(Int(days)) day(s) ago"
+        } else if hours >= 1 {
+            return "\(Int(hours)) hour(s) ago"
+        } else if minutes >= 5 {
+            return "\(Int(minutes)) minute(s) ago"
+        } else {
+            return "now"
+        }
+    }
+    
     // Time until the post expires
     var timeUntilExpires: String {
         guard let expiryDate = expiryDate else {
@@ -34,6 +61,7 @@ struct Post: Codable, Identifiable {
         
         // Create an ISO8601 Date Formatter
         let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         // Convert the expiryDate string to a Date object
         guard let expiryDateAsDate = formatter.date(from: expiryDate) else {
