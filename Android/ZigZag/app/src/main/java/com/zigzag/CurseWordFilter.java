@@ -24,7 +24,7 @@ public class CurseWordFilter {
 
         try {
             // Get the AssetManager using the provided context
-            AssetManager assetManager = context.getAssets();  // Now we have the context to access assets
+            AssetManager assetManager = context.getAssets();
 
             // Open the CSV file
             BufferedReader reader = new BufferedReader(
@@ -40,7 +40,7 @@ public class CurseWordFilter {
                     continue;
                 }
 
-                // Split the line by commas (assuming CSV format without quotes around values)
+                // Split the line by commas
                 String[] columns = line.split(",");
 
                 if (columns.length > 0) {

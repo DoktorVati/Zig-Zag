@@ -3,7 +3,6 @@ package com.zigzag;
 
 import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
 import static com.zigzag.ProfileLogin.KEY_EMAIL;
-import static com.zigzag.ProfileLogin.PREFS_NAME;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout mapImage;
     private EditText headerTextView;
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
-
+    private String orderBy = "&orderBy=";
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
@@ -158,22 +157,7 @@ public class MainActivity extends AppCompatActivity {
             closeKeyboard();
 
 
-            int distance = 5000;
-            if (lastZoomLevel == 18) {
-                distance = 800;
-            }
-            else if (lastZoomLevel == 12) {
-
-
-                distance = 40000;
-            } else if (lastZoomLevel == 8) {
-                distance = 800000;
-
-
-            }
-            else distance = 5000;
-
-
+            int distance = getDistanceBasedOnZoom();
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
@@ -394,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
-        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
+        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag + orderBy;
 
 
         Log.d("FetchPosts", "Request URL: " + url);
@@ -626,14 +610,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh posts
-        int distance = 5000;
-        if (lastZoomLevel == 15) {
-            distance = 800;
-        } else if (lastZoomLevel == 11) {
-            distance = 40000;
-        } else if (lastZoomLevel == 7) {
-            distance = 800000;
-        } else distance = 5000;
+        int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         //updateUIWithPost(text,"Just Now");
     }
@@ -808,23 +785,7 @@ public class MainActivity extends AppCompatActivity {
                     headerTextView.setText(hashtag); // Ensure headerTextView is defined
 
 
-                    // Determine the distance based on the last zoom level
-                    int distance;
-                    switch (lastZoomLevel) {
-                        case 15:
-                            distance = 800;
-                            break;
-                        case 11:
-                            distance = 40000;
-                            break;
-                        case 7:
-                            distance = 800000;
-                            break;
-                        default:
-                            distance = 5000;
-                            break;
-                    }
-                    Log.d("it has been called", "onClick: fetched hashtag posts");
+                    int distance = getDistanceBasedOnZoom();
                     // Fetch posts with the selected hashtag
                     checkAndFetchPosts(lastLatitude, lastLongitude, distance);
                 }
@@ -950,7 +911,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Fetches posts based on distance
     private void fetchPosts(double latitude, double longitude, int distance) {
-        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
+        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + orderBy;
         Log.d("FetchPosts", "Request URL: " + url + " latitude: " + latitude + " longitude: " + longitude + " distance: " + distance);
 
 
@@ -1152,14 +1113,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh the posts
-        int distance = 800;
-        if (lastZoomLevel == 13) {
-            distance = 5000;
-        } else if (lastZoomLevel == 11) {
-            distance = 40000;
-        } else if (lastZoomLevel == 7) {
-            distance = 800000;
-        } else distance = 800;
+        int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
@@ -1510,29 +1464,46 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private static final String PREFS_NAME = "SortPrefs";  // SharedPreferences name
+    private static final String KEY_LAST_SORTED = "last_sorted";  // Key to store the last selected option
 
+    // Method to show the sorting dialog
     private void showSortingDialog() {
         // Create an array with the options
         final String[] options = {"Recent", "Close", "Hot"};
 
+        // Get the last sorted option from SharedPreferences, default to "Recent"
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String lastSorted = prefs.getString(KEY_LAST_SORTED, "Recent");
+
+        // Find the index of the last selected option
+        int selectedOptionIndex = getOptionIndex(lastSorted, options);
+
         // Create an AlertDialog.Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Sort Posts") // Title of the dialog
-                .setItems(options, (dialog, which) -> {
-                    // Check which option was selected
+                .setSingleChoiceItems(options, selectedOptionIndex, (dialog, which) -> {
                     switch (which) {
                         case 0:
-                            showRecent(); // Call method for "Show Recent"
+                            showRecent();
                             break;
                         case 1:
-                            showClose(); // Call method for "Show Close"
+                            showClose();
                             break;
                         case 2:
-                            showHot(); // Call method for "Show Hot"
+                            showHot();
                             break;
                         default:
                             break;
                     }
+
+                    // Save the selected option in SharedPreferences
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(KEY_LAST_SORTED, options[which]);
+                    editor.apply();
+
+                    // Dismiss the dialog after selection
+                    dialog.dismiss();
                 })
                 .setCancelable(true); // Allows the dialog to be canceled by clicking outside
 
@@ -1540,22 +1511,52 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
+    // Helper method to get the index of the selected option
+    private int getOptionIndex(String lastSorted, String[] options) {
+        for (int i = 0; i < options.length; i++) {
+            if (options[i].equals(lastSorted)) {
+                return i;  // Return the index of the selected option
+            }
+        }
+        return 0;  // Default to "Recent" if no match
+    }
+
     // Method for "Show Recent"
     private void showRecent() {
-        // Implement the logic for showing recent posts
-        Log.d("Sorting", "Showing Recent Posts");
+        int distance = getDistanceBasedOnZoom();
+        orderBy = "&orderBy=";
+        fetchPosts(lastLatitude, lastLongitude, distance);
     }
 
     // Method for "Show Close"
     private void showClose() {
-        // Implement the logic for showing close posts
-        Log.d("Sorting", "Showing Close Posts");
+        int distance = getDistanceBasedOnZoom();
+        orderBy = "&orderBy=CLOSEST";
+        fetchPosts(lastLatitude, lastLongitude, distance);
     }
 
     // Method for "Show Hot"
     private void showHot() {
-        // Implement the logic for showing hot posts
-        Log.d("Sorting", "Showing Hot Posts");
+        int distance = getDistanceBasedOnZoom();
+        orderBy = "&orderBy=HOT";
+        fetchPosts(lastLatitude, lastLongitude, distance);
     }
+
+    // Helper method to calculate distance based on zoom level
+    private int getDistanceBasedOnZoom() {
+        int distance = 5000;  // Default distance
+
+        if (lastZoomLevel == 18) {
+            distance = 800;
+        } else if (lastZoomLevel == 12) {
+            distance = 40000;
+        } else if (lastZoomLevel == 8) {
+            distance = 800000;
+        }
+
+        return distance;
+    }
+
+
 
 }

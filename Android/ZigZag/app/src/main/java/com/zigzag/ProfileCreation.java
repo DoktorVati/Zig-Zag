@@ -217,6 +217,14 @@ public class ProfileCreation extends AppCompatActivity {
             textInputError.setVisibility(View.GONE);
         }
 
+        // Validate the password
+        if (!isPasswordValid(password.getText().toString())) {
+            textInputError.setText("Password must be at least 8 characters, contain upper and lower case letters, digits, and special characters.");
+            textInputError.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            textInputError.setVisibility(View.GONE);  // Hide the error message
+        }
         // Save the email and phone number before sending the verification code
         saveInputValues();
 
@@ -244,6 +252,12 @@ public class ProfileCreation extends AppCompatActivity {
                 })
                 .build();
         PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    private boolean isPasswordValid(String password) {
+        // Ensure the password is at least 8 characters and contains uppercase, lowercase, digits, and special characters
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$";
+        return password.matches(passwordRegex);
     }
 
     private boolean isAgeValid(String birthDate) {
