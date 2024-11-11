@@ -3,10 +3,13 @@ package com.zigzag;
 
 import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
 import static com.zigzag.ProfileLogin.KEY_EMAIL;
+
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -48,12 +51,10 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -546,6 +547,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (!userInput.isEmpty()) {
                 addNewComment(userInput, id);
+                inputReply.setText("");
             } else {
                 Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
             }
@@ -1334,51 +1336,109 @@ public class MainActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_show_profile);
 
+
         // Set the dialog to full-screen
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+
         // Initialize views
         TextView emailTextView = dialog.findViewById(R.id.emailTextView);
         TextView phoneTextView = dialog.findViewById(R.id.phoneTextView);
+        LinearLayout signOut = dialog.findViewById(R.id.SignOutLayout);
+        LinearLayout deleteAccountLayout = dialog.findViewById(R.id.DeleteAccountLayout);
         ImageButton closeButton = dialog.findViewById(R.id.closeButton);
 
-        // Assume we have a method to get current user's ID
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // Retrieve user details from Firebase
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("ProfileDialog", "DataSnapshot: " + dataSnapshot.toString());
+        // Load email and phone number from SharedPreferences
+        loadInputValues(emailTextView, phoneTextView);
 
-                if (dataSnapshot.exists()) {
-                    String email = dataSnapshot.child("email").getValue(String.class);
-                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
 
-                    // Handle null values
-                    if (email == null) {
-                        email = "Email not available";
-                    }
-                    if (phoneNumber == null) {
-                        phoneNumber = "Phone number not available";
-                    }
+        // Set button listener to close the dialog
+        closeButton.setOnClickListener(v -> dialog.dismiss());
 
-                    // Set email and phone number
-                    emailTextView.setText(email);
-                    phoneTextView.setText(phoneNumber);
 
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        // Handle click for deleting account
+        deleteAccountLayout.setOnClickListener(v -> {
+            // Show confirmation dialog for account deletion
+            showDeleteConfirmationDialog(currentUser);
+        });
+
+
+        // Sign out functionality
+        signOut.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.clear();
+            editor.apply();
+            startActivity(new Intent(this, ProfileLogin.class));
+            finish();
+        });
+
+
+        // Show the dialog
+        try {
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    private void showDeleteConfirmationDialog(FirebaseUser currentUser) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account?")
+                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                    // Proceed with account deletion
+                    deleteAccount(currentUser);
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+
+    private void deleteAccount(FirebaseUser currentUser) {
+        // Re-authenticate the user before deleting the account
+        reAuthenticateUser(currentUser);
+    }
+
+
+    private void reAuthenticateUser(FirebaseUser currentUser) {
+        // Get email from the current user
+        String email = currentUser.getEmail();
+
+
+        // Retrieve the password from SharedPreferences (replace "user_prefs" with your SharedPreferences file name)
+        SharedPreferences sharedPreferences = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
+        String storedPassword = sharedPreferences.getString("password", null);
+
+
+        // Check if email and password exist
+        if (email != null && storedPassword != null && !storedPassword.isEmpty()) {
+            // Create the AuthCredential using the email and password
+            AuthCredential credential = EmailAuthProvider.getCredential(email, storedPassword);
+
+
+            // Re-authenticate the user with the email and password
+            currentUser.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
+                if (reAuthTask.isSuccessful()) {
+                    // Now that the user is re-authenticated, proceed to delete the account
+                    deleteUserFromAuth(currentUser);
                 } else {
-                    Toast.makeText(getApplicationContext(), "User details not found", Toast.LENGTH_SHORT).show();
+                    // If re-authentication fails, notify the user
+                    Toast.makeText(this, "Re-authentication failed. Please log in again.", Toast.LENGTH_SHORT).show();
                 }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Error retrieving user data", Toast.LENGTH_SHORT).show();
-
             });
         } else {
             // If no email or password is found, prompt the user to log in again
@@ -1387,12 +1447,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     private void deleteUserFromAuth(FirebaseUser currentUser) {
         //clear all saved info about user
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();  // Clear all preferences
         editor.apply();  // Apply changes to SharedPreferences
+
 
         SharedPreferences sharedPreferences2 = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
         SharedPreferences.Editor editor2 = sharedPreferences2.edit();
@@ -1404,8 +1467,10 @@ public class MainActivity extends AppCompatActivity {
                 // If the deletion is successful, show a success message
                 Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_SHORT).show();
 
+
                 // Sign the user out after successful deletion
                 FirebaseAuth.getInstance().signOut();
+
 
                 // Navigate to the login screen or exit the app
                 startActivity(new Intent(this, ProfileLogin.class));
@@ -1413,48 +1478,44 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // If deleting the Firebase Authentication user fails
                 Toast.makeText(this, "Failed to delete account from Authentication. Please try again later.", Toast.LENGTH_SHORT).show();
-
             }
         });
+    }
 
-
-
-        // Set button listener to close the dialog
-        closeButton.setOnClickListener(v -> dialog.dismiss());
-
-        // Show the dialog
-        try {
-            dialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-
-    // Updated loadInputValues method to accept TextViews as parameters
     private void loadInputValues(TextView emailTextView, TextView phoneTextView) {
-        // First preference: ProfileCreationPrefs
+        // First, check ProfileCreationPrefs for the email and phone number
         SharedPreferences prefs = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
-        String email = prefs.getString(KEY_EMAIL, null); // Use null as a fallback value if not found
-        String phoneNumber = prefs.getString(KEY_PHONE_NUMBER, null); // Use null as fallback
+        String email = prefs.getString(KEY_EMAIL, null);
+        String phoneNumber = prefs.getString(KEY_PHONE_NUMBER, null);
 
-        // If no email found in the first preference, check the second one
+        // If email is not found, check MyPrefs for key_email
         if (email == null || email.equals("Email not available")) {
-            SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            email = prefs2.getString(KEY_EMAIL, "Email not available");
+            SharedPreferences myPrefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            email = myPrefs.getString("key_email", null);  // Check MyPrefs for key_email
         }
 
-        // Set email value in TextView
-        emailTextView.setText("Email:    " + email);
-
-        // If no phone number found in the first preference, check the second one
+        // If phone number is not found, check ProfileCreationPrefs again
         if (phoneNumber == null || phoneNumber.equals("Phone number not available")) {
             SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             phoneNumber = prefs2.getString(KEY_PHONE_NUMBER, "Phone number not available");
         }
 
-        // Set phone number value in TextView
-        phoneTextView.setText("Phone Number:     " + phoneNumber);
+        // Set the email value in the TextView
+        if (email != null && !email.equals("Email not available")) {
+            emailTextView.setText("Email: " + email);
+        } else {
+            emailTextView.setText("Email not available");
+        }
+
+        // Set the phone number value in the TextView
+        if (phoneNumber != null && !phoneNumber.equals("Phone number not available")) {
+            phoneTextView.setText("Phone Number: " + phoneNumber);
+        } else {
+            phoneTextView.setText("Phone number not available");
+        }
     }
+
+
 
 
 
@@ -1519,14 +1580,14 @@ public class MainActivity extends AppCompatActivity {
     private void showRecent() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=";
-        fetchPosts(lastLatitude, lastLongitude, distance);
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
     // Method for "Show Close"
     private void showClose() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=CLOSEST";
-        fetchPosts(lastLatitude, lastLongitude, distance);
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
 
     }
 
@@ -1534,7 +1595,7 @@ public class MainActivity extends AppCompatActivity {
     private void showHot() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=HOT";
-        fetchPosts(lastLatitude, lastLongitude, distance);
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
     // Helper method to calculate distance based on zoom level
