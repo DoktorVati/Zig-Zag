@@ -71,6 +71,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -471,11 +472,9 @@ public class MainActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_create_post);
 
-
         // Set the dialog to full-screen
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
 
         // Initialize views
         EditText inputPost = dialog.findViewById(R.id.inputPost);
@@ -484,20 +483,31 @@ public class MainActivity extends AppCompatActivity {
         Button postButton = dialog.findViewById(R.id.postButton);
         ImageButton cancelButton = dialog.findViewById(R.id.cancelButton);
 
+        // Create a CurseWordFilter instance with the Activity context
+        CurseWordFilter filter = new CurseWordFilter(this);
+        List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
         // Set up the dropdown menu
         String[] types = new String[]{"minutes", "hours", "days"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
 
-
         // Set button listeners
         postButton.setOnClickListener(v -> {
             String userInput = inputPost.getText().toString().trim();
             int duration;
 
+            // Clean the input text by replacing any swear words
+            userInput = filter.cleanInput(userInput, curseWords);
+
+            // If the user input is empty after cleaning, show a toast message
+            if (userInput.isEmpty()) {
+                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             try {
+                // Parse the duration from the EditText field
                 duration = Integer.parseInt(durationStr.getText().toString().trim());
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
@@ -506,27 +516,24 @@ public class MainActivity extends AppCompatActivity {
 
             String commentCount = "0";
             String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
-            if (!userInput.isEmpty()) {
-                addNewPost(userInput, expiryDate);
-                dialog.dismiss();
-                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount); // Ensure UserId is initialized
-            } else {
-                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
-            }
+
+            // Proceed with the post if input is valid
+            addNewPost(userInput, expiryDate);
+            dialog.dismiss();
+            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount);
         });
 
-
         cancelButton.setOnClickListener(v -> dialog.dismiss());
-
 
         // Show the dialog
         try {
             dialog.show();
         } catch (Exception e) {
-            e.printStackTrace(); // Log the exception for debugging
+            e.printStackTrace();  // Log the exception for debugging
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void showCommentsDialog(int id) {
         // Create a full-screen dialog
@@ -544,10 +551,17 @@ public class MainActivity extends AppCompatActivity {
         EditText inputReply = dialog.findViewById(R.id.CommentText);
         Button replyButton = dialog.findViewById((R.id.PostComment));
 
+        // Create a CurseWordFilter instance with the Activity context
+        CurseWordFilter filter = new CurseWordFilter(this);
+        List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         replyButton.setOnClickListener(v -> {
             String userInput = inputReply.getText().toString().trim();
+
+            // Clean the input text by replacing any swear words
+            userInput = filter.cleanInput(userInput, curseWords);
 
             if (!userInput.isEmpty()) {
                 addNewComment(userInput, id);
@@ -564,6 +578,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // This adds the post to the API
     private void addNewPost(String text, String expiryDate) {
@@ -611,14 +626,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh posts
-        int distance = 800;
-        if (lastZoomLevel == 13) {
-            distance = 5000;
+        int distance = 5000;
+        if (lastZoomLevel == 15) {
+            distance = 800;
         } else if (lastZoomLevel == 11) {
             distance = 40000;
         } else if (lastZoomLevel == 7) {
             distance = 800000;
-        } else distance = 800;
+        } else distance = 5000;
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         //updateUIWithPost(text,"Just Now");
     }
