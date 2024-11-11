@@ -12,6 +12,7 @@ struct CreatePostView: View {
     @StateObject var viewModel = CreatePostViewModel()
     
     @EnvironmentObject var navigationManager: NavigationManager
+    @EnvironmentObject var auth: FirebaseManager
     
     @State private var postText: String = ""
     @State private var timerSet = false
