@@ -3,13 +3,10 @@ package com.zigzag;
 
 import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
 import static com.zigzag.ProfileLogin.KEY_EMAIL;
-
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -51,11 +48,12 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -125,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         UserId = intent.getStringExtra("USER_ID");
         my_user_id = UserId;
-        FirebaseApp.initializeApp(this);
 
 
         messageContainer = findViewById(R.id.messageContainer);
@@ -742,7 +739,10 @@ public class MainActivity extends AppCompatActivity {
         // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
             PopupMenu postOptions = new PopupMenu(this, v);
-            postOptions.getMenuInflater().inflate(R.menu.menu_post_options, postOptions.getMenu());
+            if(my_user_id.equals(authorID))
+                postOptions.getMenuInflater().inflate(R.menu.menu_post_options_author, postOptions.getMenu());
+            else
+                postOptions.getMenuInflater().inflate(R.menu.menu_post_options, postOptions.getMenu());
             postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -756,8 +756,13 @@ public class MainActivity extends AppCompatActivity {
                             return true;
                         }
                         return false;
+                    } else {
+                        if(item.getItemId() == R.id.item_report){
+                            Toast.makeText(MainActivity.this, "Post Reported! Wee will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                        return false;
                     }
-                    return false;
                 }
             });
             postOptions.show();
@@ -868,8 +873,10 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(newMessageGroup);
     }
 
-    private void updateUIWithComments(String text){
-        // Create a new message group layout
+
+    private void updateUIWithComments(String text, String currentTime){
+    // Create a new message group layout
+
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -896,8 +903,22 @@ public class MainActivity extends AppCompatActivity {
         postParams.setMargins(0, 20, 33, 0);
         postTextView.setLayoutParams(postParams);
 
+        // Create TextView for the current time
+        TextView timeTextView = new TextView(this);
+        timeTextView.setTextColor(getResources().getColor(R.color.timeText));
+        timeTextView.setText(currentTime);
+        timeTextView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams timeParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        timeParams.addRule(RelativeLayout.BELOW, postTextView.getId());
+        postParams.setMargins(0, 25, 0, 0);
+        timeTextView.setLayoutParams(timeParams);
 
         relativeLayout.addView(postTextView);
+        relativeLayout.addView(timeTextView);
 
         // Add the RelativeLayout to the new message group
         newMessageGroup.addView(relativeLayout);
@@ -1062,9 +1083,13 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject post = postsArray.getJSONObject(i);
 
                     String text = post.getString("text"); // Get the post text
+                    String createdAt = post.getString("createdAt"); // Get the createdAt time
+
+                    String formattedTime = formatTime(createdAt);
+
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithComments(text);
+                    updateUIWithComments(text, formattedTime);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -1158,7 +1183,7 @@ public class MainActivity extends AppCompatActivity {
             if (diffInMinutes < 1) {
                 return "Just now";
             } else if (diffInMinutes < 60) {
-                return diffInMinutes + " minute" + (diffInMinutes > 1 ? "s" : "") + " ago";
+                return diffInMinutes + " min ago";
             } else if (diffInHours < 24) {
                 return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " ago";
             } else {
@@ -1276,7 +1301,7 @@ public class MainActivity extends AppCompatActivity {
             if (diffInMinutes < 1) {
                 return "About to go";
             } else if (diffInMinutes < 60) {
-                return diffInMinutes + " minute" + (diffInMinutes > 1 ? "s" : "") + " left";
+                return diffInMinutes + " min left";
             } else if (diffInHours < 24) {
                 return diffInHours + " hour" + (diffInHours > 1 ? "s" : "") + " left";
             } else {
@@ -1316,87 +1341,44 @@ public class MainActivity extends AppCompatActivity {
         // Initialize views
         TextView emailTextView = dialog.findViewById(R.id.emailTextView);
         TextView phoneTextView = dialog.findViewById(R.id.phoneTextView);
-        LinearLayout signOut = dialog.findViewById(R.id.SignOutLayout);
-        LinearLayout deleteAccountLayout = dialog.findViewById(R.id.DeleteAccountLayout);
         ImageButton closeButton = dialog.findViewById(R.id.closeButton);
 
-        // Load email and phone number from SharedPreferences
-        loadInputValues(emailTextView, phoneTextView);
+        // Assume we have a method to get current user's ID
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // Set button listener to close the dialog
-        closeButton.setOnClickListener(v -> dialog.dismiss());
+        // Retrieve user details from Firebase
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("ProfileDialog", "DataSnapshot: " + dataSnapshot.toString());
 
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
-            return;
-        }
+                if (dataSnapshot.exists()) {
+                    String email = dataSnapshot.child("email").getValue(String.class);
+                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
 
-        // Handle click for deleting account
-        deleteAccountLayout.setOnClickListener(v -> {
-            // Show confirmation dialog for account deletion
-            showDeleteConfirmationDialog(currentUser);
-        });
+                    // Handle null values
+                    if (email == null) {
+                        email = "Email not available";
+                    }
+                    if (phoneNumber == null) {
+                        phoneNumber = "Phone number not available";
+                    }
 
-        // Sign out functionality
-        signOut.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.clear();
-            editor.apply();
-            startActivity(new Intent(this, ProfileLogin.class));
-            finish();
-        });
+                    // Set email and phone number
+                    emailTextView.setText(email);
+                    phoneTextView.setText(phoneNumber);
 
-        // Show the dialog
-        try {
-            dialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void showDeleteConfirmationDialog(FirebaseUser currentUser) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Account")
-                .setMessage("Are you sure you want to delete your account?")
-                .setPositiveButton("Yes", (dialogInterface, i) -> {
-                    // Proceed with account deletion
-                    deleteAccount(currentUser);
-                })
-                .setNegativeButton("No", null)
-                .show();
-    }
-
-    private void deleteAccount(FirebaseUser currentUser) {
-        // Re-authenticate the user before deleting the account
-        reAuthenticateUser(currentUser);
-    }
-
-    private void reAuthenticateUser(FirebaseUser currentUser) {
-        // Get email from the current user
-        String email = currentUser.getEmail();
-
-        // Retrieve the password from SharedPreferences (replace "user_prefs" with your SharedPreferences file name)
-        SharedPreferences sharedPreferences = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
-        String storedPassword = sharedPreferences.getString("password", null);
-
-        // Check if email and password exist
-        if (email != null && storedPassword != null && !storedPassword.isEmpty()) {
-            // Create the AuthCredential using the email and password
-            AuthCredential credential = EmailAuthProvider.getCredential(email, storedPassword);
-
-            // Re-authenticate the user with the email and password
-            currentUser.reauthenticate(credential).addOnCompleteListener(reAuthTask -> {
-                if (reAuthTask.isSuccessful()) {
-                    // Now that the user is re-authenticated, proceed to delete the account
-                    deleteUserFromAuth(currentUser);
                 } else {
-                    // If re-authentication fails, notify the user
-                    Toast.makeText(this, "Re-authentication failed. Please log in again.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "User details not found", Toast.LENGTH_SHORT).show();
                 }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Error retrieving user data", Toast.LENGTH_SHORT).show();
+
             });
         } else {
             // If no email or password is found, prompt the user to log in again
@@ -1431,10 +1413,22 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // If deleting the Firebase Authentication user fails
                 Toast.makeText(this, "Failed to delete account from Authentication. Please try again later.", Toast.LENGTH_SHORT).show();
+
             }
         });
-    }
 
+
+
+        // Set button listener to close the dialog
+        closeButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Show the dialog
+        try {
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 
     // Updated loadInputValues method to accept TextViews as parameters
     private void loadInputValues(TextView emailTextView, TextView phoneTextView) {
@@ -1533,6 +1527,7 @@ public class MainActivity extends AppCompatActivity {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=CLOSEST";
         fetchPosts(lastLatitude, lastLongitude, distance);
+
     }
 
     // Method for "Show Hot"
