@@ -849,7 +849,7 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(newMessageGroup);
     }
 
-    private void updateUIWithComments(String text){
+    private void updateUIWithComments(String text, String currentTime){
     // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -877,8 +877,22 @@ public class MainActivity extends AppCompatActivity {
         postParams.setMargins(0, 20, 33, 0);
         postTextView.setLayoutParams(postParams);
 
+        // Create TextView for the current time
+        TextView timeTextView = new TextView(this);
+        timeTextView.setTextColor(getResources().getColor(R.color.timeText));
+        timeTextView.setText(currentTime);
+        timeTextView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams timeParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        timeParams.addRule(RelativeLayout.BELOW, postTextView.getId());
+        postParams.setMargins(0, 25, 0, 0);
+        timeTextView.setLayoutParams(timeParams);
 
         relativeLayout.addView(postTextView);
+        relativeLayout.addView(timeTextView);
 
         // Add the RelativeLayout to the new message group
         newMessageGroup.addView(relativeLayout);
@@ -1043,9 +1057,13 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject post = postsArray.getJSONObject(i);
 
                     String text = post.getString("text"); // Get the post text
+                    String createdAt = post.getString("createdAt"); // Get the createdAt time
+
+                    String formattedTime = formatTime(createdAt);
+
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithComments(text);
+                    updateUIWithComments(text, formattedTime);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
