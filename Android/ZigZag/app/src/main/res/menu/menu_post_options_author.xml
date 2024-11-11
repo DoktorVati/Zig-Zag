@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item_report"
-        android:title="Report Post" />
+        android:id="@+id/item_delete"
+        android:title="Delete Post" />
 </menu>

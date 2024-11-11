@@ -738,7 +738,10 @@ public class MainActivity extends AppCompatActivity {
         // Set click listener for the more button
         moreButton.setOnClickListener(v -> {
             PopupMenu postOptions = new PopupMenu(this, v);
-            postOptions.getMenuInflater().inflate(R.menu.menu_post_options, postOptions.getMenu());
+            if(my_user_id.equals(authorID))
+                postOptions.getMenuInflater().inflate(R.menu.menu_post_options_author, postOptions.getMenu());
+            else
+                postOptions.getMenuInflater().inflate(R.menu.menu_post_options, postOptions.getMenu());
             postOptions.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -752,8 +755,13 @@ public class MainActivity extends AppCompatActivity {
                             return true;
                         }
                         return false;
+                    } else {
+                        if(item.getItemId() == R.id.item_report){
+                            Toast.makeText(MainActivity.this, "Post Reported! Wee will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                        return false;
                     }
-                    return false;
                 }
             });
             postOptions.show();
