@@ -3,7 +3,6 @@ package com.zigzag;
 
 import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
 import static com.zigzag.ProfileLogin.KEY_EMAIL;
-import static com.zigzag.ProfileLogin.PREFS_NAME;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -62,7 +61,6 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Comment;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -72,6 +70,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -86,13 +85,14 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout mapImage;
     private EditText headerTextView;
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
-
+    private String orderBy = "&orderBy=";
 
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private ImageButton profileButton;
+    private ImageButton sortingButton;
     private LinearLayout OPContainer;
     private LinearLayout CommentsContainer;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
@@ -132,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.button);
         profileButton = findViewById(R.id.profileButton);
 
+        sortingButton = findViewById(R.id.sortingButton);
+
         headerTextView = findViewById(R.id.headerTextView);
         headerTextView.setText(DEFAULT_TAG);
         TextView clearTagTextView = findViewById(R.id.clearTag);
@@ -155,22 +157,7 @@ public class MainActivity extends AppCompatActivity {
             closeKeyboard();
 
 
-            int distance = 820;
-            if (lastZoomLevel == 18) {
-                distance = 100;
-            }
-            else if (lastZoomLevel == 12) {
-
-
-                distance = 40000;
-            } else if (lastZoomLevel == 8) {
-                distance = 800000;
-
-
-            }
-            else distance = 820;
-
-
+            int distance = getDistanceBasedOnZoom();
             checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         });
 
@@ -235,7 +222,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        // Sorting button
+        sortingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){showSortingDialog();}
+        });
 
     }
 
@@ -289,9 +280,9 @@ public class MainActivity extends AppCompatActivity {
     private void zoomIn() {
 
 
-        zoomLevel = 18; // Closer zoom
+        zoomLevel = 15; // Closer zoom
         //fetchPosts(lastLatitude, lastLongitude, 100);
-        checkAndFetchPosts(lastLatitude, lastLongitude, 100); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 800); // Distance is in meters
 
 
         getUserLocation(); // Refresh location to update the map
@@ -299,15 +290,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void showNearby() {
-        zoomLevel = 15; // Default nearby zoom
+        zoomLevel = 13; // Default nearby zoom
         //fetchPosts(lastLatitude, lastLongitude, 820);
-        checkAndFetchPosts(lastLatitude, lastLongitude, 820); // Distance is in meters
+        checkAndFetchPosts(lastLatitude, lastLongitude, 5000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
 
 
     private void zoomToUserArea() {
-        zoomLevel = 12; // User area zoom
+        zoomLevel = 11; // User area zoom
         //fetchPosts(lastLatitude, lastLongitude, 40000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
 
@@ -317,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void zoomOut() {
-        zoomLevel = 8; // Further zoom out
+        zoomLevel = 7; // Further zoom out
         //fetchPosts(lastLatitude, lastLongitude, 800000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
 
@@ -387,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Fetch posts from backend
     private void fetchPostsWithHashtag(double latitude, double longitude, int distance, String hashtag) {
-        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag;
+        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + "&hashtag=" + hashtag + orderBy;
 
 
         Log.d("FetchPosts", "Request URL: " + url);
@@ -465,11 +456,9 @@ public class MainActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_create_post);
 
-
         // Set the dialog to full-screen
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
 
         // Initialize views
         EditText inputPost = dialog.findViewById(R.id.inputPost);
@@ -478,49 +467,57 @@ public class MainActivity extends AppCompatActivity {
         Button postButton = dialog.findViewById(R.id.postButton);
         ImageButton cancelButton = dialog.findViewById(R.id.cancelButton);
 
+        // Create a CurseWordFilter instance with the Activity context
+        CurseWordFilter filter = new CurseWordFilter(this);
+        List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
         // Set up the dropdown menu
         String[] types = new String[]{"minutes", "hours", "days"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
 
-
         // Set button listeners
         postButton.setOnClickListener(v -> {
             String userInput = inputPost.getText().toString().trim();
             int duration;
 
+            // Clean the input text by replacing any swear words
+            userInput = filter.cleanInput(userInput, curseWords);
+
+            // If the user input is empty after cleaning, show a toast message
+            if (userInput.isEmpty()) {
+                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             try {
+                // Parse the duration from the EditText field
                 duration = Integer.parseInt(durationStr.getText().toString().trim());
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-
+            String commentCount = "0";
             String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
-            if (!userInput.isEmpty()) {
-                addNewPost(userInput, expiryDate);
-                dialog.dismiss();
-                updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer); // Ensure UserId is initialized
-            } else {
-                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
-            }
+
+            // Proceed with the post if input is valid
+            addNewPost(userInput, expiryDate);
+            dialog.dismiss();
+            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount);
         });
 
-
         cancelButton.setOnClickListener(v -> dialog.dismiss());
-
 
         // Show the dialog
         try {
             dialog.show();
         } catch (Exception e) {
-            e.printStackTrace(); // Log the exception for debugging
+            e.printStackTrace();  // Log the exception for debugging
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void showCommentsDialog(int id) {
         // Create a full-screen dialog
@@ -538,10 +535,17 @@ public class MainActivity extends AppCompatActivity {
         EditText inputReply = dialog.findViewById(R.id.CommentText);
         Button replyButton = dialog.findViewById((R.id.PostComment));
 
+        // Create a CurseWordFilter instance with the Activity context
+        CurseWordFilter filter = new CurseWordFilter(this);
+        List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         replyButton.setOnClickListener(v -> {
             String userInput = inputReply.getText().toString().trim();
+
+            // Clean the input text by replacing any swear words
+            userInput = filter.cleanInput(userInput, curseWords);
 
             if (!userInput.isEmpty()) {
                 addNewComment(userInput, id);
@@ -558,6 +562,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // This adds the post to the API
     private void addNewPost(String text, String expiryDate) {
@@ -605,14 +610,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh posts
-        int distance = 100;
-        if (lastZoomLevel == 15) {
-            distance = 820;
-        } else if (lastZoomLevel == 12) {
-            distance = 40000;
-        } else if (lastZoomLevel == 8) {
-            distance = 800000;
-        } else distance = 100;
+        int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
         //updateUIWithPost(text,"Just Now");
     }
@@ -660,7 +658,7 @@ public class MainActivity extends AppCompatActivity {
         fetchComments(id, lastLatitude, lastLongitude);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout, String commentAmount) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -671,9 +669,9 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
         newMessageGroup.setOnClickListener(v -> {
-           Log.d("Comments", "Comments Clicked");
-           showCommentsDialog(id);
-           fetchComments(id, lastLatitude, lastLongitude);
+            Log.d("Comments", "Comments Clicked");
+            showCommentsDialog(id);
+            fetchComments(id, lastLatitude, lastLongitude);
         });
 
         // Create a RelativeLayout for the message content
@@ -787,23 +785,7 @@ public class MainActivity extends AppCompatActivity {
                     headerTextView.setText(hashtag); // Ensure headerTextView is defined
 
 
-                    // Determine the distance based on the last zoom level
-                    int distance;
-                    switch (lastZoomLevel) {
-                        case 18:
-                            distance = 100;
-                            break;
-                        case 12:
-                            distance = 40000;
-                            break;
-                        case 8:
-                            distance = 800000;
-                            break;
-                        default:
-                            distance = 820;
-                            break;
-                    }
-                    Log.d("it has been called", "onClick: fetched hashtag posts");
+                    int distance = getDistanceBasedOnZoom();
                     // Fetch posts with the selected hashtag
                     checkAndFetchPosts(lastLatitude, lastLongitude, distance);
                 }
@@ -838,6 +820,35 @@ public class MainActivity extends AppCompatActivity {
         postDistanceView.setLayoutParams(distanceParams);
 
 
+
+
+        // Create an imageview for the comment icon
+        ImageView commentIcon = new ImageView(this);
+        commentIcon.setImageResource(R.drawable.baseline_comment_24);
+        commentIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        commentIcon.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams imageParamsComment = new RelativeLayout.LayoutParams(
+                58, 58);
+        imageParamsComment.addRule(RelativeLayout.BELOW, postTextView.getId());
+        imageParamsComment.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        imageParamsComment.setMargins(0, 180, 0, 0);
+        commentIcon.setLayoutParams(imageParamsComment);
+
+        // Create TextView for the post's comments
+        TextView commentTextView = new TextView(this);
+        commentTextView.setTextColor(getResources().getColor(R.color.timeText));
+        commentTextView.setText(commentAmount);
+        commentTextView.setTextSize(14);
+        commentTextView.setId(View.generateViewId()); // Generate unique ID
+        RelativeLayout.LayoutParams commentTextParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        commentTextParams.addRule(RelativeLayout.BELOW, postTextView.getId());
+        commentTextParams.addRule(RelativeLayout.ALIGN_RIGHT, commentIcon.getId());
+        commentTextParams.setMargins(0, 180, -35, 0);
+        commentTextView.setLayoutParams(commentTextParams);
+
+
         // Add views to the RelativeLayout
         relativeLayout.addView(timeTextView);
         relativeLayout.addView(moreButton);
@@ -845,6 +856,8 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(backwardTimeImageView);
         relativeLayout.addView(postTextView);
         relativeLayout.addView(postDistanceView);
+        relativeLayout.addView(commentIcon);
+        relativeLayout.addView(commentTextView);
 
 
         // Add the RelativeLayout to the new message group
@@ -856,7 +869,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUIWithComments(String text){
-    // Create a new message group layout
+        // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -898,7 +911,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Fetches posts based on distance
     private void fetchPosts(double latitude, double longitude, int distance) {
-        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance;
+        String url = BASE_URL + "latitude=" + latitude + "&longitude=" + longitude + "&distance=" + distance + orderBy;
         Log.d("FetchPosts", "Request URL: " + url + " latitude: " + latitude + " longitude: " + longitude + " distance: " + distance);
 
 
@@ -1023,10 +1036,10 @@ public class MainActivity extends AppCompatActivity {
 
 
                     String expiryDate = post.getString("expiryDate");
-
+                    String commentCount = post.getString("commentCount");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout, commentCount);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -1100,14 +1113,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Refresh the posts
-        int distance = 100;
-        if (lastZoomLevel == 15) {
-            distance = 820;
-        } else if (lastZoomLevel == 12) {
-            distance = 40000;
-        } else if (lastZoomLevel == 8) {
-            distance = 800000;
-        } else distance = 100;
+        int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
@@ -1416,13 +1422,8 @@ public class MainActivity extends AppCompatActivity {
                 // If the deletion is successful, show a success message
                 Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_SHORT).show();
 
-
-
-
-
                 // Sign the user out after successful deletion
                 FirebaseAuth.getInstance().signOut();
-
 
                 // Navigate to the login screen or exit the app
                 startActivity(new Intent(this, ProfileLogin.class));
@@ -1435,36 +1436,126 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
-
-
-
     // Updated loadInputValues method to accept TextViews as parameters
     private void loadInputValues(TextView emailTextView, TextView phoneTextView) {
+        // First preference: ProfileCreationPrefs
         SharedPreferences prefs = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
-        String email = prefs.getString(KEY_EMAIL, "Email not available");
+        String email = prefs.getString(KEY_EMAIL, null); // Use null as a fallback value if not found
+        String phoneNumber = prefs.getString(KEY_PHONE_NUMBER, null); // Use null as fallback
 
-        if (email == "Email not available")
-        {
+        // If no email found in the first preference, check the second one
+        if (email == null || email.equals("Email not available")) {
             SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String emails = prefs2.getString(KEY_EMAIL, "Email not available");
-            emailTextView.setText("Email:    " + emails);
-
+            email = prefs2.getString(KEY_EMAIL, "Email not available");
         }
-        else
-        {
-            emailTextView.setText("Email:    " + email);
 
+        // Set email value in TextView
+        emailTextView.setText("Email:    " + email);
+
+        // If no phone number found in the first preference, check the second one
+        if (phoneNumber == null || phoneNumber.equals("Phone number not available")) {
+            SharedPreferences prefs2 = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            phoneNumber = prefs2.getString(KEY_PHONE_NUMBER, "Phone number not available");
         }
-        SharedPreferences prefs2 = getSharedPreferences("ProfileCreationPrefs", MODE_PRIVATE);
-        String phoneNumber = prefs2.getString(KEY_PHONE_NUMBER, "Phone number not available");
 
+        // Set phone number value in TextView
         phoneTextView.setText("Phone Number:     " + phoneNumber);
     }
 
+
+
+    private static final String PREFS_NAME = "SortPrefs";  // SharedPreferences name
+    private static final String KEY_LAST_SORTED = "last_sorted";  // Key to store the last selected option
+
+    // Method to show the sorting dialog
+    private void showSortingDialog() {
+        // Create an array with the options
+        final String[] options = {"Recent", "Close", "Hot"};
+
+        // Get the last sorted option from SharedPreferences, default to "Recent"
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String lastSorted = prefs.getString(KEY_LAST_SORTED, "Recent");
+
+        // Find the index of the last selected option
+        int selectedOptionIndex = getOptionIndex(lastSorted, options);
+
+        // Create an AlertDialog.Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Sort Posts") // Title of the dialog
+                .setSingleChoiceItems(options, selectedOptionIndex, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            showRecent();
+                            break;
+                        case 1:
+                            showClose();
+                            break;
+                        case 2:
+                            showHot();
+                            break;
+                        default:
+                            break;
+                    }
+
+                    // Save the selected option in SharedPreferences
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(KEY_LAST_SORTED, options[which]);
+                    editor.apply();
+
+                    // Dismiss the dialog after selection
+                    dialog.dismiss();
+                })
+                .setCancelable(true); // Allows the dialog to be canceled by clicking outside
+
+        // Show the dialog
+        builder.create().show();
+    }
+
+    // Helper method to get the index of the selected option
+    private int getOptionIndex(String lastSorted, String[] options) {
+        for (int i = 0; i < options.length; i++) {
+            if (options[i].equals(lastSorted)) {
+                return i;  // Return the index of the selected option
+            }
+        }
+        return 0;  // Default to "Recent" if no match
+    }
+
+    // Method for "Show Recent"
+    private void showRecent() {
+        int distance = getDistanceBasedOnZoom();
+        orderBy = "&orderBy=";
+        fetchPosts(lastLatitude, lastLongitude, distance);
+    }
+
+    // Method for "Show Close"
+    private void showClose() {
+        int distance = getDistanceBasedOnZoom();
+        orderBy = "&orderBy=CLOSEST";
+        fetchPosts(lastLatitude, lastLongitude, distance);
+    }
+
+    // Method for "Show Hot"
+    private void showHot() {
+        int distance = getDistanceBasedOnZoom();
+        orderBy = "&orderBy=HOT";
+        fetchPosts(lastLatitude, lastLongitude, distance);
+    }
+
+    // Helper method to calculate distance based on zoom level
+    private int getDistanceBasedOnZoom() {
+        int distance = 5000;  // Default distance
+
+        if (lastZoomLevel == 18) {
+            distance = 800;
+        } else if (lastZoomLevel == 12) {
+            distance = 40000;
+        } else if (lastZoomLevel == 8) {
+            distance = 800000;
+        }
+
+        return distance;
+    }
 
 
 

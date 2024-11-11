@@ -21,6 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Profile"
+        android:textColor="@color/black"
         android:textSize="40sp"
         android:gravity="center"
         android:layout_gravity="center"
@@ -31,7 +32,7 @@
         android:id="@+id/emailTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text = "Email: "
+        android:text = "Email:                              "
         android:layout_marginTop="60dp"
         android:textSize="20dp"
         android:textColor="@color/black"
@@ -42,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_height="wrap_content"
-        android:text = "Phone Number: "
+        android:text = "Phone Number:               "
         android:textSize="20dp"
         android:textColor="@color/black"
         />
@@ -57,26 +58,26 @@
         android:orientation="horizontal"
         android:layout_marginTop="100dp"
         android:padding="10dp"
-        android:background="@color/transparentGrey">
+        android:background="@color/transparentRed"
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/signOutIcon"
             android:layout_width="34dp"
             android:layout_height="34dp"
+            android:contentDescription="Sign Out Icon"
             android:scaleType="fitXY"
             android:src="@drawable/baseline_person_24"
-            android:contentDescription="Sign Out Icon"
             android:layout_marginEnd="8dp" />
 
         <TextView
             android:id="@+id/signOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
             android:text="Sign Out"
             android:textColor="@color/black"
-            android:textStyle="bold"
-          />
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Delete Account Section -->
@@ -88,15 +89,16 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="10dp"
-
-        android:layout_marginTop="150dp"
-        android:background="@color/transparentGrey">
+        android:layout_marginTop="50dp"
+        android:background="@color/invisible"
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/deleteAccountIcon"
             android:layout_width="34dp"
             android:layout_height="34dp"
             android:scaleType="fitXY"
+
             android:src="@drawable/baseline_delete_forever_24"
             android:contentDescription="Delete Account Icon"
             android:layout_marginEnd="8dp" />
@@ -105,10 +107,11 @@
             android:id="@+id/deleteAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:text="Delete Account (Warning! This action is permanent)"
+            android:text="Delete Account"
+            android:textColor="@color/red"
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
+
 
 </LinearLayout>

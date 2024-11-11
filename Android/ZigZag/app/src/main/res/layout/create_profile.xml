@@ -45,43 +45,16 @@
         android:textStyle="bold"
         />
 
-    <TextView
-        android:id="@+id/usernameLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Username"
-        android:layout_below="@+id/title"
-        android:textSize="18sp"
-        android:textColor="@color/black"
-        android:layout_marginStart="20dp"
 
-        android:paddingStart="12dp"
-        android:layout_marginTop="20dp"/>
 
-    <EditText
-        android:id="@+id/userName"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:textColorHint="@color/black"
-        android:paddingStart="12dp"
-        android:layout_below="@id/usernameLabel"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:textStyle="italic"
-        android:background="@drawable/edittext_background"
-        android:gravity="start|center_vertical"
-        android:textColor="@color/black"
-        android:layout_marginTop="5dp"
-        android:hint="Username"
-        android:textSize="18dp"
-        />
+
 
     <TextView
         android:id="@+id/emailLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email"
-        android:layout_below="@+id/userName"
+        android:layout_below="@+id/title"
         android:textSize="18sp"
         android:textColor="@color/black"
         android:layout_marginStart="20dp"
@@ -211,24 +184,25 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:hint="Select your birth date"
+        android:textColorHint="@color/black"
         android:focusable="false"
         android:clickable="true"
         android:background="@drawable/edittext_background"
         android:textColor="@color/black"
         android:textSize="18sp"/>
 
-<TextView
-    android:id="@+id/textInputError"
-    android:layout_width="match_parent"
-    android:layout_height="30dp"
-    android:layout_below="@id/birthDateInput"
-    android:visibility="gone"
-    android:textSize="16dp"
-    android:gravity="center"
-    android:textColor="@color/red"
-    android:layout_margin="10dp"
-    android:text="One or more Inputs are invalid"
-    />
+    <TextView
+        android:id="@+id/textInputError"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_below="@id/birthDateInput"
+        android:visibility="gone"
+        android:textSize="16dp"
+        android:gravity="center"
+        android:textColor="@color/red"
+        android:layout_margin="10dp"
+        android:text="One or more Inputs are invalid"
+        />
 
 
     <TextView

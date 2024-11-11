@@ -27,7 +27,6 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 public class ProfileCreation extends AppCompatActivity {
-    private EditText userNameText;
     private TextView textInputError;
 
     private EditText emailText;
@@ -39,7 +38,6 @@ public class ProfileCreation extends AppCompatActivity {
     private TextView phoneLabel;
     private TextView passwordLabel;
     private TextView emailLabel;
-    private TextView usernameLabel;
     private Button createProfileButton;
     private Button sendCodeButton;
     private Button showPasswordButton;
@@ -73,8 +71,7 @@ public class ProfileCreation extends AppCompatActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
-        userNameText = findViewById(R.id.userName);
-        usernameLabel = findViewById(R.id.usernameLabel);
+
         emailText = findViewById(R.id.email);
         emailLabel = findViewById(R.id.emailLabel);
         password = findViewById(R.id.password);
@@ -129,7 +126,6 @@ public class ProfileCreation extends AppCompatActivity {
 
 
     private void setInputFilters() {
-        userNameText.setInputType(InputType.TYPE_CLASS_TEXT);
         emailText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         phoneNumberText.setInputType(InputType.TYPE_CLASS_PHONE);
         codeInput.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -198,11 +194,10 @@ public class ProfileCreation extends AppCompatActivity {
 
     private void sendVerificationCode() {
         String email = emailText.getText().toString().trim();
-        String userName = userNameText.getText().toString().trim();
         String phoneNumber = phoneNumberText.getText().toString().trim();
         String birthDate = birthDateInput.getText().toString().trim();
 
-        if (email.isEmpty() || userName.isEmpty() || phoneNumber.isEmpty() || birthDate.isEmpty()) {
+        if (email.isEmpty() || phoneNumber.isEmpty() || birthDate.isEmpty()) {
             // Set the error message in the TextView and make it visible
             textInputError.setText("Please fill in all fields.");
             textInputError.setVisibility(View.VISIBLE);
@@ -222,6 +217,14 @@ public class ProfileCreation extends AppCompatActivity {
             textInputError.setVisibility(View.GONE);
         }
 
+        // Validate the password
+        if (!isPasswordValid(password.getText().toString())) {
+            textInputError.setText("Password must be at least 8 characters, contain upper and lower case letters, digits, and special characters.");
+            textInputError.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            textInputError.setVisibility(View.GONE);  // Hide the error message
+        }
         // Save the email and phone number before sending the verification code
         saveInputValues();
 
@@ -249,6 +252,12 @@ public class ProfileCreation extends AppCompatActivity {
                 })
                 .build();
         PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    private boolean isPasswordValid(String password) {
+        // Ensure the password is at least 8 characters and contains uppercase, lowercase, digits, and special characters
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$";
+        return password.matches(passwordRegex);
     }
 
     private boolean isAgeValid(String birthDate) {
@@ -290,11 +299,9 @@ public class ProfileCreation extends AppCompatActivity {
         password.setVisibility(View.GONE);
         passwordLabel.setVisibility(View.GONE);
         phoneLabel.setVisibility(View.GONE);
-        usernameLabel.setVisibility(View.GONE);
         emailLabel.setVisibility(View.GONE);
         phoneLayout.setVisibility(View.GONE);
         passwordlayout.setVisibility(View.GONE);
-        userNameText.setVisibility(View.GONE);
         emailText.setVisibility(View.GONE);
         phoneNumberText.setVisibility(View.GONE);
         createProfileButton.setVisibility(View.GONE);
@@ -402,12 +409,10 @@ public class ProfileCreation extends AppCompatActivity {
         backButton.setVisibility(View.VISIBLE);
         password.setVisibility(View.VISIBLE);
         phoneLabel.setVisibility(View.VISIBLE);
-        usernameLabel.setVisibility(View.VISIBLE);
         emailLabel.setVisibility(View.VISIBLE);
         phoneLayout.setVisibility(View.VISIBLE);
         passwordlayout.setVisibility(View.VISIBLE);
         passwordLabel.setVisibility(View.VISIBLE);
-        userNameText.setVisibility(View.VISIBLE);
         emailText.setVisibility(View.VISIBLE);
         phoneNumberText.setVisibility(View.VISIBLE);
         createProfileButton.setVisibility(View.VISIBLE);
