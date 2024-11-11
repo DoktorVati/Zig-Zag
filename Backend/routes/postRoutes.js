@@ -36,6 +36,7 @@ router.get(
   query("latitude").isFloat(),
   query("distance").isNumeric().optional(),
   query("hashtag").isString().optional(),
+  query("orderBy").isString().optional(),
   async (req, res) => {
     const errors = validationResult(req);
 
@@ -43,16 +44,16 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { latitude, longitude, distance = null, hashtag = null } = req.query;
+    const { latitude, longitude, distance = null, hashtag = null, orderBy = "new" } = req.query;
 
     try {
       let posts;
       if (hashtag) {
-        posts = await getPostsByHashtag(hashtag, latitude, longitude);
+        posts = await getPostsByHashtag(hashtag, latitude, longitude, orderBy);
       } else if (distance) {
-        posts = await getPostsWithinDistance(distance, latitude, longitude);
+        posts = await getPostsWithinDistance(distance, latitude, longitude, orderBy);
       } else {
-        posts = await getAllPosts(latitude, longitude);
+        posts = await getAllPosts(latitude, longitude, orderBy);
       }
 
       return res.status(200).json(posts);

@@ -2,6 +2,23 @@ const sequelize = require("../config/database");
 const { Post, Hashtag, Comment } = require("../models");
 const Sequelize = require("sequelize");
 
+function createOrderByArray(desiredOrder = "new") {
+  let orderCondition = []; // Everything should be 
+
+  switch (desiredOrder.toLowerCase()) {
+    case 'hot':
+      orderCondition = [[Sequelize.literal("COUNT(\"Comments\".\"id\")"), "DESC"], ["created_at", "DESC"]];
+      break;
+    case 'closest':
+      orderCondition = [[Sequelize.literal("distance"), "ASC"], ["created_at", "DESC"]];
+      break;
+    default:
+      orderCondition = [["created_at", "DESC"], [Sequelize.literal("distance"), "ASC"]];
+  }
+
+  return orderCondition;
+}
+
 function extractHashtags(content) {
   const regex = /#(\w{2,})/g;
   const matches = [];
@@ -67,7 +84,7 @@ async function getPostsByHashtag(
   hashtag,
   latitude,
   longitude,
-  sortOrder = "ASC"
+  orderBy
 ) {
   if (!hashtag || !latitude || !longitude) {
     throw new Error(
@@ -118,10 +135,7 @@ async function getPostsByHashtag(
       replacements: {
         coordinates: `POINT(${longitude} ${latitude})`,
       },
-      order: [
-        ["created_at", "DESC"],
-        [Sequelize.literal("distance"), "ASC"],
-      ],
+      order: createOrderByArray(orderBy),
       group: ['Post.id']
     });
 
@@ -134,7 +148,7 @@ async function getPostsByHashtag(
   }
 }
 
-async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
+async function getAllPosts(latitude, longitude, orderBy) {
   try {
     const currentDate = new Date();
     const posts = await Post.findAll({
@@ -160,18 +174,14 @@ async function getAllPosts(latitude, longitude, sortOrder = "ASC") {
               Sequelize.col("location"),
               Sequelize.literal(`ST_GeomFromText(:coordinates)`)
             ),
-            "distance",
+            "distance"],
             [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
           ],
-        ],
       },
       replacements: {
         coordinates: `POINT(${longitude} ${latitude})`,
       },
-      order: [
-        ["created_at", "DESC"],
-        [Sequelize.literal("distance"), sortOrder],
-      ],
+      order: createOrderByArray(orderBy),
       group: ['Post.id']
     });
     const formattedPosts = posts.map(formatPost);
@@ -187,7 +197,7 @@ async function getPostsWithinDistance(
   distance,
   latitude,
   longitude,
-  sortOrder = "ASC"
+  orderBy
 ) {
   if (!distance || !latitude || !longitude) {
     throw new Error("Distance, latitude, and longitude must all be provided.");
@@ -238,10 +248,7 @@ async function getPostsWithinDistance(
         ],
       },
       group: ['Post.id'],
-      order: [
-        ["created_at", "DESC"],
-        [Sequelize.literal("distance"), sortOrder],
-      ],
+      order: createOrderByArray(orderBy),
     });
 
     const formattedPost = posts.map(formatPost);

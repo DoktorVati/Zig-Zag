@@ -19,7 +19,7 @@ const Post = sequelize.define(
     location: {
       type: DataTypes.GEOMETRY("POINT", 4326),
       allowNull: false,
-    },
+    }
   },
   {
     modelName: "post",
