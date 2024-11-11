@@ -760,7 +760,7 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     } else {
                         if(item.getItemId() == R.id.item_report){
-                            Toast.makeText(MainActivity.this, "Post Reported! Wee will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
                             return true;
                         }
                         return false;
