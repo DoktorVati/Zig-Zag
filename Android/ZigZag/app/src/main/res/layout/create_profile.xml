@@ -271,7 +271,7 @@
         android:textSize="25dp"
         android:gravity="center"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="100dp"
         android:background="@color/blue"
         android:text="Sign Up"
         android:textColor="@color/white"
