@@ -3,7 +3,7 @@ const { Post, Hashtag, Comment } = require("../models");
 const Sequelize = require("sequelize");
 
 function createOrderByArray(desiredOrder = "new") {
-  let orderCondition = []; // Everything should be 
+  let orderCondition = [];
 
   switch (desiredOrder.toLowerCase()) {
     case 'hot':
@@ -61,7 +61,13 @@ async function getPost(id, latitude, longitude) {
             ),
             "distance",
           ],
-          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
+          [
+            Sequelize.cast(
+              Sequelize.fn('COALESCE', Sequelize.fn('COUNT', Sequelize.col('Comments.id')), 0),
+              'integer'
+            ),
+            'commentCount'
+          ],
         ],
       },
       include: [{
@@ -129,7 +135,13 @@ async function getPostsByHashtag(
             ),
             "distance",
           ],
-          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
+          [
+            Sequelize.cast(
+              Sequelize.fn('COALESCE', Sequelize.fn('COUNT', Sequelize.col('Comments.id')), 0),
+              'integer'
+            ),
+            'commentCount'
+          ],
         ],
       },
       replacements: {
@@ -174,9 +186,16 @@ async function getAllPosts(latitude, longitude, orderBy) {
               Sequelize.col("location"),
               Sequelize.literal(`ST_GeomFromText(:coordinates)`)
             ),
-            "distance"],
-            [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
+            "distance",
           ],
+          [
+            Sequelize.cast(
+              Sequelize.fn('COALESCE', Sequelize.fn('COUNT', Sequelize.col('Comments.id')), 0),
+              'integer'
+            ),
+            'commentCount'
+          ],
+        ],
       },
       replacements: {
         coordinates: `POINT(${longitude} ${latitude})`,
@@ -244,7 +263,13 @@ async function getPostsWithinDistance(
             ),
             "distance",
           ],
-          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount'],
+          [
+            Sequelize.cast(
+              Sequelize.fn('COALESCE', Sequelize.fn('COUNT', Sequelize.col('Comments.id')), 0),
+              'integer'
+            ),
+            'commentCount'
+          ],
         ],
       },
       group: ['Post.id'],

@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import CoreLocation
+import FirebaseAuth
 
 struct FeedView: View {
+    @EnvironmentObject var auth: FirebaseManager
+    
     @StateObject var viewModel = FeedViewModel()
     @StateObject var navigationManager = NavigationManager()
     
+    @State private var showProfileSheet = false // State to control sheet display
     @State var mapsize: CGFloat = 250
     @State var mapTitle = "ZigZag"
     
@@ -25,21 +30,24 @@ struct FeedView: View {
                     .foregroundStyle(Color(UIColor.systemBackground))
                     .frame(height: mapsize - 10)
                     .ignoresSafeArea(.all)
+                
                 // Scrollable Feed
                 NavigationStack(path: $navigationManager.path) {
                     VStack {
-                        List {
-                            //  RadiusButtonsView()
-                            //  .listRowBackground(Color.clear) // Set background to clear
-                            
-                            ForEach(0..<10, id: \.self) { _ in
-                                Section {
-                                    PostView()  // Custom post view below
+                        List(viewModel.posts) { post in
+                            Section {
+
+                                NavigationLink(destination: PostDetailView(post: post)) {
+                                    PostView(post: post) {
+                                    viewModel.fetchPosts()
+
                                 }
+                                }
+                                    
                             }
                         }
                         .refreshable {
-                            //Add logic
+                            viewModel.fetchPosts()
                         }
                     }
                     .toolbar {
@@ -51,21 +59,59 @@ struct FeedView: View {
                         switch destination {
                         case .createPost:
                             CreatePostView()
-                            //TODO: find a way to make transitionBetter
+                        case .tagFilter(let tag):
+                            TagsView(selectedTag: tag)
                         }
                     }
                     .onAppear {
+                        if viewModel.needsLocationPermission {
+                            LocationManager.shared.requestWhenInUseAuthorization()
+                        }
+                        viewModel.setUserLoaction()
                         withAnimation {
                             mapsize = 250
                             mapTitle = "ZigZag"
                         }
                     }
+                    .task {
+                        viewModel.fetchPosts()
+                    }
                 }
-                
             }
             .environmentObject(navigationManager)
             
             MapView(region: $viewModel.region, mapSize: $mapsize, overlayText: $mapTitle)
+            
+            // Position ProfileIcon at the top right
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        showProfileSheet = true // Trigger sheet display
+                    } label: {
+                        ProfileIcon()
+                    }
+                }
+                Spacer()
+            }
+            .padding(.horizontal,20)
+            .padding(.vertical, 38)
+            .sheet(isPresented: $showProfileSheet) {
+                NavigationStack {
+                    ScrollView {
+                        ProfileSheetView()
+                            .environmentObject(auth)
+                    }
+                        //.navigationBarTitle("Profile", displayMode: .inline) // Title for the profile sheet
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button("Close") {
+                                    showProfileSheet = false // Dismiss the sheet
+                                }
+                            }
+                        }
+                }
+            }
             
             // Floating "+" Button
             VStack {
