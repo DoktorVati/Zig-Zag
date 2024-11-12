@@ -789,7 +789,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View widget) {
                     // Replace the headerTextView text with the selected hashtag
-                    headerTextView.setText(hashtag); // Ensure headerTextView is defined
+                    headerTextView.setText(hashtag);
 
 
                     int distance = getDistanceBasedOnZoom();
@@ -827,8 +827,6 @@ public class MainActivity extends AppCompatActivity {
         postDistanceView.setLayoutParams(distanceParams);
 
 
-
-
         // Create an imageview for the comment icon
         ImageView commentIcon = new ImageView(this);
         commentIcon.setImageResource(R.drawable.baseline_comment_24);
@@ -855,6 +853,20 @@ public class MainActivity extends AppCompatActivity {
         commentTextParams.setMargins(0, 180, -35, 0);
         commentTextView.setLayoutParams(commentTextParams);
 
+        if(my_user_id == authorID) {
+            ImageView profileIcon = new ImageView(this);
+
+            profileIcon.setImageResource(R.drawable.baseline_person_24);
+            profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            profileIcon.setId(View.generateViewId()); // Generate unique ID
+            RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
+                    58, 58);
+            imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
+            imageParamsProfile.addRule(RelativeLayout.RIGHT_OF, durationTextView.getId());
+            imageParamsProfile.addRule(RelativeLayout.LEFT_OF, moreButton.getId());
+            imageParamsProfile.setMargins(0, 0, 0, 0);
+            relativeLayout.addView(timeTextView);
+        }
 
         // Add views to the RelativeLayout
         relativeLayout.addView(timeTextView);
@@ -876,8 +888,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void updateUIWithComments(String text, String currentTime){
-    // Create a new message group layout
+    private void updateUIWithComments(String text, String currentTime, String authorId){
+        // Create a new message group layout
 
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -905,6 +917,7 @@ public class MainActivity extends AppCompatActivity {
         postParams.setMargins(0, 20, 33, 0);
         postTextView.setLayoutParams(postParams);
 
+
         // Create TextView for the current time
         TextView timeTextView = new TextView(this);
         timeTextView.setTextColor(getResources().getColor(R.color.timeText));
@@ -913,12 +926,23 @@ public class MainActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams timeParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        timeParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        timeParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        timeParams.addRule(RelativeLayout.BELOW, postTextView.getId());
-        postParams.setMargins(0, 25, 0, 0);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         timeTextView.setLayoutParams(timeParams);
 
+        if(my_user_id == authorId) {
+            ImageView profileIcon = new ImageView(this);
+
+            profileIcon.setImageResource(R.drawable.baseline_person_24);
+            profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            profileIcon.setId(View.generateViewId()); // Generate unique ID
+            RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
+                    58, 58);
+            imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
+            imageParamsProfile.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
+            imageParamsProfile.setMargins(0, 0, 0, 0);
+            relativeLayout.addView(timeTextView);
+        }
         relativeLayout.addView(postTextView);
         relativeLayout.addView(timeTextView);
 
@@ -1089,9 +1113,10 @@ public class MainActivity extends AppCompatActivity {
 
                     String formattedTime = formatTime(createdAt);
 
+                    String authorId = post.getString("authorId");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithComments(text, formattedTime);
+                    updateUIWithComments(text, formattedTime, authorId);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
