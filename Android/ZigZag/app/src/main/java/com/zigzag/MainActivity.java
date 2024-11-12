@@ -5,8 +5,12 @@ import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
 import static com.zigzag.ProfileLogin.KEY_EMAIL;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +18,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Spannable;
@@ -85,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText headerTextView;
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
     private String orderBy = "&orderBy=";
-
+    private static final String CHANNEL_ID = "user_channel_id";
+    private static final CharSequence CHANNEL_NAME = "My Notifications";
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the post message groups
@@ -119,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); // Link to activity_main.xml layout
 
+        // Schedule the daily notification
+        scheduleDailyNotification();
 
         // Retrieve the UUID from the intent
         Intent intent = getIntent();
@@ -139,6 +147,18 @@ public class MainActivity extends AppCompatActivity {
 
         mapImage = findViewById(R.id.mapImage);
 
+        // Create notification channel for Android 8.0 and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocation();
@@ -1639,5 +1659,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void scheduleDailyNotification() {
+        // Get the AlarmManager system service
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        // Set up the time for 12 PM
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 12); // Set the hour to 12 PM
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        // If the time has already passed for today, set it for tomorrow
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);  // Move to the next day if 12 PM has passed
+        }
+
+        // Create an intent to trigger the BroadcastReceiver
+        Intent intent = new Intent(this, DailyNotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the alarm to trigger daily at 12 PM
+        if (alarmManager != null) {
+            alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,  // Wake up the device if it's asleep
+                    calendar.getTimeInMillis(), // Start time (12 PM today or tomorrow)
+                    AlarmManager.INTERVAL_DAY, // Repeat every 24 hours
+                    pendingIntent // PendingIntent to trigger the receiver
+            );
+        }
+    }
 
 }
