@@ -489,8 +489,8 @@ public class MainActivity extends AppCompatActivity {
         CurseWordFilter filter = new CurseWordFilter(this);
         List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
-        // Set up the dropdown menu
-        String[] types = new String[]{"minutes", "hours", "days"};
+        // Set up the dropdown menu    // I swapped these around to see if it will work
+        String[] types = new String[]{"days", "hours", "minutes"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
 

@@ -40,6 +40,7 @@
         android:id="@+id/selectText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:text="Select your post's duration (up to 30 days)."
         android:textSize="18sp"
         android:layout_below="@id/cancelButton"
@@ -50,12 +51,14 @@
     <!-- Duration Type Dropdown -->
     <Spinner
         android:id="@+id/typeDropdown"
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/selectText"
+        android:layout_centerHorizontal="true"
         android:padding="10dp"
         android:textColorHint="@color/black"
         android:textColor="@color/black"
+        android:textAlignment="center"
         android:textSize="18sp"
         android:layout_marginTop="30dp"/>
 
@@ -63,12 +66,15 @@
     <!-- Duration Input Field -->
     <EditText
         android:id="@+id/durationStr"
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:hint="Input Duration"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:hint="Duration"
         android:textColorHint="@color/black"
         android:inputType="number"
         android:textStyle="bold"
+        android:text="7"
         android:padding="10dp"
         android:textColor="@color/black"
         android:layout_marginTop="20dp"
