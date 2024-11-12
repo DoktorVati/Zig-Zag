@@ -76,6 +76,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -873,19 +874,20 @@ public class MainActivity extends AppCompatActivity {
         commentTextParams.setMargins(0, 180, -35, 0);
         commentTextView.setLayoutParams(commentTextParams);
 
-        if(my_user_id == authorID) {
+        if(Objects.equals(my_user_id, authorID)) {
             ImageView profileIcon = new ImageView(this);
 
             profileIcon.setImageResource(R.drawable.baseline_person_24);
             profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             profileIcon.setId(View.generateViewId()); // Generate unique ID
             RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
-                    58, 58);
+                    44, 44);
             imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
             imageParamsProfile.addRule(RelativeLayout.RIGHT_OF, durationTextView.getId());
             imageParamsProfile.addRule(RelativeLayout.LEFT_OF, moreButton.getId());
-            imageParamsProfile.setMargins(0, 0, 0, 0);
-            relativeLayout.addView(timeTextView);
+            profileIcon.setLayoutParams(imageParamsProfile);
+            //imageParamsProfile.setMargins(0, 0, 0, 0);
+            relativeLayout.addView(profileIcon);
         }
 
         // Add views to the RelativeLayout
@@ -894,6 +896,7 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(durationTextView);
         relativeLayout.addView(backwardTimeImageView);
         relativeLayout.addView(postTextView);
+
         relativeLayout.addView(postDistanceView);
         relativeLayout.addView(commentIcon);
         relativeLayout.addView(commentTextView);
@@ -908,7 +911,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void updateUIWithComments(String text, String currentTime, String authorId){
+    private void updateUIWithComments(String text, String currentTime, String authorID){
         // Create a new message group layout
 
         LinearLayout newMessageGroup = new LinearLayout(this);
@@ -934,7 +937,7 @@ public class MainActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams postParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        postParams.setMargins(0, 20, 33, 0);
+        postParams.setMargins(0, 40, 33, 0);
         postTextView.setLayoutParams(postParams);
 
 
@@ -950,22 +953,22 @@ public class MainActivity extends AppCompatActivity {
         timeParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         timeTextView.setLayoutParams(timeParams);
 
-        if(my_user_id == authorId) {
+        relativeLayout.addView(postTextView);
+        relativeLayout.addView(timeTextView);
+        if(Objects.equals(my_user_id, authorID)) {
             ImageView profileIcon = new ImageView(this);
 
             profileIcon.setImageResource(R.drawable.baseline_person_24);
             profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             profileIcon.setId(View.generateViewId()); // Generate unique ID
             RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
-                    58, 58);
+                    44, 44);
             imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
             imageParamsProfile.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
-            imageParamsProfile.setMargins(0, 0, 0, 0);
-            relativeLayout.addView(timeTextView);
+            profileIcon.setLayoutParams(imageParamsProfile);
+            //imageParamsProfile.setMargins(0, 0, 0, 0);
+            relativeLayout.addView(profileIcon);
         }
-        relativeLayout.addView(postTextView);
-        relativeLayout.addView(timeTextView);
-
         // Add the RelativeLayout to the new message group
         newMessageGroup.addView(relativeLayout);
 
@@ -1199,10 +1202,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d("DistanceLogger", "Distance in meters: " + meters + ", calculated miles: " + miles);
 
 
-        if (miles < 0.1) {
+        if (miles < 0.1 ) {
             double feet = meters * 3.28084; // Convert meters to feet
-            Log.d("DistanceLogger", "Distance in feet: " + feet); // Log the feet distance
-            return String.format("%.0f ft", feet);
+            if(feet < 250)
+            {
+                return String.format("<250 ft", feet);
+            }
+            else {
+                Log.d("DistanceLogger", "Distance in feet: " + feet); // Log the feet distance
+                return String.format("%.0f ft", feet);
+            }
         } else {
             return String.format("%.2f mi", miles);
         }
@@ -1666,7 +1675,7 @@ public class MainActivity extends AppCompatActivity {
         // Set up the time for 12 PM
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 12); // Set the hour to 12 PM
-        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.MINUTE, 16);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
@@ -1677,7 +1686,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create an intent to trigger the BroadcastReceiver
         Intent intent = new Intent(this, DailyNotificationReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         // Set the alarm to trigger daily at 12 PM
         if (alarmManager != null) {
