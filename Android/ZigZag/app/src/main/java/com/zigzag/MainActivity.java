@@ -526,7 +526,9 @@ public class MainActivity extends AppCompatActivity {
             updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount);
         });
 
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        cancelButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
 
         // Show the dialog
         try {
@@ -554,11 +556,14 @@ public class MainActivity extends AppCompatActivity {
         EditText inputReply = dialog.findViewById(R.id.CommentText);
         Button replyButton = dialog.findViewById((R.id.PostComment));
 
+
         // Create a CurseWordFilter instance with the Activity context
         CurseWordFilter filter = new CurseWordFilter(this);
         List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        cancelButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
 
         replyButton.setOnClickListener(v -> {
             String userInput = inputReply.getText().toString().trim();
