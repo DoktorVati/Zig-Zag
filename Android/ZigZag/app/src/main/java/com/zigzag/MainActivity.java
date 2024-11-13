@@ -101,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton button;
     private ImageButton profileButton;
     private ImageButton sortingButton;
+    private ImageButton close;
+    private ImageButton nearby;
+    private ImageButton userArea;
+    private ImageButton global;
     private LinearLayout OPContainer;
     private LinearLayout CommentsContainer;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
@@ -142,6 +146,11 @@ public class MainActivity extends AppCompatActivity {
         profileButton = findViewById(R.id.profileButton);
 
         sortingButton = findViewById(R.id.sortingButton);
+
+        close = findViewById(R.id.close);
+        nearby = findViewById(R.id.nearby);
+        userArea = findViewById(R.id.userArea);
+        global = findViewById(R.id.global);
 
         headerTextView = findViewById(R.id.headerTextView);
         headerTextView.setText("");
@@ -304,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         zoomLevel = 15; // Closer zoom
         //fetchPosts(lastLatitude, lastLongitude, 100);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800); // Distance is in meters
-
+        close.setColorFilter(Color.parseColor("#23C6F4"));
 
         getUserLocation(); // Refresh location to update the map
     }
@@ -313,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
     private void showNearby() {
         zoomLevel = 13; // Default nearby zoom
         //fetchPosts(lastLatitude, lastLongitude, 820);
+        nearby.setColorFilter(Color.parseColor("#23C6F4"));
         checkAndFetchPosts(lastLatitude, lastLongitude, 5000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
@@ -320,10 +330,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void zoomToUserArea() {
         zoomLevel = 11; // User area zoom
+        userArea.setColorFilter(Color.parseColor("#23C6F4"));
         //fetchPosts(lastLatitude, lastLongitude, 40000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
-
-
         getUserLocation(); // Refresh location to update the map
     }
 
@@ -332,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         zoomLevel = 7; // Further zoom out
         //fetchPosts(lastLatitude, lastLongitude, 800000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
-
+        global.setColorFilter(Color.parseColor("#23C6F4"));
 
         getUserLocation(); // Refresh location to update the map
     }
@@ -348,6 +357,10 @@ public class MainActivity extends AppCompatActivity {
     //this will set the buttons back to normal scale
     private void resetButtonScales() {
 
+        close.setColorFilter(Color.parseColor("#000000"));
+        nearby.setColorFilter(Color.parseColor("#000000"));
+        userArea.setColorFilter(Color.parseColor("#000000"));
+        global.setColorFilter(Color.parseColor("#000000"));
 
         // Reset scale for all buttons
         findViewById(R.id.close).setScaleX(0.8f);
@@ -829,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
         while (matcher.find()) {
             int start = matcher.start();
             int end = matcher.end();
-            spannableString.setSpan(new ForegroundColorSpan(Color.BLUE), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableString.setSpan(new ForegroundColorSpan(Color.parseColor("#23C6F4")), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             spannableString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 
@@ -905,15 +918,16 @@ public class MainActivity extends AppCompatActivity {
 
         if(Objects.equals(my_user_id, authorID)) {
             ImageView profileIcon = new ImageView(this);
+            profileIcon.setColorFilter(Color.parseColor("#23C6F4"));  // Example tint for dark mode (red)
 
             profileIcon.setImageResource(R.drawable.baseline_person_24);
             profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             profileIcon.setId(View.generateViewId()); // Generate unique ID
             RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
-                    44, 44);
+                    54, 54);
             imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
-            imageParamsProfile.addRule(RelativeLayout.RIGHT_OF, durationTextView.getId());
             imageParamsProfile.addRule(RelativeLayout.LEFT_OF, moreButton.getId());
+
             profileIcon.setLayoutParams(imageParamsProfile);
             //imageParamsProfile.setMargins(0, 0, 0, 0);
             relativeLayout.addView(profileIcon);
@@ -1817,9 +1831,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the color filter based on the mode (dark or light)
         if (isInDarkMode()) {
-            sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));
+            //sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
         } else {
-            sortingButton.setColorFilter(Color.parseColor("#FF5733"));  // Default gray tint for light mode
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));  // Default gray tint for light mode
         }
 
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
@@ -1833,9 +1848,10 @@ public class MainActivity extends AppCompatActivity {
         sortingButton.setImageResource(R.drawable.baseline_public_24);
         // Set the color filter based on the mode (dark or light)
         if (isInDarkMode()) {
-            sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));
+            //sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
         } else {
-            sortingButton.setColorFilter(Color.parseColor("#FF5733"));  // Default gray tint for light mode
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));  // Default gray tint for light mode
         }
 
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
@@ -1849,9 +1865,10 @@ public class MainActivity extends AppCompatActivity {
         sortingButton.setImageResource(R.drawable.baseline_local_fire_department_24);
         // Set the color filter based on the mode (dark or light)
         if (isInDarkMode()) {
-            sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));
+            //sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
         } else {
-            sortingButton.setColorFilter(Color.parseColor("#FF5733"));  // Default gray tint for light mode
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));  // Default gray tint for light mode
         }
 
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
