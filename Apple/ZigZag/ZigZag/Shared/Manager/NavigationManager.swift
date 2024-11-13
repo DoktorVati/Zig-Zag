@@ -10,6 +10,8 @@ import SwiftUI
 
 enum ZigZagDestination: Hashable {
     case createPost
+    case tagFilter(String)
+    
 }
 
 class NavigationManager: ObservableObject {
@@ -28,5 +30,30 @@ class NavigationManager: ObservableObject {
     // Method to pop back one step
     func navigateBack() {
         path.removeLast()
+    }
+}
+
+enum AuthDestination: Hashable {
+    case SignUp
+    case Login
+    case SMSVerification
+    
+}
+
+class AuthNavigationManager: ObservableObject {
+    @Published var path = NavigationPath()
+    
+    func navigateTo(_ destination: AuthDestination) {
+        path.append(destination)
+    }
+    
+    func navigateBackToRoot() {
+        path.removeLast(path.count) // Clears all views in the stack to go back to the root
+    }
+    
+    func navigateBack() {
+        if !path.isEmpty {
+            path.removeLast()
+        }
     }
 }

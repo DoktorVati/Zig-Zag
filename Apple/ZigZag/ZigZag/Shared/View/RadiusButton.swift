@@ -26,7 +26,7 @@ struct RadiusButton: View {
             action()
         } label: {
             Image(systemName: icon)
-                .foregroundStyle(isPressed ? Color(.white) : Color(UIColor.label))
+                .foregroundStyle(isPressed ? Color(.blue) : Color(UIColor.label))
                 .padding()
 //                .background(
 //                    RoundedRectangle(cornerRadius: CGFloat(20))

@@ -17,16 +17,24 @@ struct RadiusButtonsView: View {
     
     var body: some View {
         HStack(spacing: 32) {
-            RadiusButton(icon: distanceIcons[0], myIndex: 0) { viewModel.mapZoom(index: 0)
+            RadiusButton(icon: distanceIcons[0], myIndex: 0) {
+                viewModel.mapZoom(index: 0)
+                viewModel.fetchPosts()
             }
 
-            RadiusButton(icon: distanceIcons[1], myIndex: 1) { viewModel.mapZoom(index: 1)
+            RadiusButton(icon: distanceIcons[1], myIndex: 1) {
+                viewModel.mapZoom(index: 1)
+                viewModel.fetchPosts()
             }
             
-            RadiusButton(icon: distanceIcons[2], myIndex: 2) { viewModel.mapZoom(index: 2)
+            RadiusButton(icon: distanceIcons[2], myIndex: 2) {
+                viewModel.mapZoom(index: 2)
+                viewModel.fetchPosts()
             }
             
-            RadiusButton(icon: distanceIcons[3], myIndex: 3) { viewModel.mapZoom(index: 3)
+            RadiusButton(icon: distanceIcons[3], myIndex: 3) {
+                viewModel.mapZoom(index: 3)
+                viewModel.fetchPosts()
             }
         }
     }
