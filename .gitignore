@@ -124,3 +124,8 @@ xcuserdata/
 *.moved-aside
 
 *.xcuserstate
+
+
+# Backend
+node_modules/
+.env
