@@ -11,6 +11,8 @@ const {
   getAllPosts,
 } = require("../controllers/postController");
 
+const { createReport } = require("../controllers/reportController")
+
 const { Post } = require("../models");
 
 const router = require("express").Router();
@@ -220,5 +222,36 @@ router.post(
     }
   }
 );
+
+
+// HANDLE REPORTS HERE
+router.post(
+  "/:id/reports",
+  param("postId").isNumeric(),
+  body("snitch").isString().notEmpty(),
+  async (req, res) => {
+    const { id: postId } = req.params;
+    const { snitch } = req.body;
+
+    try {
+      const post = await Post.findOne({ where: { id: postId } });
+
+      if (post) {
+        // Post exists, okay to create report
+        const createdReport = await createReport(postId, snitch);
+
+        return res.status(201).json(createdReport);
+      } else {
+        return res.status(404).json({ error: "Post not found" });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        message: "Server Error",
+        error,
+      });
+    }
+  }
+);
+
 
 module.exports = router;
