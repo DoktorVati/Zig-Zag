@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -36,6 +37,7 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -1654,8 +1656,13 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to show the sorting dialog
     private void showSortingDialog() {
-        // Create an array with the options
+        // Define the options and their associated icons (drawables)
         final String[] options = {"Recent", "Close", "Hot"};
+        final int[] icons = {
+                R.drawable.baseline_calendar_month_24,  // Icon for "Recent"
+                R.drawable.baseline_public_24,          // Icon for "Close"
+                R.drawable.baseline_local_fire_department_24 // Icon for "Hot"
+        };
 
         // Get the last sorted option from SharedPreferences, default to "Recent"
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -1664,10 +1671,14 @@ public class MainActivity extends AppCompatActivity {
         // Find the index of the last selected option
         int selectedOptionIndex = getOptionIndex(lastSorted, options);
 
+        // Create a custom adapter for the dialog, passing the context to the adapter
+        CustomAdapter adapter = new CustomAdapter(this, options, icons, selectedOptionIndex); // Pass the context here
+
         // Create an AlertDialog.Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Sort Posts") // Title of the dialog
-                .setSingleChoiceItems(options, selectedOptionIndex, (dialog, which) -> {
+                .setSingleChoiceItems(adapter, selectedOptionIndex, (dialog, which) -> {
+                    // Handle the selection
                     switch (which) {
                         case 0:
                             showRecent();
@@ -1687,14 +1698,104 @@ public class MainActivity extends AppCompatActivity {
                     editor.putString(KEY_LAST_SORTED, options[which]);
                     editor.apply();
 
+                    // Update the selected index and notify the adapter to refresh the list
+                    adapter.setSelectedIndex(which);
+                    adapter.notifyDataSetChanged();
+
                     // Dismiss the dialog after selection
                     dialog.dismiss();
                 })
-                .setCancelable(true); // Allows the dialog to be canceled by clicking outside
-
-        // Show the dialog
-        builder.create().show();
+                .setCancelable(true) // Allows the dialog to be canceled by clicking outside
+                .create() // Create the dialog
+                .show(); // Show the dialog
     }
+
+    // Custom Adapter
+    private class CustomAdapter extends BaseAdapter {
+        private final Context context;
+        private final String[] options;
+        private final int[] icons;
+        private int selectedIndex;
+
+        // Constructor for the custom adapter
+        public CustomAdapter(Context context, String[] options, int[] icons, int selectedIndex) {
+            this.context = context;  // Save the context
+            this.options = options;
+            this.icons = icons;
+            this.selectedIndex = selectedIndex;
+        }
+
+        @Override
+        public int getCount() {
+            return options.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return options[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // If convertView is null, create a new layout
+            if (convertView == null) {
+                convertView = new LinearLayout(context);  // Use the context passed in constructor
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                convertView.setLayoutParams(layoutParams);
+                ((LinearLayout) convertView).setOrientation(LinearLayout.HORIZONTAL);
+
+                // Set padding to create space between items
+                convertView.setPadding(16, 16, 16, 16);
+
+                // TextView for option text
+                TextView optionText = new TextView(context);  // Use the context here too
+                optionText.setTextSize(18);  // Increase text size
+                optionText.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)); // Text takes the available space
+
+                // ImageView for the icon on the right
+                ImageView iconImage = new ImageView(context);  // Use the context here too
+                LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(80, 80);  // Increase icon size
+                iconParams.setMargins(16, 0, 0, 0); // margin between text and icon
+                iconImage.setLayoutParams(iconParams);
+
+                // Add both views (TextView and ImageView) to the LinearLayout
+                ((LinearLayout) convertView).addView(optionText);
+                ((LinearLayout) convertView).addView(iconImage);
+            }
+
+            // Get the TextView and ImageView from the converted view
+            LinearLayout linearLayout = (LinearLayout) convertView;
+            TextView optionText = (TextView) linearLayout.getChildAt(0);
+            ImageView iconImage = (ImageView) linearLayout.getChildAt(1);
+
+            // Set text and image
+            optionText.setText(options[position]);
+            iconImage.setImageResource(icons[position]);
+
+            // Highlight the selected item by changing the background
+            if (position == selectedIndex) {
+                convertView.setBackgroundColor(context.getResources().getColor(android.R.color.darker_gray)); // Selected item background
+            } else {
+                convertView.setBackgroundColor(context.getResources().getColor(android.R.color.transparent)); // Reset background for non-selected items
+            }
+
+            return convertView;
+        }
+
+        // Method to set the selected index
+        public void setSelectedIndex(int index) {
+            this.selectedIndex = index;
+        }
+    }
+
+
+
 
     // Helper method to get the index of the selected option
     private int getOptionIndex(String lastSorted, String[] options) {
@@ -1703,13 +1804,24 @@ public class MainActivity extends AppCompatActivity {
                 return i;  // Return the index of the selected option
             }
         }
-        return 0;  // Default to "Recent" if no match
+        return 0;  // Default to "Recent" if no match or there is an error
     }
 
     // Method for "Show Recent"
     private void showRecent() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=";
+
+        // Set the "Recent" icon
+        sortingButton.setImageResource(R.drawable.baseline_calendar_month_24);
+
+        // Set the color filter based on the mode (dark or light)
+        if (isInDarkMode()) {
+            sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+        } else {
+            sortingButton.setColorFilter(Color.parseColor("#FF5733"));  // Default gray tint for light mode
+        }
+
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
@@ -1717,16 +1829,34 @@ public class MainActivity extends AppCompatActivity {
     private void showClose() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=CLOSEST";
-        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
+        // Set the "Close" icon
+        sortingButton.setImageResource(R.drawable.baseline_public_24);
+        // Set the color filter based on the mode (dark or light)
+        if (isInDarkMode()) {
+            sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+        } else {
+            sortingButton.setColorFilter(Color.parseColor("#FF5733"));  // Default gray tint for light mode
+        }
 
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
     // Method for "Show Hot"
     private void showHot() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=HOT";
+        // Set the "Hot" icon
+        sortingButton.setImageResource(R.drawable.baseline_local_fire_department_24);
+        // Set the color filter based on the mode (dark or light)
+        if (isInDarkMode()) {
+            sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+        } else {
+            sortingButton.setColorFilter(Color.parseColor("#FF5733"));  // Default gray tint for light mode
+        }
+
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
+
 
     // Helper method to calculate distance based on zoom level
     private int getDistanceBasedOnZoom() {
@@ -1774,5 +1904,8 @@ public class MainActivity extends AppCompatActivity {
             );
         }
     }
-
+    private boolean isInDarkMode() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
 }

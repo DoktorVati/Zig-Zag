@@ -119,7 +119,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:scaleType="fitXY"
-            android:background="@color/transparentGrey"
+            android:background="@color/invisible"
             android:layout_gravity="bottom|center_horizontal"
             />
 
