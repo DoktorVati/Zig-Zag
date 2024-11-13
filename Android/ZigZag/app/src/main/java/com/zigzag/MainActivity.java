@@ -490,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
         CurseWordFilter filter = new CurseWordFilter(this);
         List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
-        // Set up the dropdown menu    // I swapped these around to see if it will work
+        // Set up the dropdown menu
         String[] types = new String[]{"days", "hours", "minutes"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
@@ -498,7 +498,7 @@ public class MainActivity extends AppCompatActivity {
         // Set button listeners
         postButton.setOnClickListener(v -> {
             String userInput = inputPost.getText().toString().trim();
-            int duration;
+            Integer duration = null;  // Default to null for "forever"
 
             // Clean the input text by replacing any swear words
             userInput = filter.cleanInput(userInput, curseWords);
@@ -509,21 +509,33 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            try {
-                // Parse the duration from the EditText field
-                duration = Integer.parseInt(durationStr.getText().toString().trim());
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
-                return;
+            // Check if the duration input is empty
+            String durationText = durationStr.getText().toString().trim();
+            if (!durationText.isEmpty()) {
+                try {
+                    // If the input is not empty, parse the duration
+                    duration = Integer.parseInt(durationText);
+                } catch (NumberFormatException e) {
+                    // Handle invalid duration input
+                    Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
 
-            String commentCount = "0";
-            String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
+            String expiryDate;
 
+            // Format the expiration date (if duration is null, it means "forever")
+            if(duration!=null) {
+                 expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
+            }else {
+                 expiryDate = "";
+            }
             // Proceed with the post if input is valid
             addNewPost(userInput, expiryDate);
             dialog.dismiss();
-            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount);
+
+            // Update the UI with the new post
+            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, "0");
         });
 
         cancelButton.setOnClickListener(v -> {
@@ -538,6 +550,9 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
+
+
 
 
     private void showCommentsDialog(int id) {
@@ -591,54 +606,61 @@ public class MainActivity extends AppCompatActivity {
 
     // This adds the post to the API
     private void addNewPost(String text, String expiryDate) {
+        // Get the current time in the required format
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
-        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
-                text, UserId, expiryDate, lastLatitude, lastLongitude);
 
+        // Check if expiryDate is null, and if so, omit it from the JSON body
+        String jsonBody;
+        if (expiryDate == null || expiryDate.equals("")) {
+            jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
+                    text, UserId, lastLatitude, lastLongitude);
+        } else {
+            jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
+                    text, UserId, expiryDate, lastLatitude, lastLongitude);
+        }
 
-        // This line below shows the posted zig immediately
-        //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
-
+        // Log the JSON body to ensure it's being generated correctly
+        Log.d("Post JSON", jsonBody);
 
         new Thread(() -> {
             try {
+                // Construct the URL for the API
                 URL url = new URL("https://api.zigzag.madebysaul.com/posts/?latitude=" + lastLatitude + "&longitude=" + lastLongitude);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setDoOutput(true);
 
-
-
-
+                // Write the JSON body to the request
                 try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
                     os.write(input, 0, input.length);
                 }
 
-
+                // Get the response code
                 int responseCode = connection.getResponseCode();
+                Log.d("Post Response", "Response code: " + responseCode);
+
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     runOnUiThread(() -> {
-
-
                         Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
                     });
                 } else {
-                    //runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> {
+                        //Toast.makeText(MainActivity.this, "Failed to create post. Response code: " + responseCode, Toast.LENGTH_SHORT).show();
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error posting!", Toast.LENGTH_SHORT).show());
             }
         }).start();
 
-
-        //Refresh posts
+        // Refresh posts (optional, based on your implementation)
         int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
-        //updateUIWithPost(text,"Just Now");
     }
+
 
     private void addNewComment(String text, int id) {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\"}", text, UserId);
@@ -786,7 +808,7 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     } else {
                         if(item.getItemId() == R.id.item_report){
-                            Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                            reportPost(text, id, authorID);
                             return true;
                         }
                         return false;
@@ -915,6 +937,53 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(newMessageGroup);
     }
 
+    private void reportPost(String text, int postID, String authorID) {
+        // Create the JSON body with the snitch (reporting user)
+        String jsonBody = String.format(
+                "{\"text\":\"%s\", \"author\":\"%s\", \"snitch\":\"%s\"}",
+                text, authorID, UserId  // UserId is the ID of the reporting user
+        );
+
+        // This line below shows the posted zig immediately
+        // updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
+
+        new Thread(() -> {
+            try {
+                // Construct the URL for the report API
+                URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + postID + "/reports");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setDoOutput(true);
+
+                // Write the JSON body to the request output stream
+                try (OutputStream os = connection.getOutputStream()) {
+                    byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+
+                // Get the response code
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // Report successful, show a success toast
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    // Report failed, show a failure toast
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Report Failed!!", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
 
     private void updateUIWithComments(String text, String currentTime, String authorID){
         // Create a new message group layout
@@ -980,7 +1049,6 @@ public class MainActivity extends AppCompatActivity {
 
         // and add the new message group to the container
         CommentsContainer.addView(newMessageGroup);
-        Log.d("Comments", "We made it to the end");
     }
 
 
@@ -1252,14 +1320,16 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e("MainActivity", "Date parsing error: ", e);
-            return "Unknown time";
+            return "";
         }
     }
 
 
-    private String formatExpiration(int duration, String type){
-
-
+    private String formatExpiration(Integer duration, String type){
+        if (duration == null) {
+            // If duration is null, return "Forever" or some default message.
+            return null;
+        }
         if(type.equals("days"))
             duration *= (24 * 60);
         else if(type.equals("hours"))
@@ -1343,12 +1413,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private String formatDuration(String expiryDate){
+        if (expiryDate.equals("")) {
+            return "Forever";
+        }
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = inputFormat.parse(expiryDate);
-
-
 
 
             // Calculate the time difference
@@ -1370,7 +1441,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e("MainActivity", "Date parsing error: ", e);
-            return "Unknown time";
+            return "Forever";
         }
     }
 

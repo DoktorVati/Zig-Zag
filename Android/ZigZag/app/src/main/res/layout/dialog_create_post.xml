@@ -51,22 +51,25 @@
     <!-- Duration Type Dropdown -->
     <Spinner
         android:id="@+id/typeDropdown"
-        android:layout_width="250dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/selectText"
-        android:layout_centerHorizontal="true"
         android:padding="10dp"
-        android:textColorHint="@color/black"
         android:textColor="@color/black"
-        android:textAlignment="center"
-        android:textSize="18sp"
-        android:layout_marginTop="30dp"/>
+    android:textColorHint="@color/black"
+    android:textAlignment="center"
+    android:textSize="18sp"
+
+    android:layout_marginTop="30dp"
+    android:dropDownVerticalOffset="2dp"
+    android:spinnerMode="dropdown" />
+
 
 
     <!-- Duration Input Field -->
     <EditText
         android:id="@+id/durationStr"
-        android:layout_width="250dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:textAlignment="center"
@@ -74,12 +77,14 @@
         android:textColorHint="@color/black"
         android:inputType="number"
         android:textStyle="bold"
-        android:text="7"
+        android:text=""
         android:padding="10dp"
         android:textColor="@color/black"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
         android:textSize="18sp"
-        android:layout_below="@id/typeDropdown"/>
+        android:layout_toRightOf="@id/typeDropdown"
+        android:layout_below="@id/selectText"/>
 
 
     <!-- Post Content Input Field -->
