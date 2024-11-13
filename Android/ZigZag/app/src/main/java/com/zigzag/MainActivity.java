@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         sortingButton = findViewById(R.id.sortingButton);
 
         headerTextView = findViewById(R.id.headerTextView);
-        headerTextView.setText(DEFAULT_TAG);
+        headerTextView.setText("");
         TextView clearTagTextView = findViewById(R.id.clearTag);
 
 
@@ -388,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
             fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
         }
         clearTagTextView.setOnClickListener(v -> {
-            headerTextView.setText(DEFAULT_TAG); // Reset headerTextView text to DEFAULT_TAG
+            headerTextView.setText(""); // Reset headerTextView text to DEFAULT_TAG
             clearTagTextView.setVisibility(View.GONE); // Hide clear tag after resetting
             fetchPosts(latitude, longitude, distance);
         });

@@ -55,10 +55,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/selectText"
         android:padding="10dp"
-        android:textColor="@color/black"
-    android:textColorHint="@color/black"
+        android:textColor="@android:color/black"
+    android:textColorHint="@android:color/black"
     android:textAlignment="center"
-    android:textSize="18sp"
+    android:textSize="25sp"
 
     android:layout_marginTop="30dp"
     android:dropDownVerticalOffset="2dp"
