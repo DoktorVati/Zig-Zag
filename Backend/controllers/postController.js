@@ -61,7 +61,7 @@ async function getPost(id, latitude, longitude) {
             ),
             "distance",
           ],
-          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
+          [Sequelize.cast(Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'INTEGER'), 'commentCount']
         ],
       },
       include: [{
@@ -129,7 +129,7 @@ async function getPostsByHashtag(
             ),
             "distance",
           ],
-          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
+          [Sequelize.cast(Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'INTEGER'), 'commentCount']
         ],
       },
       replacements: {
@@ -175,7 +175,7 @@ async function getAllPosts(latitude, longitude, orderBy) {
               Sequelize.literal(`ST_GeomFromText(:coordinates)`)
             ),
             "distance"],
-            [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount']
+            [Sequelize.cast(Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'INTEGER'), 'commentCount']
           ],
       },
       replacements: {
@@ -244,7 +244,7 @@ async function getPostsWithinDistance(
             ),
             "distance",
           ],
-          [Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'commentCount'],
+          [Sequelize.cast(Sequelize.fn('COUNT', Sequelize.col("Comments.id")), 'INTEGER'), 'commentCount']
         ],
       },
       group: ['Post.id'],
