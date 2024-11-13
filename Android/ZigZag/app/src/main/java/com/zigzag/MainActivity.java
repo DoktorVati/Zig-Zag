@@ -1506,21 +1506,25 @@ public class MainActivity extends AppCompatActivity {
         // Set button listener to close the dialog
         closeButton.setOnClickListener(v -> dialog.dismiss());
 
-
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
-            return;
+        if(Objects.equals(UserId, "TesterAccount"))
+        {
+            String currentUser = "TesterAccount";
         }
+        else {
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
 
-        // Handle click for deleting account
-        deleteAccountLayout.setOnClickListener(v -> {
-            // Show confirmation dialog for account deletion
-            showDeleteConfirmationDialog(currentUser);
-        });
+            // Handle click for deleting account
+            deleteAccountLayout.setOnClickListener(v -> {
+                // Show confirmation dialog for account deletion
+                showDeleteConfirmationDialog(currentUser);
+            });
 
-
+        }
         // Sign out functionality
         signOut.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
