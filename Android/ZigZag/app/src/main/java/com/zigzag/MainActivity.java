@@ -5,15 +5,21 @@ import static com.zigzag.ProfileCreation.KEY_PHONE_NUMBER;
 import static com.zigzag.ProfileLogin.KEY_EMAIL;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Spannable;
@@ -31,6 +37,7 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -71,6 +78,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,13 +93,18 @@ public class MainActivity extends AppCompatActivity {
     private EditText headerTextView;
     private static final String BASE_URL = "https://api.zigzag.madebysaul.com/posts?";
     private String orderBy = "&orderBy=";
-
+    private static final String CHANNEL_ID = "user_channel_id";
+    private static final CharSequence CHANNEL_NAME = "My Notifications";
     private static final int LOCATION_REQUEST_CODE = 101;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout messageContainer; // Container for the post message groups
     private ImageButton button;
     private ImageButton profileButton;
     private ImageButton sortingButton;
+    private ImageButton close;
+    private ImageButton nearby;
+    private ImageButton userArea;
+    private ImageButton global;
     private LinearLayout OPContainer;
     private LinearLayout CommentsContainer;
     private static final String DEFAULT_TAG = "Zig Zag"; // Default tag
@@ -104,12 +117,12 @@ public class MainActivity extends AppCompatActivity {
     private double lastLongitude;
     private int lastZoomLevel = 1;
     private int zoomLevel = 12; // This is the zoom modifier for the map
-    private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
+    private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; //  our map api key
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
-    private Handler handler = new Handler(); // Handler for delays
+    private Handler handler = new Handler();
 
 
-    //Current universal user ID
+    //Their user ID
     private String my_user_id;
     TextView clearTagTextView;
 
@@ -117,8 +130,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Link to activity_main.xml layout
+        setContentView(R.layout.activity_main);
 
+        // Schedule the daily notification
+        scheduleDailyNotification();
 
         // Retrieve the UUID from the intent
         Intent intent = getIntent();
@@ -132,13 +147,30 @@ public class MainActivity extends AppCompatActivity {
 
         sortingButton = findViewById(R.id.sortingButton);
 
+        close = findViewById(R.id.close);
+        nearby = findViewById(R.id.nearby);
+        userArea = findViewById(R.id.userArea);
+        global = findViewById(R.id.global);
+
         headerTextView = findViewById(R.id.headerTextView);
-        headerTextView.setText(DEFAULT_TAG);
+        headerTextView.setText("");
         TextView clearTagTextView = findViewById(R.id.clearTag);
 
 
         mapImage = findViewById(R.id.mapImage);
 
+        // Create notification channel for Android 8.0 and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocation();
@@ -281,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         zoomLevel = 15; // Closer zoom
         //fetchPosts(lastLatitude, lastLongitude, 100);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800); // Distance is in meters
-
+        close.setColorFilter(Color.parseColor("#23C6F4"));
 
         getUserLocation(); // Refresh location to update the map
     }
@@ -290,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
     private void showNearby() {
         zoomLevel = 13; // Default nearby zoom
         //fetchPosts(lastLatitude, lastLongitude, 820);
+        nearby.setColorFilter(Color.parseColor("#23C6F4"));
         checkAndFetchPosts(lastLatitude, lastLongitude, 5000); // Distance is in meters
         getUserLocation(); // Refresh location to update the map
     }
@@ -297,10 +330,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void zoomToUserArea() {
         zoomLevel = 11; // User area zoom
+        userArea.setColorFilter(Color.parseColor("#23C6F4"));
         //fetchPosts(lastLatitude, lastLongitude, 40000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 40000); // Distance is in meters
-
-
         getUserLocation(); // Refresh location to update the map
     }
 
@@ -309,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         zoomLevel = 7; // Further zoom out
         //fetchPosts(lastLatitude, lastLongitude, 800000);
         checkAndFetchPosts(lastLatitude, lastLongitude, 800000); // Distance is in meters
-
+        global.setColorFilter(Color.parseColor("#23C6F4"));
 
         getUserLocation(); // Refresh location to update the map
     }
@@ -325,6 +357,11 @@ public class MainActivity extends AppCompatActivity {
     //this will set the buttons back to normal scale
     private void resetButtonScales() {
 
+        // Reset the colors for each icon
+        close.setColorFilter(Color.parseColor("#000000"));
+        nearby.setColorFilter(Color.parseColor("#000000"));
+        userArea.setColorFilter(Color.parseColor("#000000"));
+        global.setColorFilter(Color.parseColor("#000000"));
 
         // Reset scale for all buttons
         findViewById(R.id.close).setScaleX(0.8f);
@@ -367,7 +404,7 @@ public class MainActivity extends AppCompatActivity {
             fetchPostsWithHashtag(latitude, longitude, distance, hashtag);
         }
         clearTagTextView.setOnClickListener(v -> {
-            headerTextView.setText(DEFAULT_TAG); // Reset headerTextView text to DEFAULT_TAG
+            headerTextView.setText(""); // Reset headerTextView text to DEFAULT_TAG
             clearTagTextView.setVisibility(View.GONE); // Hide clear tag after resetting
             fetchPosts(latitude, longitude, distance);
         });
@@ -393,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
                     Log.d("FetchPosts", "Received response: " + jsonResponse);
-                    handlePostsResponse(jsonResponse, messageContainer);
+                    handlePostsResponse(jsonResponse, messageContainer, false);
                 } else {
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message());
                 }
@@ -470,14 +507,14 @@ public class MainActivity extends AppCompatActivity {
         List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
         // Set up the dropdown menu
-        String[] types = new String[]{"minutes", "hours", "days"};
+        String[] types = new String[]{"days", "hours", "minutes"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         typeDropdown.setAdapter(adapter);
 
         // Set button listeners
         postButton.setOnClickListener(v -> {
             String userInput = inputPost.getText().toString().trim();
-            int duration;
+            Integer duration = null;  // Default to null for "forever"
 
             // Clean the input text by replacing any swear words
             userInput = filter.cleanInput(userInput, curseWords);
@@ -488,24 +525,38 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            try {
-                // Parse the duration from the EditText field
-                duration = Integer.parseInt(durationStr.getText().toString().trim());
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
-                return;
+            // Check if the duration input is empty
+            String durationText = durationStr.getText().toString().trim();
+            if (!durationText.isEmpty()) {
+                try {
+                    // If the input is not empty, parse the duration
+                    duration = Integer.parseInt(durationText);
+                } catch (NumberFormatException e) {
+                    // Handle invalid duration input
+                    Toast.makeText(this, "Please enter a valid duration.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
 
-            String commentCount = "0";
-            String expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
+            String expiryDate;
 
+            // Format the expiration date (if duration is null, it means "forever")
+            if(duration!=null) {
+                 expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
+            }else {
+                 expiryDate = "";
+            }
             // Proceed with the post if input is valid
             addNewPost(userInput, expiryDate);
             dialog.dismiss();
-            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, commentCount);
+
+            // Update the UI with the new post
+            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, "0", false);
         });
 
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        cancelButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
 
         // Show the dialog
         try {
@@ -515,6 +566,9 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error showing dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
+
+
 
 
     private void showCommentsDialog(int id) {
@@ -533,11 +587,14 @@ public class MainActivity extends AppCompatActivity {
         EditText inputReply = dialog.findViewById(R.id.CommentText);
         Button replyButton = dialog.findViewById((R.id.PostComment));
 
+
         // Create a CurseWordFilter instance with the Activity context
         CurseWordFilter filter = new CurseWordFilter(this);
         List<String> curseWords = filter.loadCurseWords();  // Load curse words from the CSV
 
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        cancelButton.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
 
         replyButton.setOnClickListener(v -> {
             String userInput = inputReply.getText().toString().trim();
@@ -565,54 +622,61 @@ public class MainActivity extends AppCompatActivity {
 
     // This adds the post to the API
     private void addNewPost(String text, String expiryDate) {
+        // Get the current time in the required format
         String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
-        String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
-                text, UserId, expiryDate, lastLatitude, lastLongitude);
 
+        // Check if expiryDate is null, and if so, omit it from the JSON body
+        String jsonBody;
+        if (expiryDate == null || expiryDate.equals("")) {
+            jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
+                    text, UserId, lastLatitude, lastLongitude);
+        } else {
+            jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\", \"expiryDate\":\"%s\", \"postLatitude\":%f, \"postLongitude\":%f}",
+                    text, UserId, expiryDate, lastLatitude, lastLongitude);
+        }
 
-        // This line below shows the posted zig immediately
-        //updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
-
+        // Log the JSON body to ensure it's being generated correctly
+        Log.d("Post JSON", jsonBody);
 
         new Thread(() -> {
             try {
+                // Construct the URL for the API
                 URL url = new URL("https://api.zigzag.madebysaul.com/posts/?latitude=" + lastLatitude + "&longitude=" + lastLongitude);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setDoOutput(true);
 
-
-
-
+                // Write the JSON body to the request
                 try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
                     os.write(input, 0, input.length);
                 }
 
-
+                // Get the response code
                 int responseCode = connection.getResponseCode();
+                Log.d("Post Response", "Response code: " + responseCode);
+
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     runOnUiThread(() -> {
-
-
                         Toast.makeText(MainActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
                     });
                 } else {
-                    //runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> {
+                        //Toast.makeText(MainActivity.this, "Failed to create post. Response code: " + responseCode, Toast.LENGTH_SHORT).show();
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error posting!", Toast.LENGTH_SHORT).show());
             }
         }).start();
 
-
-        //Refresh posts
+        // Refresh posts (optional, based on your implementation)
         int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
-        //updateUIWithPost(text,"Just Now");
     }
+
 
     private void addNewComment(String text, int id) {
         String jsonBody = String.format("{\"text\":\"%s\", \"author\":\"%s\"}", text, UserId);
@@ -657,7 +721,7 @@ public class MainActivity extends AppCompatActivity {
         fetchComments(id, lastLatitude, lastLongitude);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout, String commentAmount) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout, String commentAmount, boolean isComments) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -667,11 +731,15 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
-        newMessageGroup.setOnClickListener(v -> {
+        if(!isComments)
+        {
+            newMessageGroup.setOnClickListener(v -> {
             Log.d("Comments", "Comments Clicked");
             showCommentsDialog(id);
             fetchComments(id, lastLatitude, lastLongitude);
-        });
+            });
+        }
+
 
         // Create a RelativeLayout for the message content
         RelativeLayout relativeLayout = new RelativeLayout(this);
@@ -700,7 +768,6 @@ public class MainActivity extends AppCompatActivity {
         backwardTimeImageView.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(
                 48, 48);
-        //imageParams.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
         imageParams.setMargins(275, 0, 0, 0);
         backwardTimeImageView.setLayoutParams(imageParams);
 
@@ -715,7 +782,7 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         durationParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
         durationParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
-        durationParams.setMargins(0, 5, 0, 0); // Reduced margin to decrease gap
+        durationParams.setMargins(0, 5, 0, 0);
         durationTextView.setLayoutParams(durationParams);
 
 
@@ -731,7 +798,6 @@ public class MainActivity extends AppCompatActivity {
         moreButton.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams moreButtonParams = new RelativeLayout.LayoutParams(
                 100, 160);
-        //moreButtonParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         moreButtonParams.setMargins(0, -60, 0, -30);
@@ -760,7 +826,7 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     } else {
                         if(item.getItemId() == R.id.item_report){
-                            Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                            reportPost(text, id, authorID);
                             return true;
                         }
                         return false;
@@ -779,7 +845,7 @@ public class MainActivity extends AppCompatActivity {
         while (matcher.find()) {
             int start = matcher.start();
             int end = matcher.end();
-            spannableString.setSpan(new ForegroundColorSpan(Color.BLUE), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableString.setSpan(new ForegroundColorSpan(Color.parseColor("#23C6F4")), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             spannableString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 
@@ -789,7 +855,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View widget) {
                     // Replace the headerTextView text with the selected hashtag
-                    headerTextView.setText(hashtag); // Ensure headerTextView is defined
+                    headerTextView.setText(hashtag);
 
 
                     int distance = getDistanceBasedOnZoom();
@@ -827,8 +893,6 @@ public class MainActivity extends AppCompatActivity {
         postDistanceView.setLayoutParams(distanceParams);
 
 
-
-
         // Create an imageview for the comment icon
         ImageView commentIcon = new ImageView(this);
         commentIcon.setImageResource(R.drawable.baseline_comment_24);
@@ -855,6 +919,22 @@ public class MainActivity extends AppCompatActivity {
         commentTextParams.setMargins(0, 180, -35, 0);
         commentTextView.setLayoutParams(commentTextParams);
 
+        // If the user is the author, show the profile icon to differentiate posts
+        if(Objects.equals(my_user_id, authorID)) {
+            ImageView profileIcon = new ImageView(this);
+            profileIcon.setColorFilter(Color.parseColor("#23C6F4"));  // Example tint for dark mode (red)
+
+            profileIcon.setImageResource(R.drawable.baseline_person_24);
+            profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            profileIcon.setId(View.generateViewId()); // Generate unique ID
+            RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
+                    54, 54);
+            imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
+            imageParamsProfile.addRule(RelativeLayout.LEFT_OF, moreButton.getId());
+
+            profileIcon.setLayoutParams(imageParamsProfile);
+            relativeLayout.addView(profileIcon);
+        }
 
         // Add views to the RelativeLayout
         relativeLayout.addView(timeTextView);
@@ -862,6 +942,7 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(durationTextView);
         relativeLayout.addView(backwardTimeImageView);
         relativeLayout.addView(postTextView);
+
         relativeLayout.addView(postDistanceView);
         relativeLayout.addView(commentIcon);
         relativeLayout.addView(commentTextView);
@@ -875,9 +956,56 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(newMessageGroup);
     }
 
+    private void reportPost(String text, int postID, String authorID) {
+        // Create the JSON body with the snitch (reporting user)
+        String jsonBody = String.format(
+                "{\"text\":\"%s\", \"author\":\"%s\", \"snitch\":\"%s\"}",
+                text, authorID, UserId  // UserId is the ID of the reporting user
+        );
 
-    private void updateUIWithComments(String text, String currentTime){
-    // Create a new message group layout
+        // This line below shows the posted zig immediately
+        // updateUIWithPost(text, "Just now", "0 ft", expiryDate, 0);
+
+        new Thread(() -> {
+            try {
+                // Construct the URL for the report API
+                URL url = new URL("https://api.zigzag.madebysaul.com/posts/" + postID + "/reports");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setDoOutput(true);
+
+                // Write the JSON body to the request output stream
+                try (OutputStream os = connection.getOutputStream()) {
+                    byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+
+                // Get the response code
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // Report successful, show a success toast
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    // Report failed, show a failure toast
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "Post Reported! We will investigate this at our earliest convenience.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Report Failed!!", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+
+    private void updateUIWithComments(String text, String currentTime, String authorID){
+        // Create a new message group layout
 
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -902,8 +1030,9 @@ public class MainActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams postParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        postParams.setMargins(0, 20, 33, 0);
+        postParams.setMargins(0, 40, 33, 0);
         postTextView.setLayoutParams(postParams);
+
 
         // Create TextView for the current time
         TextView timeTextView = new TextView(this);
@@ -913,22 +1042,32 @@ public class MainActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams timeParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        timeParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        timeParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        timeParams.addRule(RelativeLayout.BELOW, postTextView.getId());
-        postParams.setMargins(0, 25, 0, 0);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_START);
+        timeParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         timeTextView.setLayoutParams(timeParams);
 
         relativeLayout.addView(postTextView);
         relativeLayout.addView(timeTextView);
+        if(Objects.equals(my_user_id, authorID)) {
+            ImageView profileIcon = new ImageView(this);
 
+            profileIcon.setImageResource(R.drawable.baseline_person_24);
+            profileIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            profileIcon.setId(View.generateViewId()); // Generate unique ID
+            RelativeLayout.LayoutParams imageParamsProfile = new RelativeLayout.LayoutParams(
+                    44, 44);
+            imageParamsProfile.addRule(RelativeLayout.ABOVE, postTextView.getId());
+            imageParamsProfile.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
+            profileIcon.setLayoutParams(imageParamsProfile);
+            //imageParamsProfile.setMargins(0, 0, 0, 0);
+            relativeLayout.addView(profileIcon);
+        }
         // Add the RelativeLayout to the new message group
         newMessageGroup.addView(relativeLayout);
 
 
         // and add the new message group to the container
         CommentsContainer.addView(newMessageGroup);
-        Log.d("Comments", "We made it to the end");
     }
 
 
@@ -948,7 +1087,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
-                    handlePostsResponse(jsonResponse, messageContainer);
+                    handlePostsResponse(jsonResponse, messageContainer, false);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
@@ -981,7 +1120,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = "[" + response.body().string() + "]";
-                    handlePostsResponse(jsonResponse, OPContainer);
+                    handlePostsResponse(jsonResponse, OPContainer, true);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
@@ -1018,7 +1157,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void handlePostsResponse(String jsonResponse, LinearLayout layout) {
+    private void handlePostsResponse(String jsonResponse, LinearLayout layout, boolean isCommentss) {
         runOnUiThread(() -> {
             try {
                 Log.d("handlePostsResponse", "Response received");
@@ -1062,7 +1201,7 @@ public class MainActivity extends AppCompatActivity {
                     String commentCount = post.getString("commentCount");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout, commentCount);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout, commentCount, isCommentss);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -1089,9 +1228,10 @@ public class MainActivity extends AppCompatActivity {
 
                     String formattedTime = formatTime(createdAt);
 
+                    String authorId = post.getString("authorId");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithComments(text, formattedTime);
+                    updateUIWithComments(text, formattedTime, authorId);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -1154,10 +1294,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d("DistanceLogger", "Distance in meters: " + meters + ", calculated miles: " + miles);
 
 
-        if (miles < 0.1) {
+        if (miles < 0.1 ) {
             double feet = meters * 3.28084; // Convert meters to feet
-            Log.d("DistanceLogger", "Distance in feet: " + feet); // Log the feet distance
-            return String.format("%.0f ft", feet);
+            if(feet < 250)
+            {
+                return String.format("<250 ft", feet);
+            }
+            else {
+                Log.d("DistanceLogger", "Distance in feet: " + feet); // Log the feet distance
+                return String.format("%.0f ft", feet);
+            }
         } else {
             return String.format("%.2f mi", miles);
         }
@@ -1193,14 +1339,16 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e("MainActivity", "Date parsing error: ", e);
-            return "Unknown time";
+            return "";
         }
     }
 
 
-    private String formatExpiration(int duration, String type){
-
-
+    private String formatExpiration(Integer duration, String type){
+        if (duration == null) {
+            // If duration is null, return "Forever" or some default message.
+            return null;
+        }
         if(type.equals("days"))
             duration *= (24 * 60);
         else if(type.equals("hours"))
@@ -1284,12 +1432,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private String formatDuration(String expiryDate){
+        if (expiryDate.equals("")) {
+            return "Forever";
+        }
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = inputFormat.parse(expiryDate);
-
-
 
 
             // Calculate the time difference
@@ -1311,7 +1460,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e("MainActivity", "Date parsing error: ", e);
-            return "Unknown time";
+            return "Forever";
         }
     }
 
@@ -1357,21 +1506,25 @@ public class MainActivity extends AppCompatActivity {
         // Set button listener to close the dialog
         closeButton.setOnClickListener(v -> dialog.dismiss());
 
-
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
-            return;
+        if(Objects.equals(UserId, "TesterAccount"))
+        {
+            String currentUser = "TesterAccount";
         }
+        else {
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
 
-        // Handle click for deleting account
-        deleteAccountLayout.setOnClickListener(v -> {
-            // Show confirmation dialog for account deletion
-            showDeleteConfirmationDialog(currentUser);
-        });
+            // Handle click for deleting account
+            deleteAccountLayout.setOnClickListener(v -> {
+                // Show confirmation dialog for account deletion
+                showDeleteConfirmationDialog(currentUser);
+            });
 
-
+        }
         // Sign out functionality
         signOut.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
@@ -1502,14 +1655,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the email value in the TextView
         if (email != null && !email.equals("Email not available")) {
-            emailTextView.setText("Email: " + email);
+            emailTextView.setText("Email:       " + email);
         } else {
             emailTextView.setText("Email not available");
         }
 
         // Set the phone number value in the TextView
         if (phoneNumber != null && !phoneNumber.equals("Phone number not available")) {
-            phoneTextView.setText("Phone Number: " + phoneNumber);
+            phoneTextView.setText("Phone Number:       " + phoneNumber);
         } else {
             phoneTextView.setText("Phone number not available");
         }
@@ -1524,8 +1677,13 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to show the sorting dialog
     private void showSortingDialog() {
-        // Create an array with the options
+        // Define the options and their associated icons (drawables)
         final String[] options = {"Recent", "Close", "Hot"};
+        final int[] icons = {
+                R.drawable.baseline_calendar_month_24,  // Icon for "Recent"
+                R.drawable.baseline_public_24,          // Icon for "Close"
+                R.drawable.baseline_local_fire_department_24 // Icon for "Hot"
+        };
 
         // Get the last sorted option from SharedPreferences, default to "Recent"
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -1534,10 +1692,14 @@ public class MainActivity extends AppCompatActivity {
         // Find the index of the last selected option
         int selectedOptionIndex = getOptionIndex(lastSorted, options);
 
+        // Create a custom adapter for the dialog, passing the context to the adapter
+        CustomAdapter adapter = new CustomAdapter(this, options, icons, selectedOptionIndex); // Pass the context here
+
         // Create an AlertDialog.Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Sort Posts") // Title of the dialog
-                .setSingleChoiceItems(options, selectedOptionIndex, (dialog, which) -> {
+                .setSingleChoiceItems(adapter, selectedOptionIndex, (dialog, which) -> {
+                    // Handle the selection
                     switch (which) {
                         case 0:
                             showRecent();
@@ -1557,14 +1719,104 @@ public class MainActivity extends AppCompatActivity {
                     editor.putString(KEY_LAST_SORTED, options[which]);
                     editor.apply();
 
+                    // Update the selected index and notify the adapter to refresh the list
+                    adapter.setSelectedIndex(which);
+                    adapter.notifyDataSetChanged();
+
                     // Dismiss the dialog after selection
                     dialog.dismiss();
                 })
-                .setCancelable(true); // Allows the dialog to be canceled by clicking outside
-
-        // Show the dialog
-        builder.create().show();
+                .setCancelable(true) // Allows the dialog to be canceled by clicking outside
+                .create() // Create the dialog
+                .show(); // Show the dialog
     }
+
+    // Custom Adapter
+    private class CustomAdapter extends BaseAdapter {
+        private final Context context;
+        private final String[] options;
+        private final int[] icons;
+        private int selectedIndex;
+
+        // Constructor for the custom adapter
+        public CustomAdapter(Context context, String[] options, int[] icons, int selectedIndex) {
+            this.context = context;  // Save the context
+            this.options = options;
+            this.icons = icons;
+            this.selectedIndex = selectedIndex;
+        }
+
+        @Override
+        public int getCount() {
+            return options.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return options[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // If convertView is null, create a new layout
+            if (convertView == null) {
+                convertView = new LinearLayout(context);  // Use the context passed in constructor
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                convertView.setLayoutParams(layoutParams);
+                ((LinearLayout) convertView).setOrientation(LinearLayout.HORIZONTAL);
+
+                // Set padding to create space between items
+                convertView.setPadding(16, 16, 16, 16);
+
+                // TextView for option text
+                TextView optionText = new TextView(context);  // Use the context here too
+                optionText.setTextSize(18);  // Increase text size
+                optionText.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)); // Text takes the available space
+
+                // ImageView for the icon on the right
+                ImageView iconImage = new ImageView(context);  // Use the context here too
+                LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(80, 80);  // Increase icon size
+                iconParams.setMargins(16, 0, 0, 0); // margin between text and icon
+                iconImage.setLayoutParams(iconParams);
+
+                // Add both views (TextView and ImageView) to the LinearLayout
+                ((LinearLayout) convertView).addView(optionText);
+                ((LinearLayout) convertView).addView(iconImage);
+            }
+
+            // Get the TextView and ImageView from the converted view
+            LinearLayout linearLayout = (LinearLayout) convertView;
+            TextView optionText = (TextView) linearLayout.getChildAt(0);
+            ImageView iconImage = (ImageView) linearLayout.getChildAt(1);
+
+            // Set text and image
+            optionText.setText(options[position]);
+            iconImage.setImageResource(icons[position]);
+
+            // Highlight the selected item by changing the background
+            if (position == selectedIndex) {
+                convertView.setBackgroundColor(context.getResources().getColor(android.R.color.darker_gray)); // Selected item background
+            } else {
+                convertView.setBackgroundColor(context.getResources().getColor(android.R.color.transparent)); // Reset background for non-selected items
+            }
+
+            return convertView;
+        }
+
+        // Method to set the selected index
+        public void setSelectedIndex(int index) {
+            this.selectedIndex = index;
+        }
+    }
+
+
+
 
     // Helper method to get the index of the selected option
     private int getOptionIndex(String lastSorted, String[] options) {
@@ -1573,13 +1825,25 @@ public class MainActivity extends AppCompatActivity {
                 return i;  // Return the index of the selected option
             }
         }
-        return 0;  // Default to "Recent" if no match
+        return 0;  // Default to "Recent" if no match or there is an error
     }
 
     // Method for "Show Recent"
     private void showRecent() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=";
+
+        // Set the "Recent" icon
+        sortingButton.setImageResource(R.drawable.baseline_calendar_month_24);
+
+        // Set the color filter based on the mode (dark or light)
+        if (isInDarkMode()) {
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));
+            //sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+        } else {
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));  // Default gray tint for light mode
+        }
+
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
@@ -1587,16 +1851,36 @@ public class MainActivity extends AppCompatActivity {
     private void showClose() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=CLOSEST";
-        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
+        // Set the "Close" icon
+        sortingButton.setImageResource(R.drawable.baseline_public_24);
+        // Set the color filter based on the mode (dark or light)
+        if (isInDarkMode()) {
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));
+            //sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+        } else {
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));  // Default gray tint for light mode
+        }
 
+        checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
 
     // Method for "Show Hot"
     private void showHot() {
         int distance = getDistanceBasedOnZoom();
         orderBy = "&orderBy=HOT";
+        // Set the "Hot" icon
+        sortingButton.setImageResource(R.drawable.baseline_local_fire_department_24);
+        // Set the color filter based on the mode (dark or light)
+        if (isInDarkMode()) {
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));
+            //sortingButton.setColorFilter(Color.parseColor("#B3B3B3"));  // Example tint for dark mode (red)
+        } else {
+            sortingButton.setColorFilter(Color.parseColor("#1EB4DF"));  // Default gray tint for light mode
+        }
+
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
+
 
     // Helper method to calculate distance based on zoom level
     private int getDistanceBasedOnZoom() {
@@ -1614,5 +1898,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void scheduleDailyNotification() {
+        // Get the AlarmManager system service
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
+        // Set up the time for 12 PM
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 12); // Set the hour to 12 PM
+        calendar.set(Calendar.MINUTE, 16);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        // If the time has already passed for today, set it for tomorrow
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);  // Move to the next day if 12 PM has passed
+        }
+
+        // Create an intent to trigger the BroadcastReceiver
+        Intent intent = new Intent(this, DailyNotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        // Set the alarm to trigger daily at 12 PM
+        if (alarmManager != null) {
+            alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,  // Wake up the device if it's asleep
+                    calendar.getTimeInMillis(), // Start time (12 PM today or tomorrow)
+                    AlarmManager.INTERVAL_DAY, // Repeat every 24 hours
+                    pendingIntent // PendingIntent to trigger the receiver
+            );
+        }
+    }
+    private boolean isInDarkMode() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
 }

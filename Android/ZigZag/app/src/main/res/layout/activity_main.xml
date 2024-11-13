@@ -20,9 +20,9 @@
         android:id="@+id/headerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Type your tag..."
+        android:hint="Zig Zag"
         android:textColorHint="@color/black"
-        android:text="Zig Zag"
+        android:text=""
         android:textSize="34sp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -37,10 +37,10 @@
             android:id="@+id/clearTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="|Clear text|"
+            android:text="| Clear Tag| "
             android:textAllCaps="true"
             android:textStyle="italic"
-            android:layout_marginStart="145dp"
+            android:layout_centerHorizontal="true"
             android:textColor="@color/red"
             android:background="@color/transparentGrey"
             android:layout_below="@+id/headerTextView"
@@ -72,12 +72,14 @@
         <ImageButton
             android:contentDescription="This is the nearby image button"
             android:id="@+id/nearby"
+
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginHorizontal="20dp"
             android:scaleType="fitXY"
             android:scaleX="0.8"
             android:scaleY="0.8"
+            app:tint="#23C6F4"
             android:background="@color/invisible"
             android:src="@drawable/baseline_house_24" />
 
@@ -115,13 +117,12 @@
 
         <ImageButton
             android:id="@+id/sortingButton"
-            android:src="@drawable/baseline_filter_list_24"
             android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="fitXY"
-            android:background="@color/transparentGrey"
+            android:layout_height="40dp"
             android:layout_gravity="bottom|center_horizontal"
-            />
+            android:background="@color/transparentGrey"
+            android:scaleType="fitXY"
+            android:src="@drawable/baseline_filter_list_24" />
 
     </LinearLayout>
 
@@ -239,13 +240,13 @@
         android:id="@+id/profileButton"
         android:layout_margin="10dp"
         android:layout_gravity="end|top"
-        android:layout_width="50dp"
+        android:layout_width="55dp"
         android:layout_height="55dp"
-        android:scaleY="0.9"
-        android:scaleX="0.9"
-        android:scaleType="fitXY"
-        android:background="@color/invisible"
-        android:src="@drawable/baseline_co_present_24"
+        android:scaleY="1"
+        android:scaleX="1"
+        android:scaleType="fitCenter"
+        android:background="@drawable/rounded_profile"
+        android:src="@drawable/baseline_person_24"
         />
 
     <ImageButton

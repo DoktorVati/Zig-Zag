@@ -11,6 +11,7 @@
         android:layout_width="50dp"
         android:layout_height="40dp"
         android:scaleType="fitXY"
+
         android:src="@drawable/baseline_arrow_back_24"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Cancel"
@@ -35,45 +36,6 @@
         android:paddingBottom="16dp"/>
 
 
-    <!-- Post Duration Instructions -->
-    <TextView
-        android:id="@+id/selectText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select your post's duration (up to 30 days)."
-        android:textSize="18sp"
-        android:layout_below="@id/cancelButton"
-        android:textColor="@color/black"
-        android:paddingTop="70dp"/>
-
-
-    <!-- Duration Type Dropdown -->
-    <Spinner
-        android:id="@+id/typeDropdown"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/selectText"
-        android:padding="10dp"
-        android:textColorHint="@color/black"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:layout_marginTop="30dp"/>
-
-
-    <!-- Duration Input Field -->
-    <EditText
-        android:id="@+id/durationStr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Input Duration"
-        android:textColorHint="@color/black"
-        android:inputType="number"
-        android:textStyle="bold"
-        android:padding="10dp"
-        android:textColor="@color/black"
-        android:layout_marginTop="20dp"
-        android:textSize="18sp"
-        android:layout_below="@id/typeDropdown"/>
 
 
     <!-- Post Content Input Field -->
@@ -82,20 +44,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="What's on your mind?"
+        android:textAlignment="center"
         android:textColorHint="@color/black"
         android:padding="10dp"
         android:textSize="18sp"
         android:textColor="@color/black"
-        android:layout_marginTop="80dp"
-        android:layout_below="@id/durationStr"/>
+        android:layout_marginTop="180dp"
+        android:layout_below="@id/cancelButton"/>
 
+
+    <TextView
+        android:id="@+id/optional"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Optional"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="100dp"
+        android:textSize="30dp"
+        android:textColor="@color/blue"
+        android:layout_below="@+id/inputPost"
+        />
 
     <!-- Tag Instructions -->
     <TextView
+        android:id="@+id/hintText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="You can also add a tag (#tagname) anywhere in the post."
+        android:text="You can also add a tag (#tag)."
         android:textSize="18sp"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
         android:layout_below="@id/inputPost"
         android:paddingTop="10dp"/>
 
@@ -112,6 +90,58 @@
         android:layout_marginTop="0dp"
         android:textSize="25sp"
         android:layout_marginBottom="40dp"/>
+
+
+    <!-- Post Duration Instructions -->
+    <TextView
+        android:id="@+id/selectText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Select your post's duration (up to 30 days)."
+        android:textSize="18sp"
+        android:layout_below="@id/optional"
+        android:textColor="@color/black"
+        android:paddingTop="30dp"/>
+
+
+    <!-- Duration Type Dropdown -->
+    <Spinner
+        android:id="@+id/typeDropdown"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/selectText"
+        android:padding="10dp"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/black"
+        android:textAlignment="center"
+        android:textSize="25sp"
+
+        android:layout_marginTop="30dp"
+        android:dropDownVerticalOffset="2dp"
+        android:spinnerMode="dropdown" />
+
+
+
+    <!-- Duration Input Field -->
+    <EditText
+        android:id="@+id/durationStr"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:hint="Duration"
+        android:textColorHint="@color/black"
+        android:inputType="number"
+        android:textStyle="bold"
+        android:text=""
+        android:padding="10dp"
+        android:textColor="@color/black"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        android:textSize="18sp"
+        android:layout_toRightOf="@id/typeDropdown"
+        android:layout_below="@id/selectText"/>
 
 
 </RelativeLayout>

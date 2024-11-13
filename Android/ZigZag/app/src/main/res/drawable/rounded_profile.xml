@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Main circular shape -->
+    <item>
+        <shape android:shape="oval">
+            <size android:width="200dp" android:height="200dp"/> <!-- Circle size -->
+            <solid android:color="@color/blue"/> <!-- Circle color -->
+        </shape>
+    </item>
+
+
+
+</layer-list>

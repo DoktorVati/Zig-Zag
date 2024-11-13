@@ -147,7 +147,7 @@
     <LinearLayout
         android:id="@+id/OPContainer"
         android:layout_width="373dp"
-        android:layout_height="124dp"
+        android:layout_height="134dp"
         android:layout_below="@+id/textView"
         android:layout_marginTop="40dp"
         android:orientation="vertical"></LinearLayout>
