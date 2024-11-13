@@ -117,12 +117,12 @@ public class MainActivity extends AppCompatActivity {
     private double lastLongitude;
     private int lastZoomLevel = 1;
     private int zoomLevel = 12; // This is the zoom modifier for the map
-    private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; // Use your API key
+    private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; //  our map api key
     //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
-    private Handler handler = new Handler(); // Handler for delays
+    private Handler handler = new Handler();
 
 
-    //Current universal user ID
+    //Their user ID
     private String my_user_id;
     TextView clearTagTextView;
 
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Link to activity_main.xml layout
+        setContentView(R.layout.activity_main);
 
         // Schedule the daily notification
         scheduleDailyNotification();
@@ -357,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
     //this will set the buttons back to normal scale
     private void resetButtonScales() {
 
+        // Reset the colors for each icon
         close.setColorFilter(Color.parseColor("#000000"));
         nearby.setColorFilter(Color.parseColor("#000000"));
         userArea.setColorFilter(Color.parseColor("#000000"));
@@ -429,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
                     Log.d("FetchPosts", "Received response: " + jsonResponse);
-                    handlePostsResponse(jsonResponse, messageContainer);
+                    handlePostsResponse(jsonResponse, messageContainer, false);
                 } else {
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message());
                 }
@@ -550,7 +551,7 @@ public class MainActivity extends AppCompatActivity {
             dialog.dismiss();
 
             // Update the UI with the new post
-            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, "0");
+            updateUIWithPost(userInput, "Just now", "0 ft", expiryDate, 0, UserId, messageContainer, "0", false);
         });
 
         cancelButton.setOnClickListener(v -> {
@@ -720,7 +721,7 @@ public class MainActivity extends AppCompatActivity {
         fetchComments(id, lastLatitude, lastLongitude);
     }
 
-    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout, String commentAmount) {
+    private void updateUIWithPost(String text, String currentTime, String distance, String expiryDate, int id, String authorID, LinearLayout layout, String commentAmount, boolean isComments) {
         // Create a new message group layout
         LinearLayout newMessageGroup = new LinearLayout(this);
         LinearLayout.LayoutParams messageGroupLayoutParams = new LinearLayout.LayoutParams(
@@ -730,11 +731,15 @@ public class MainActivity extends AppCompatActivity {
         newMessageGroup.setLayoutParams(messageGroupLayoutParams);
         newMessageGroup.setBackgroundResource(R.drawable.rounded_posts_shape);
 
-        newMessageGroup.setOnClickListener(v -> {
+        if(!isComments)
+        {
+            newMessageGroup.setOnClickListener(v -> {
             Log.d("Comments", "Comments Clicked");
             showCommentsDialog(id);
             fetchComments(id, lastLatitude, lastLongitude);
-        });
+            });
+        }
+
 
         // Create a RelativeLayout for the message content
         RelativeLayout relativeLayout = new RelativeLayout(this);
@@ -763,7 +768,6 @@ public class MainActivity extends AppCompatActivity {
         backwardTimeImageView.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(
                 48, 48);
-        //imageParams.addRule(RelativeLayout.RIGHT_OF, timeTextView.getId());
         imageParams.setMargins(275, 0, 0, 0);
         backwardTimeImageView.setLayoutParams(imageParams);
 
@@ -778,7 +782,7 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         durationParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
         durationParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
-        durationParams.setMargins(0, 5, 0, 0); // Reduced margin to decrease gap
+        durationParams.setMargins(0, 5, 0, 0);
         durationTextView.setLayoutParams(durationParams);
 
 
@@ -794,7 +798,6 @@ public class MainActivity extends AppCompatActivity {
         moreButton.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams moreButtonParams = new RelativeLayout.LayoutParams(
                 100, 160);
-        //moreButtonParams.addRule(RelativeLayout.RIGHT_OF, backwardTimeImageView.getId());
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         moreButtonParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         moreButtonParams.setMargins(0, -60, 0, -30);
@@ -916,6 +919,7 @@ public class MainActivity extends AppCompatActivity {
         commentTextParams.setMargins(0, 180, -35, 0);
         commentTextView.setLayoutParams(commentTextParams);
 
+        // If the user is the author, show the profile icon to differentiate posts
         if(Objects.equals(my_user_id, authorID)) {
             ImageView profileIcon = new ImageView(this);
             profileIcon.setColorFilter(Color.parseColor("#23C6F4"));  // Example tint for dark mode (red)
@@ -929,7 +933,6 @@ public class MainActivity extends AppCompatActivity {
             imageParamsProfile.addRule(RelativeLayout.LEFT_OF, moreButton.getId());
 
             profileIcon.setLayoutParams(imageParamsProfile);
-            //imageParamsProfile.setMargins(0, 0, 0, 0);
             relativeLayout.addView(profileIcon);
         }
 
@@ -1084,7 +1087,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = response.body().string();
-                    handlePostsResponse(jsonResponse, messageContainer);
+                    handlePostsResponse(jsonResponse, messageContainer, false);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
@@ -1117,7 +1120,7 @@ public class MainActivity extends AppCompatActivity {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String jsonResponse = "[" + response.body().string() + "]";
-                    handlePostsResponse(jsonResponse, OPContainer);
+                    handlePostsResponse(jsonResponse, OPContainer, true);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
                     Log.e("MainActivity", "Error fetching posts: " + response.code() + " " + response.message() + " Response body: " + errorBody);
@@ -1154,7 +1157,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void handlePostsResponse(String jsonResponse, LinearLayout layout) {
+    private void handlePostsResponse(String jsonResponse, LinearLayout layout, boolean isCommentss) {
         runOnUiThread(() -> {
             try {
                 Log.d("handlePostsResponse", "Response received");
@@ -1198,7 +1201,7 @@ public class MainActivity extends AppCompatActivity {
                     String commentCount = post.getString("commentCount");
 
                     // Update the UI with the post, formatted time, and distance
-                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout, commentCount);
+                    updateUIWithPost(text, formattedTime, distanceString, expiryDate, id, authorID, layout, commentCount, isCommentss);
                 }
             } catch (JSONException e) {
                 Log.e("MainActivity", "JSON Parsing Error: ", e);
@@ -1648,14 +1651,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the email value in the TextView
         if (email != null && !email.equals("Email not available")) {
-            emailTextView.setText("Email: " + email);
+            emailTextView.setText("Email:       " + email);
         } else {
             emailTextView.setText("Email not available");
         }
 
         // Set the phone number value in the TextView
         if (phoneNumber != null && !phoneNumber.equals("Phone number not available")) {
-            phoneTextView.setText("Phone Number: " + phoneNumber);
+            phoneTextView.setText("Phone Number:       " + phoneNumber);
         } else {
             phoneTextView.setText("Phone number not available");
         }

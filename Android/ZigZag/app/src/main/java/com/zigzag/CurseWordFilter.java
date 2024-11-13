@@ -32,11 +32,13 @@ public class CurseWordFilter {
             );
 
             String line;
-            boolean firstLine = true; // To skip the header row
+            // To skip the header row
+            boolean firstLine = true;
 
             while ((line = reader.readLine()) != null) {
                 if (firstLine) {
-                    firstLine = false;  // Skip the header row
+                    // Skip the header row
+                    firstLine = false;
                     continue;
                 }
 
@@ -44,14 +46,16 @@ public class CurseWordFilter {
                 String[] columns = line.split(",");
 
                 if (columns.length > 0) {
-                    String curseWord = columns[0].trim();  // The 'Text' column
+                    // The Text column
+                    String curseWord = columns[0].trim();
                     if (!curseWord.isEmpty()) {
-                        curseWords.add(curseWord);  // Add the curse word to the list
+                        // Add the curse word to the list to be censored
+                        curseWords.add(curseWord);
                     }
                 }
             }
-
-            reader.close();  // Don't forget to close the reader
+            // Don't forget to close the reader
+            reader.close();
         } catch (IOException e) {
             Log.e("CurseWordFilter", "Error reading curse words file", e);
         }
