@@ -33,7 +33,7 @@ public class DailyNotificationReceiver extends BroadcastReceiver {
             Notification notification = new Notification.Builder(context, "ZigZagChannelID")
                     .setContentTitle("Don't Miss Out On What's Happening on ZigZag!")
                     .setContentText("See what's buzzing right now!")
-                    .setSmallIcon(R.drawable.backward_time)  // our app icon
+                    .setSmallIcon(R.mipmap.ic_launcher_foreground)  // our app icon
                     .setAutoCancel(true)
                     .build();
 
@@ -44,7 +44,7 @@ public class DailyNotificationReceiver extends BroadcastReceiver {
             Notification notification = new Notification.Builder(context)
                     .setContentTitle("Don't Miss Out On What's Happening on ZigZag!")
                     .setContentText("See what's buzzing right now!")
-                    .setSmallIcon(R.drawable.backward_time)  // our app icon
+                    .setSmallIcon(R.mipmap.ic_launcher_foreground)  // our app icon
                     .setAutoCancel(true)
                     .build();
 
