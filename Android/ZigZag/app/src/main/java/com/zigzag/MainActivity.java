@@ -196,7 +196,8 @@ public class MainActivity extends AppCompatActivity {
         headerTextView.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 closeKeyboard();
-                checkAndFetchPosts(lastLatitude, lastLongitude, 800000);
+                int distance = getDistanceBasedOnZoom();
+                checkAndFetchPosts(lastLatitude, lastLongitude, distance);
                 return true;
             }
             return false;
@@ -542,9 +543,9 @@ public class MainActivity extends AppCompatActivity {
 
             // Format the expiration date (if duration is null, it means "forever")
             if(duration!=null) {
-                 expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
+                expiryDate = formatExpiration(duration, typeDropdown.getSelectedItem().toString());
             }else {
-                 expiryDate = "";
+                expiryDate = "";
             }
             // Proceed with the post if input is valid
             addNewPost(userInput, expiryDate);
@@ -734,9 +735,9 @@ public class MainActivity extends AppCompatActivity {
         if(!isComments)
         {
             newMessageGroup.setOnClickListener(v -> {
-            Log.d("Comments", "Comments Clicked");
-            showCommentsDialog(id);
-            fetchComments(id, lastLatitude, lastLongitude);
+                Log.d("Comments", "Comments Clicked");
+                showCommentsDialog(id);
+                fetchComments(id, lastLatitude, lastLongitude);
             });
         }
 
@@ -1886,11 +1887,11 @@ public class MainActivity extends AppCompatActivity {
     private int getDistanceBasedOnZoom() {
         int distance = 5000;  // Default distance
 
-        if (lastZoomLevel == 18) {
+        if (lastZoomLevel == 15) {
             distance = 800;
-        } else if (lastZoomLevel == 12) {
+        } else if (lastZoomLevel == 11) {
             distance = 40000;
-        } else if (lastZoomLevel == 8) {
+        } else if (lastZoomLevel == 7) {
             distance = 800000;
         }
 
