@@ -517,14 +517,19 @@ public class MainActivity extends AppCompatActivity {
             String userInput = inputPost.getText().toString().trim();
             Integer duration = null;  // Default to null for "forever"
 
-            // Clean the input text by replacing any swear words
-            userInput = filter.cleanInput(userInput, curseWords);
-
             // If the user input is empty after cleaning, show a toast message
             if (userInput.isEmpty()) {
                 Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (userInput.length() >= 225)
+            {
+                Toast.makeText(this, "Message must be below 225 characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Clean the input text by replacing any swear words
+            userInput = filter.cleanInput(userInput, curseWords);
+
 
             // Check if the duration input is empty
             String durationText = durationStr.getText().toString().trim();
@@ -548,6 +553,16 @@ public class MainActivity extends AppCompatActivity {
                 expiryDate = "";
             }
             // Proceed with the post if input is valid
+            // If the user input is empty after cleaning, show a toast message
+            if (userInput.isEmpty()) {
+                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (userInput.length() >= 225)
+            {
+                Toast.makeText(this, "Message must be below 225 characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             addNewPost(userInput, expiryDate);
             dialog.dismiss();
 
@@ -602,12 +617,18 @@ public class MainActivity extends AppCompatActivity {
 
             // Clean the input text by replacing any swear words
             userInput = filter.cleanInput(userInput, curseWords);
-
-            if (!userInput.isEmpty()) {
+            if (userInput.isEmpty()) {
+                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (userInput.length() >= 225)
+            {
+                Toast.makeText(this, "Message must be below 225 characters!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!userInput.isEmpty() && userInput.length() <= 225) {
                 addNewComment(userInput, id);
                 inputReply.setText("");
-            } else {
-                Toast.makeText(this, "Please enter a message before posting.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -673,7 +694,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
-        // Refresh posts (optional, based on your implementation)
+        // Refresh posts
         int distance = getDistanceBasedOnZoom();
         checkAndFetchPosts(lastLatitude, lastLongitude, distance);
     }
@@ -901,9 +922,11 @@ public class MainActivity extends AppCompatActivity {
         commentIcon.setId(View.generateViewId()); // Generate unique ID
         RelativeLayout.LayoutParams imageParamsComment = new RelativeLayout.LayoutParams(
                 58, 58);
+        imageParamsComment.addRule(RelativeLayout.ALIGN_PARENT_START);
         imageParamsComment.addRule(RelativeLayout.BELOW, postTextView.getId());
-        imageParamsComment.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-        imageParamsComment.setMargins(0, 180, 0, 0);
+        imageParamsComment.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        // every +40 for bottom = 2 line
+        imageParamsComment.setMargins(0, 180, 0, 40);
         commentIcon.setLayoutParams(imageParamsComment);
 
         // Create TextView for the post's comments
@@ -915,9 +938,10 @@ public class MainActivity extends AppCompatActivity {
         RelativeLayout.LayoutParams commentTextParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
+        commentTextParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         commentTextParams.addRule(RelativeLayout.BELOW, postTextView.getId());
         commentTextParams.addRule(RelativeLayout.ALIGN_RIGHT, commentIcon.getId());
-        commentTextParams.setMargins(0, 180, -35, 0);
+        commentTextParams.setMargins(0, 25, -35, 0);
         commentTextView.setLayoutParams(commentTextParams);
 
         // If the user is the author, show the profile icon to differentiate posts
@@ -948,7 +972,24 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout.addView(commentIcon);
         relativeLayout.addView(commentTextView);
 
+        // Measure the height of the postTextView
+        postTextView.post(() -> {
+            // Get the actual height of the postTextView after rendering
+            int postTextHeight = postTextView.getHeight();
 
+            // Adjust the margins dynamically based on the height of the postTextView
+            int additionalMargin = (postTextHeight / postTextView.getLineHeight()) * 40;
+
+            // Update comment icon margin dynamically
+            RelativeLayout.LayoutParams updatedIconParams = (RelativeLayout.LayoutParams) commentIcon.getLayoutParams();
+            updatedIconParams.setMargins(0, 140, 0, additionalMargin); // Add space based on text height
+            commentIcon.setLayoutParams(updatedIconParams);
+
+            // Update comment text margin dynamically
+            RelativeLayout.LayoutParams updatedTextParams = (RelativeLayout.LayoutParams) commentTextView.getLayoutParams();
+            updatedTextParams.setMargins(0, 25, -35, additionalMargin);
+            commentTextView.setLayoutParams(updatedTextParams);
+        });
         // Add the RelativeLayout to the new message group
         newMessageGroup.addView(relativeLayout);
 
