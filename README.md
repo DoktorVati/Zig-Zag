@@ -48,8 +48,7 @@ To run the backend, ensure the following is installed:
 1. Install [Docker](https://docs.docker.com/engine/install/).
 2. Clone the Zig Zag repository from Git.
 3. Create a `.env` file in the `backend` directory with the following fields:
-
-   ```env
+    ```env
    # PostgreSQL Configuration
    DB_NAME=
    DB_USER=
@@ -58,7 +57,8 @@ To run the backend, ensure the following is installed:
    DB_PORT=5432
    ```
 4.	Navigate to the backend directory and run the following command to build and start the backend services:
-  ```bash
-  docker compose up --build -d
-  ```
-  This command initializes both the Node.js server and the PostgreSQL database with the PostGIS extension as containers.
+
+    ```bash 
+    docker compose up --build -d
+    ```
+    This command initializes both the Node.js server and the PostgreSQL database with the PostGIS extension as containers.
