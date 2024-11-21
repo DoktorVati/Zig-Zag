@@ -23,8 +23,11 @@ Zig Zag is a social media platform designed to connect users through location-ba
 
 ## iOS
 
-_Information about the iOS platform goes here._
+The iOS platform of Zig Zag was built in XCode using swift and swiftUI. To run the application follow these steps:
 
+1. Download XCode from the app store on a compatible MAC
+2. Clone the github repository into a file on your system
+3. Open XCode and select the ZigZag folder from the Apple folder of your cloned repository
 ---
 
 ## Android
