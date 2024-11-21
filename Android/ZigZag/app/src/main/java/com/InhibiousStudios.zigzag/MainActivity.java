@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
     private int lastZoomLevel = 1;
     private int zoomLevel = 12; // This is the zoom modifier for the map
     private String key = "AIzaSyAvNciAUallXrKrOjyS_8YZUVF5hxRLTk0"; //  our map api key
-    //private String key = "AIzaSyCo18BB_aVNvFECgWGoXqEMS9Odqw1vgX4";
     private Handler handler = new Handler();
 
 
