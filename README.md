@@ -1,6 +1,6 @@
 # Zig Zag
 
-Zig Zag is a multi-platform location-based social media platform.
+Zig Zag is a multi-platform dual native location-based social media platform.
 
 ---
 
@@ -30,8 +30,15 @@ _Information about the iOS platform goes here._
 ## Android
 The Android platform of Zig Zag is built in Android Studio using Java and Extensible Markup Language (XML). 
 In order to run the application, you can either 
-1. Clone the repository and open ZigZag using Android Studio, or
-2. Download the application directly from the Google Play Store at (https://play.google.com/store/apps/details?id=com.InhibiousStudios.zigzag).
+
+1. Download the application directly from the Google Play Store at (https://play.google.com/store/apps/details?id=com.InhibiousStudios.zigzag).
+
+   or
+   
+2. Download [Android Studio](https://developer.android.com/studio).
+   I.  Clone the ZigZag repository from Git.
+   II. Open the Android/ZigZag file inside Android Studio.  
+
 ---
 
 ## Backend
