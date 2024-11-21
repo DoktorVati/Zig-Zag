@@ -35,9 +35,9 @@ In order to run the application, you can either
 
    or
    
-2. Download [Android Studio](https://developer.android.com/studio).
-   I.  Clone the ZigZag repository from Git.
-   II. Open the Android/ZigZag file inside Android Studio.  
+2. I. Download [Android Studio](https://developer.android.com/studio).                                                                                                                                             
+   II.  Clone the ZigZag repository from Git.                                                                                                                                                                       
+   III. Open the Android/ZigZag file inside Android Studio.                                                                                                                              
 
 ---
 
