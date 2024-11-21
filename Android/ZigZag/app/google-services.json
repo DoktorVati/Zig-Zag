@@ -9,26 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:91879021979:android:e824df66c84a957666153e",
         "android_client_info": {
-          "package_name": "com.zigzag"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAXPuCMrdhC3ENJFA6fEQ6vXIz9jpz2M_M"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:91879021979:android:7c50f2a60c63cc8c66153e",
-        "android_client_info": {
-          "package_name": "com.zybooks.zigzag"
+          "package_name": "com.InhibiousStudios.zigzag"
         }
       },
       "oauth_client": [],
