@@ -21,15 +21,6 @@ Zig Zag is a social media platform designed to connect users through location-ba
 
 ---
 
-## iOS
-
-The iOS platform of Zig Zag was built in XCode using swift and swiftUI. To run the application follow these steps:
-
-1. Download XCode from the app store on a compatible MAC
-2. Clone the github repository into a file on your system
-3. Open XCode and select the ZigZag folder from the Apple folder of your cloned repository
----
-
 ## Android
 The Android platform of Zig Zag is built in Android Studio using Java and Extensible Markup Language (XML). 
 In order to run the application, you can either 
@@ -40,7 +31,17 @@ In order to run the application, you can either
    
 2. I. Download [Android Studio](https://developer.android.com/studio).                                                                                                                                             
    II.  Clone the ZigZag repository from Git.                                                                                                                                                                       
-   III. Open the Android/ZigZag file inside Android Studio.                                                                                                                              
+   III. Open the Android/ZigZag file inside Android Studio.
+
+---
+   
+## iOS
+
+The iOS platform of Zig Zag was built in XCode using swift and swiftUI. To run the application follow these steps:
+
+1. Download XCode from the app store on a compatible MAC
+2. Clone the github repository into a file on your system
+3. Open XCode and select the ZigZag folder from the Apple folder of your cloned repository
 
 ---
 
