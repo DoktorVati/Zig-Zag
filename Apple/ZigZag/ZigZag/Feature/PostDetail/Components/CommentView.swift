@@ -30,7 +30,7 @@ struct CommentView: View {
     
     List {
         Section {
-            PostView(post: samplePost);
+            PostView(post: samplePost, manualComment: .constant(3))
         }
        
             

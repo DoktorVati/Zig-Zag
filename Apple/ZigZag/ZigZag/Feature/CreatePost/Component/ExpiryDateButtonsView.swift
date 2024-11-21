@@ -8,9 +8,9 @@
 import SwiftUI
 
 enum ExpiryDate: String, CaseIterable, Identifiable {
-    case thirtyMinutes = "30min"
-    case oneHour = "1hour"
-    case oneDay = "1day"
+    case thirtyMinutes = "30 min"
+    case oneHour = "1 hrs"
+    case oneDay = "1 day"
     
     var id: String { self.rawValue } // Conform to Identifiable using rawValue as id
     

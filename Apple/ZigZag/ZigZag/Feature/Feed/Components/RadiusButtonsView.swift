@@ -16,7 +16,7 @@ struct RadiusButtonsView: View {
     var distanceIcons: [String] = ["figure.walk.circle", "house.circle", "building.2.crop.circle", "globe.americas"]
     
     var body: some View {
-        HStack(spacing: 32) {
+        HStack(spacing: 6) {
             RadiusButton(icon: distanceIcons[0], myIndex: 0) {
                 viewModel.mapZoom(index: 0)
                 viewModel.fetchPosts()

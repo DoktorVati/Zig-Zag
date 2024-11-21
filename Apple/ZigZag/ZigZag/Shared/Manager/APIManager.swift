@@ -105,8 +105,12 @@ class APIManager {
     }
     
     // MARK: - Fetch Posts
-    func fetchPosts(latitude: Double, longitude: Double, distance: String, completion: @escaping (Result<[Post], Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/posts?latitude=\(latitude)&longitude=\(longitude)&distance=\(distance)") else {
+    func fetchPosts(option: String?, latitude: Double, longitude: Double, distance: String, completion: @escaping (Result<[Post], Error>) -> Void) {
+        var orderBy: String = ""
+        if let option {
+            orderBy = "&orderBy=\(option)"
+        }
+        guard let url = URL(string: "\(baseURL)/posts?latitude=\(latitude)&longitude=\(longitude)&distance=\(distance)\(orderBy)") else {
             print("Invalid URL")
             return
         }
@@ -225,6 +229,46 @@ class APIManager {
                 let comments = try JSONDecoder().decode([Comment].self, from: data)
                 completion(.success(comments))
             } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    func reportPost(postId: Int, reportingUserId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Construct the URL with the post ID
+        guard let url = URL(string: "\(baseURL)/posts/\(postId)/reports") else {
+            print("Invalid URL")
+            return
+        }
+        
+        // Create a URLRequest and set it to POST
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        // Set the request body with the "snitch" field containing the reporting user ID
+        let body: [String: Any] = ["snitch": reportingUserId]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        // Set headers, if necessary (e.g., for JSON content type)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Perform the network request
+        session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // Check for successful HTTP response status code (e.g., 200...299)
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                let error = NSError(domain: "", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: "Failed to report post"])
                 completion(.failure(error))
             }
         }.resume()

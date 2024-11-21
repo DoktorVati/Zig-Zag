@@ -24,26 +24,6 @@ struct CreateAccountView: View {
                     .fontWeight(.bold)
                     .padding(.bottom, 20)
                 
-                // Username Field with Validation
-                Group {
-                    Text("Username")
-                        .font(.headline)
-                    TextField("Username", text: $viewModel.username)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                        ).focused($isTextFieldFocused)
-                        .onChange(of: viewModel.username, perform: { _ in viewModel.validateUsername() })
-                    if let error = viewModel.usernameError {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.red)
-                    }
-                }
-                
                 // Email Field with Validation
                 Group {
                     Text("Email")
@@ -164,7 +144,7 @@ struct CreateAccountView: View {
                         .cornerRadius(8)
                 }
                 .padding(.top, 20)
-                .disabled(!viewModel.canSignUp()) // Disable button if validation fails
+              //  .disabled(!viewModel.canSignUp()) // Disable button if validation fails
                 
                 // Sign-Up Prompt
                 HStack {

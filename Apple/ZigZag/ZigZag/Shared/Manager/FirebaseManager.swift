@@ -139,4 +139,43 @@ class FirebaseManager: ObservableObject {
             }
         }
     }
+    
+    func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            // Return a custom error only if there's no current user
+            completion(.failure(NSError(domain: "FirebaseManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user is currently logged in."])))
+            return
+        }
+        
+        user.delete { error in
+            if let error = error {
+                // Pass the Firebase error directly without wrapping it
+                completion(.failure(error))
+            } else {
+                // Clear local user properties on successful deletion
+                self.clearUserProperties()
+                completion(.success(()))
+            }
+        }
+    }
+    
+    func reauthenticateUser(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            let error = NSError(domain: "FirebaseManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user is currently logged in."])
+            print("Re-authentication Error: \(error.localizedDescription)")
+            completion(.failure(error))
+            return
+        }
+
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        user.reauthenticate(with: credential) { _, error in
+            if let error = error {
+                print("Re-authentication Error: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                print("Re-authentication successful.")
+                completion(.success(()))
+            }
+        }
+    }
 }

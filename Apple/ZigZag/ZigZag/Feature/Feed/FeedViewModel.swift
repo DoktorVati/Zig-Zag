@@ -23,6 +23,11 @@ class FeedViewModel: ObservableObject {
     let distancesArray: [Double] = [0.001, 0.01, 0.1, 10]
     let distanceIcons: [String] = ["figure.walk.circle", "house", "building.2.crop.circle", "globe.americas"]
     
+    let filterOptions: [String] = ["Now", "Hot", "Near"]
+    let filterIcons: [String] = ["alarm.fill", "flame.fill", "map.fill"]
+    
+    @Published var selectedFilterIndex: Int = 0
+    
     var needsLocationPermission: Bool {
         LocationManager.shared.authorizationStatus == .notDetermined
     }
@@ -58,7 +63,15 @@ class FeedViewModel: ObservableObject {
         isLoading = true
         guard let location = LocationManager.shared.location else { return }
         let distance = decodeDistanceIndex().rawValue
-        APIManager.shared.fetchPosts(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, distance: distance) { result in
+        
+        var option = ""
+        
+        if selectedFilterIndex == 2 {
+            option = "CLOSEST"
+        } else if selectedFilterIndex == 1 {
+            option = "HOT"
+        }
+        APIManager.shared.fetchPosts(option: option, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, distance: distance) { result in
             DispatchQueue.main.async {
                 self.isLoading = false
                 switch result {

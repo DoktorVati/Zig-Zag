@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 import FirebaseCore
 import FirebaseAuth
-
+import FirebaseAppCheck
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
@@ -21,11 +21,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             NotificationCenter.default.post(name: .authStateDidChange, object: nil)
         }
         
+        AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
+        
         return true
     }
     // Register for remote notifications
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Auth.auth().setAPNSToken(deviceToken, type: .prod) // Use .prod for production
+        Auth.auth().setAPNSToken(deviceToken, type: .sandbox) // Use .prod for production
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {

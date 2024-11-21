@@ -148,6 +148,12 @@ struct Location: Codable {
     }
     
     private func returnDistanceString() -> String {
-        useFeetValue ? "\(Int(distanceInFeet)) feet away" : "\(Int(distanceInMiles)) miles away"
+        if distanceInFeet < 150 {
+            return "Nearby"
+        }
+        if distanceInMiles < 1 {
+            return "\(distanceInMiles.formatted(.number.precision(.fractionLength(1)))) miles away"
+        }
+        return useFeetValue ? "\(Int(distanceInFeet)) feet away" : "\(Int(distanceInMiles)) miles away"
     }
 }

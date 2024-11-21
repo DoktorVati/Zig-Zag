@@ -12,7 +12,6 @@ import FirebaseAuth
 
 class AuthenticationViewModel: ObservableObject {
     // User credentials and other state variables
-    @Published var username: String = ""
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var phoneNumber: String = ""
@@ -37,10 +36,6 @@ class AuthenticationViewModel: ObservableObject {
     }
     
     // MARK: - Validation Functions
-
-    func validateUsername() {
-        usernameError = username.isEmpty ? "Username cannot be empty." : nil
-    }
     
     func validateEmail() {
         if email.isEmpty {

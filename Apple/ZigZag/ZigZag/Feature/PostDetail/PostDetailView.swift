@@ -13,18 +13,29 @@ struct PostDetailView: View {
     @State private var replyText = ""
     @FocusState private var isTextFieldFocused: Bool
     
+    @State private var manualCount: Int? = 0
+    
+    var refreshAction: (() -> Void)?
+    
     let post: Post;
     
     var body: some View {
         VStack {
             VStack {
-                PostView(post: post).padding(8)
-                List {
-                    ForEach(viewModel.comments) {
-                        comment in CommentView(comment: comment);
-                    }.listStyle(PlainListStyle())
-                    
-                }.refreshable {
+                PostView(post: post, manualComment: $manualCount).padding(8)
+                Divider()
+                ScrollView {
+                    VStack {
+                        ForEach(viewModel.comments) { comment in
+                            CommentView(comment: comment)
+                                .padding()
+                            Divider()
+                        }
+                        
+                    }
+                }
+                .padding(.horizontal)
+                .refreshable {
                     await viewModel.fetchPostComments(postId: post.id);
                     
                 }.onAppear {
@@ -44,7 +55,7 @@ struct PostDetailView: View {
                 TextField("Reply...", text: $replyText).padding(10).background(Color(.systemGray6)).cornerRadius(8).focused($isTextFieldFocused)
                 Button(action: {
                     if !replyText.isEmpty {
-                        APIManager.shared.createComment(postId: post.id, text: replyText, author: "Saul") {
+                        APIManager.shared.createComment(postId: post.id, text: filterProfanity(in: replyText), author: "Saul") {
                             result in
                             switch result {
                             case .success(let newComment):
@@ -59,12 +70,28 @@ struct PostDetailView: View {
                         }
                     }
                     replyText = ""
+                    manualCount = (manualCount ?? 0) + 1
+                    
+                    
                 }) {
                     Image(systemName: "paperplane.fill").foregroundColor(.blue)
                 }
                 
             }.padding()
         }
+    }
+    
+    // Function to filter profanity
+    private func filterProfanity(in text: String) -> String {
+        var filteredText = text
+        for word in viewModel.profanityList {
+            let pattern = "\\b\(word)\\b" // Match whole words only
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                let range = NSRange(filteredText.startIndex..<filteredText.endIndex, in: filteredText)
+                filteredText = regex.stringByReplacingMatches(in: filteredText, options: [], range: range, withTemplate: String(repeating: "*", count: word.count))
+            }
+        }
+        return filteredText
     }
 }
 

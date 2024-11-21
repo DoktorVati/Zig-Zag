@@ -19,6 +19,8 @@ struct FeedView: View {
     @State var mapsize: CGFloat = 250
     @State var mapTitle = "ZigZag"
     
+    @State var hidePlus = false
+    
     var body: some View {
         ZStack(alignment: .top) {
             // Background color, dynamic for light/dark mode
@@ -36,14 +38,22 @@ struct FeedView: View {
                     VStack {
                         List(viewModel.posts) { post in
                             Section {
-
-                                NavigationLink(destination: PostDetailView(post: post)) {
-                                    PostView(post: post) {
-                                    viewModel.fetchPosts()
-
-                                }
-                                }
+                                PostView(post: post, manualComment: .constant(nil), changeTagAction: { selectedTag in
+                                    self.mapTitle = selectedTag
                                     
+                                }, refreshAction:  {
+                                    viewModel.fetchPosts()
+                                    
+                                })
+                                .background(
+                                    NavigationLink("", destination: PostDetailView(post: post)
+                                        .onAppear {
+                                            mapTitle = "Comments"
+                                            hidePlus = true  // Set hidPlus to true when navigating
+                                        }
+                                    )
+                                    .opacity(0)
+                                )
                             }
                         }
                         .refreshable {
@@ -51,7 +61,54 @@ struct FeedView: View {
                         }
                     }
                     .toolbar {
-                        ToolbarItem {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Menu {
+                                Button(action: {
+                                    viewModel.selectedFilterIndex = 0
+                                }) {
+                                    Label("Now", systemImage: "alarm.fill")
+                                        .bold()
+                                        .padding(4)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                                
+                                Button(action: {
+                                    viewModel.selectedFilterIndex = 1
+                                }) {
+                                    Label("Hot", systemImage: "flame.fill")
+                                        .bold()
+                                        .padding(4)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                                
+                                Button(action: {
+                                    viewModel.selectedFilterIndex = 2
+                                }) {
+                                    Label("Near", systemImage: "map.fill")
+                                        .bold()
+                                        .padding(4)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                                
+                            } label: {
+                                HStack {
+                                    Text(viewModel.filterOptions[viewModel.selectedFilterIndex])
+                                    Image(systemName: viewModel.filterIcons[viewModel.selectedFilterIndex])
+                                }
+                                    .bold()
+                                    .padding(4)
+                                    .background(Color.blue)
+                                    .foregroundStyle(.white)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        ToolbarItem{
                             RadiusButtonsView()
                         }
                     }
@@ -69,11 +126,16 @@ struct FeedView: View {
                         }
                         viewModel.setUserLoaction()
                         withAnimation {
+                            hidePlus = false
                             mapsize = 250
                             mapTitle = "ZigZag"
+                            
                         }
                     }
                     .task {
+                        viewModel.fetchPosts()
+                    }
+                    .onChange(of: viewModel.selectedFilterIndex) {
                         viewModel.fetchPosts()
                     }
                 }
@@ -102,14 +164,13 @@ struct FeedView: View {
                         ProfileSheetView()
                             .environmentObject(auth)
                     }
-                        //.navigationBarTitle("Profile", displayMode: .inline) // Title for the profile sheet
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button("Close") {
-                                    showProfileSheet = false // Dismiss the sheet
-                                }
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Close") {
+                                showProfileSheet = false // Dismiss the sheet
                             }
                         }
+                    }
                 }
             }
             
@@ -125,7 +186,7 @@ struct FeedView: View {
                             mapTitle = "Create Post"
                         }
                     }) {
-                        if mapsize == 250 {
+                        if !hidePlus {
                             Image(systemName: "plus")
                                 .font(.system(size: 30))
                                 .foregroundColor(.white)

@@ -16,7 +16,7 @@ struct TagsView: View {
                 VStack {
                     List(posts) { post in
                         Section {
-                            PostView(post: post)
+                            PostView(post: post, manualComment: .constant(nil))
                         }
                         
                     }
