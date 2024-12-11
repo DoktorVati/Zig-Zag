@@ -19,8 +19,9 @@ Zig Zag is a multi-platform dual native location-based social media platform.
 
 Zig Zag is a social media platform designed to connect users through location-based interactions, available on multiple platforms.
 
-This is a walkthrough of the Android version showcasing all features.
+If you are not interested in setting up the backend and loading the application, listed below is a YouTube walkthrough of the application.
 
+https://youtu.be/gngqBngFl_g
 
 ---
 
